@@ -1,0 +1,6 @@
+---
+container_runtime: podman
+container_network: noctis_test_net
+noctis_feeds_dir: "{{ playbook_dir }}/../../tests"
+noctis_bin: "{{ playbook_dir }}/../../target/debug/noctis"
+scan_timeout: 30

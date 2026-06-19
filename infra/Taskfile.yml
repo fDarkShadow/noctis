@@ -1,0 +1,60 @@
+version: "3"
+
+vars:
+  INVENTORIES:
+    - CVE-2021-41773
+    - CVE-2017-9841
+    - CVE-2019-11510
+    - CVE-2014-6271
+    - CVE-2022-1388
+    - CVE-2022-26134
+    - CVE-2021-26855
+    - CVE-2023-48795
+
+tasks:
+  check-deps:
+    desc: "Vérifie les prérequis et leurs versions minimales"
+    preconditions:
+      - sh: "which ansible-playbook"
+        msg: "ansible-playbook not found — install ansible-core >= 2.15"
+      - sh: "which podman"
+        msg: "podman not found — install podman >= 4.0"
+      - sh: "which cargo"
+        msg: "cargo not found — install Rust >= 1.75"
+      - sh: "python3 scripts/check-versions.py"
+        msg: "Version requirements not met (see output above)"
+
+  build:
+    desc: "Construit les images locales (mocks + OpenSSH custom)"
+    deps: [check-deps]
+    cmds:
+      - ansible-playbook build-images.yml
+
+  test:
+    desc: "Teste un seul CVE — task test CVE=CVE-2021-41773"
+    deps: [check-deps]
+    requires:
+      vars: [CVE]
+    cmds:
+      - ansible-playbook site.yml -i inventories/{{.CVE}}
+
+  test-all:
+    desc: "Lance tous les tests CVE (TP + TN) séquentiellement"
+    deps: [check-deps]
+    cmds:
+      - for: {var: INVENTORIES}
+        cmd: |
+          echo ""
+          echo "════════════════════════════════════════"
+          echo "Testing {{.ITEM}}"
+          echo "════════════════════════════════════════"
+          ansible-playbook site.yml -i inventories/{{.ITEM}}
+
+  clean:
+    desc: "Supprime les images locales noctis/*"
+    cmds:
+      - podman rmi --ignore
+        noctis/bigip-mock:vuln noctis/bigip-mock:patched
+        noctis/exchange-mock:vuln noctis/exchange-mock:patched
+        noctis/pulse-secure-mock:vuln noctis/pulse-secure-mock:patched
+        noctis/openssh-9.5:local noctis/openssh-9.6:local

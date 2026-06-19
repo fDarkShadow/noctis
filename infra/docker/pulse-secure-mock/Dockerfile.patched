@@ -1,0 +1,9 @@
+FROM nginx:alpine
+
+# Pulse Secure mock — patched version
+# Path traversal is blocked: returns 404 on all dana-na/.. attempts
+
+COPY nginx-patched.conf /etc/nginx/nginx.conf
+
+EXPOSE 443
+CMD ["nginx", "-g", "daemon off;"]

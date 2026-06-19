@@ -1,0 +1,10 @@
+---
+- name: "Build noctis binary"
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Compile noctis (cargo build)
+      ansible.builtin.command:
+        cmd: cargo build
+        chdir: "{{ playbook_dir }}/../../"
+      changed_when: true

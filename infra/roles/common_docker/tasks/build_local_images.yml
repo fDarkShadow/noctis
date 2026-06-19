@@ -1,0 +1,60 @@
+---
+- name: Build Apache CVE-2021-41773 (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-41773:vuln -f Dockerfile.vuln ."
+    chdir: "{{ playbook_dir }}/../docker/apache-cve-2021-41773"
+  changed_when: true
+
+- name: Build Apache CVE-2021-41773 (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-41773:patched -f Dockerfile.patched ."
+    chdir: "{{ playbook_dir }}/../docker/apache-cve-2021-41773"
+  changed_when: true
+
+- name: Build BIG-IP mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ playbook_dir }}/../docker/bigip-mock"
+  changed_when: true
+
+- name: Build BIG-IP mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ playbook_dir }}/../docker/bigip-mock"
+  changed_when: true
+
+- name: Build Exchange mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/exchange-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ playbook_dir }}/../docker/exchange-mock"
+  changed_when: true
+
+- name: Build Exchange mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/exchange-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ playbook_dir }}/../docker/exchange-mock"
+  changed_when: true
+
+- name: Build Pulse Secure mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/pulse-secure-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ playbook_dir }}/../docker/pulse-secure-mock"
+  changed_when: true
+
+- name: Build Pulse Secure mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/pulse-secure-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ playbook_dir }}/../docker/pulse-secure-mock"
+  changed_when: true
+
+- name: Build OpenSSH 9.5 (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/openssh-9.5:local ."
+    chdir: "{{ playbook_dir }}/../docker/openssh-9.5"
+  changed_when: true
+
+- name: Build OpenSSH 9.6 (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/openssh-9.6:local ."
+    chdir: "{{ playbook_dir }}/../docker/openssh-9.6"
+  changed_when: true

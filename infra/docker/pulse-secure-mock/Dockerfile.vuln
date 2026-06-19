@@ -1,0 +1,13 @@
+FROM nginx:alpine
+
+# Pulse Secure 9.0.x mock — vulnerable to CVE-2019-11510
+# Reproduces the behaviour: path traversal dana-na/../dana/html5acc/...
+# is resolved server-side without validation → arbitrary file read.
+
+RUN apk add --no-cache bash
+
+COPY nginx-vuln.conf /etc/nginx/nginx.conf
+COPY passwd /etc/passwd.fake
+
+EXPOSE 443
+CMD ["nginx", "-g", "daemon off;"]

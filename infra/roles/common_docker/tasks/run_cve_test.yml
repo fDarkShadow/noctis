@@ -1,0 +1,95 @@
+---
+- name: "{{ cve_id }} — Setup + test + teardown"
+  block:
+    - name: "{{ cve_id }} — Pull image {{ docker_image }}"
+      ansible.builtin.command:
+        cmd: "{{ container_runtime }} pull {{ docker_image }}"
+      when: not docker_image.startswith('noctis/')
+      changed_when: true
+      ignore_errors: true
+
+    - name: "{{ cve_id }} — Find a free host port for {{ container_name }}"
+      ansible.builtin.command:
+        cmd: >-
+          python3 -c
+          "import socket; s=socket.socket(); s.bind(('',0));
+          print(s.getsockname()[1]); s.close()"
+      register: free_port_reg
+      changed_when: false
+
+    - name: "{{ cve_id }} — Set dynamic target_port"
+      ansible.builtin.set_fact:
+        target_port: "{{ free_port_reg.stdout | int }}"
+
+    - name: "{{ cve_id }} — Start container {{ container_name }}"
+      ansible.builtin.command:
+        cmd: >-
+          {{ container_runtime }} run -d
+          --name {{ container_name }}
+          --network {{ container_network }}
+          -p {{ target_port }}:{{ container_port | default(80) }}
+          {{ docker_image }}
+      changed_when: true
+
+    - name: "{{ cve_id }} — Wait for service on {{ target_host }}:{{ target_port }}"
+      ansible.builtin.wait_for:
+        host: "{{ target_host }}"
+        port: "{{ target_port }}"
+        timeout: 45
+
+    - name: "{{ cve_id }} — Run noctis scan on {{ inventory_hostname }}"
+      ansible.builtin.command:
+        cmd: >-
+          {{ noctis_bin }} scan
+          --host {{ target_host }}
+          --service {{ target_service }}:{{ target_port }}
+          --tests {{ feed_path }}
+      register: scan_result
+      failed_when: false
+      changed_when: false
+      timeout: "{{ scan_timeout }}"
+
+    - name: "{{ cve_id }} — Parse findings count"
+      ansible.builtin.set_fact:
+        findings_count: >-
+          {{ (scan_result.stdout | from_json).findings | length
+             if scan_result.rc == 0 else 0 }}
+
+    - name: "{{ cve_id }} — Assert TRUE POSITIVE"
+      ansible.builtin.assert:
+        that: findings_count | int > 0
+        fail_msg: >-
+          FALSE NEGATIVE on {{ inventory_hostname }} ({{ cve_id }}):
+          expected findings on vulnerable target, got 0.
+          stdout: {{ scan_result.stdout[:500] }}
+        success_msg: "TRUE POSITIVE ✓ — {{ findings_count }} finding(s)"
+      when: expected_result == 'vulnerable'
+
+    - name: "{{ cve_id }} — Assert TRUE NEGATIVE"
+      ansible.builtin.assert:
+        that: findings_count | int == 0
+        fail_msg: >-
+          FALSE POSITIVE on {{ inventory_hostname }} ({{ cve_id }}):
+          expected 0 findings on patched target, got {{ findings_count }}.
+          stdout: {{ scan_result.stdout[:500] }}
+        success_msg: "TRUE NEGATIVE ✓ — 0 findings on patched target"
+      when: expected_result == 'clean'
+
+    - name: "{{ cve_id }} — Summary"
+      ansible.builtin.debug:
+        msg: |
+          ── {{ cve_id }} — {{ inventory_hostname }} ──────────────
+          Target   : {{ target_host }}:{{ target_port }}
+          Expected : {{ expected_result }}
+          Findings : {{ findings_count }}
+          Result   : {{ 'PASS' if
+                         (expected_result == 'vulnerable' and findings_count | int > 0) or
+                         (expected_result == 'clean' and findings_count | int == 0)
+                       else 'FAIL' }}
+
+  always:
+    - name: "{{ cve_id }} — Teardown container {{ container_name }}"
+      ansible.builtin.command:
+        cmd: "{{ container_runtime }} rm -f {{ container_name }}"
+      failed_when: false
+      changed_when: true

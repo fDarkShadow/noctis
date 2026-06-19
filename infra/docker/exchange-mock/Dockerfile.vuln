@@ -1,0 +1,6 @@
+FROM python:3.11-slim
+COPY server.py /app/server.py
+WORKDIR /app
+ENV EXCHANGE_MODE=vuln
+EXPOSE 443
+CMD ["python3", "server.py"]

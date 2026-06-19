@@ -1,0 +1,10 @@
+---
+- import_playbook: playbooks/00-build-noctis.yml
+- import_playbook: playbooks/CVE-2021-41773.yml
+- import_playbook: playbooks/CVE-2017-9841.yml
+- import_playbook: playbooks/CVE-2019-11510.yml
+- import_playbook: playbooks/CVE-2014-6271.yml
+- import_playbook: playbooks/CVE-2022-1388.yml
+- import_playbook: playbooks/CVE-2022-26134.yml
+- import_playbook: playbooks/CVE-2021-26855.yml
+- import_playbook: playbooks/CVE-2023-48795.yml

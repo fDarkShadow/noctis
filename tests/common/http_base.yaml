@@ -1,0 +1,23 @@
+# Shared HTTP base — included by tests that need a first HTTP probe.
+# The `probe` step result is available as {{probe.status}}, {{probe.body}}, etc.
+uid: 94efedaa-c8cd-4a81-a1bc-b2cf9e529903
+name: "Common HTTP base"
+type: misconfig
+severity: info
+confidence_base: 1.0
+
+vars:
+  http_port: 80
+  http_path: "/"
+  http_method: "GET"
+
+steps:
+  - id: probe
+    action: http_request
+    method: "{{http_method}}"
+    path: "{{http_path}}"
+    port: "{{http_port}}"
+    tls_insecure: true
+    follow_redirects: true
+    timeout_secs: 10
+    store_as: probe

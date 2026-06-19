@@ -1,0 +1,47 @@
+# Detect SSH servers that advertise password authentication.
+uid: b06ad8cb-e183-4a8b-96b5-ae03c613a0db
+name: "SSH password authentication enabled"
+description: "SSH server allows password-based authentication, increasing brute-force risk"
+type: misconfig
+category: ssh
+severity: medium
+confidence_base: 0.85
+tags: [ssh, auth, hardening]
+author: florian
+version: "1.0.0"
+
+vars:
+  port: 22
+
+steps:
+  - id: ssh-inspect
+    action: ssh_check
+    port: "{{port}}"
+    timeout_secs: 10
+    store_as: ssh
+
+  - id: check-password-auth
+    action: match
+    source: ssh.auth_methods
+    pattern: "password"
+    case_insensitive: true
+    on_match:
+      finding:
+        title: "SSH password authentication enabled"
+        description: "Server advertises 'password' as an accepted auth method."
+        remediation: "Set 'PasswordAuthentication no' in sshd_config and restart SSH."
+        confidence_delta: 0.10
+        evidence: "Auth methods: {{ssh.auth_methods}}"
+
+  - id: check-keyboard-interactive
+    action: match
+    source: ssh.auth_methods
+    pattern: "keyboard-interactive"
+    case_insensitive: true
+    on_match:
+      finding:
+        title: "SSH keyboard-interactive authentication enabled"
+        description: "May allow password login via PAM."
+        remediation: "Set 'KbdInteractiveAuthentication no' in sshd_config."
+        confidence_delta: -0.10
+        severity: low

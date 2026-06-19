@@ -1,0 +1,51 @@
+# Probe for commonly exposed sensitive paths via HTTP.
+# Uses a loop over a list of paths — each 200 response is a finding.
+uid: b7d6f17f-e102-491a-acae-1f107201b038
+name: "Exposed sensitive paths"
+description: "Checks for publicly accessible admin/debug/backup paths"
+type: misconfig
+category: exposure
+severity: high
+confidence_base: 0.80
+tags: [http, exposure, recon]
+author: florian
+version: "1.0.0"
+
+vars:
+  port: 80
+
+steps:
+  - id: probe-paths
+    action: http_request
+    method: GET
+    path: "{{current_path}}"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 8
+    store_as: path_response
+    loop:
+      over:
+        - /.git/config
+        - /.env
+        - /admin
+        - /admin/
+        - /manager/html
+        - /phpinfo.php
+        - /.htaccess
+        - /wp-admin/
+        - /actuator/env
+        - /actuator/health
+        - /console
+        - /api/swagger.json
+        - /api/openapi.json
+        - /debug
+        - /server-status
+      var: current_path
+    on_success:
+      condition: "path_response_status == 200"
+      finding:
+        title: "Exposed sensitive path: {{current_path}}"
+        description: "Path returned HTTP 200 — may expose sensitive information."
+        confidence_delta: 0.10
+        evidence: "{{path_response.url}} → {{path_response.status}}"

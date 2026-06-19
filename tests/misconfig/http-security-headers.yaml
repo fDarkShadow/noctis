@@ -1,0 +1,81 @@
+# Check for missing HTTP security headers.
+#
+# Each missing header is reported as a separate finding with its own
+# confidence so downstream correlation can group them.
+uid: 1c22561e-0d2a-4f7d-be74-096137de4982
+name: "Missing HTTP security headers"
+description: "Checks for absence of security-relevant response headers"
+type: misconfig
+category: http-headers
+severity: medium
+confidence_base: 0.90
+tags: [http, headers, hardening, owasp]
+author: florian
+version: "1.0.0"
+references:
+  - "https://owasp.org/www-project-secure-headers/"
+
+includes:
+  - ../common/http_base.yaml
+
+vars:
+  http_port: 80
+  http_path: "/"
+
+steps:
+  # ── HSTS ──────────────────────────────────────────────────────────────
+  - id: check-hsts
+    action: match
+    source: probe.headers
+    pattern: "strict-transport-security"
+    case_insensitive: true
+    negate: true
+    condition: "probe_status >= 200 && probe_status < 400"
+    on_match:
+      finding:
+        title: "Missing Strict-Transport-Security (HSTS)"
+        description: "Without HSTS, browsers may connect over plain HTTP."
+        remediation: "Add: Strict-Transport-Security: max-age=31536000; includeSubDomains"
+        confidence_delta: 0.0
+
+  # ── X-Frame-Options ───────────────────────────────────────────────────
+  - id: check-xframe
+    action: match
+    source: probe.headers
+    pattern: "x-frame-options"
+    case_insensitive: true
+    negate: true
+    on_match:
+      finding:
+        title: "Missing X-Frame-Options"
+        description: "Application may be vulnerable to clickjacking."
+        remediation: "Add: X-Frame-Options: DENY"
+        confidence_delta: 0.0
+
+  # ── Content-Security-Policy ───────────────────────────────────────────
+  - id: check-csp
+    action: match
+    source: probe.headers
+    pattern: "content-security-policy"
+    case_insensitive: true
+    negate: true
+    on_match:
+      finding:
+        title: "Missing Content-Security-Policy"
+        description: "No CSP header — XSS attacks have broader impact."
+        remediation: "Define a Content-Security-Policy appropriate for the application."
+        confidence_delta: -0.05
+
+  # ── X-Content-Type-Options ────────────────────────────────────────────
+  - id: check-xcto
+    action: match
+    source: probe.headers
+    pattern: "x-content-type-options"
+    case_insensitive: true
+    negate: true
+    on_match:
+      finding:
+        title: "Missing X-Content-Type-Options"
+        remediation: "Add: X-Content-Type-Options: nosniff"
+        confidence_delta: -0.05
+        severity: low

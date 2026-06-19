@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+# F5 BIG-IP mock — patched version: always returns 401 even with bypass header
+
+COPY server.py /app/server.py
+WORKDIR /app
+ENV BIGIP_MODE=patched
+EXPOSE 443
+CMD ["python3", "server.py"]

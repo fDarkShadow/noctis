@@ -1,0 +1,11 @@
+---
+# Builds all local Docker images required for tests
+# Usage: ansible-playbook build-images.yml
+
+- name: Build local Docker images for noctis CVE tests
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Include build tasks
+      ansible.builtin.include_tasks:
+        file: roles/common_docker/tasks/build_local_images.yml

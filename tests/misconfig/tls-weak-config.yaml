@@ -1,0 +1,48 @@
+# Detect weak TLS configurations: old protocols, self-signed/expired certs.
+uid: 136b0b9f-9b4c-4a42-95ba-ea0a6f64cffe
+name: "Weak TLS configuration"
+description: "Inspects TLS handshake for deprecated protocol versions and certificate issues"
+type: misconfig
+category: tls
+severity: high
+confidence_base: 0.95
+tags: [tls, ssl, crypto, hardening]
+author: florian
+version: "1.0.0"
+references:
+  - "https://www.ssllabs.com/projects/best-practices/"
+
+vars:
+  port: 443
+
+steps:
+  - id: tls-inspect
+    action: tls_check
+    port: "{{port}}"
+    timeout_secs: 10
+    store_as: tls
+
+  - id: check-cert-validity
+    action: match
+    source: tls.cert_valid
+    pattern: "false"
+    on_match:
+      finding:
+        title: "Invalid or untrusted TLS certificate"
+        description: "Certificate failed validation — may be self-signed or expired."
+        remediation: "Install a certificate from a trusted CA."
+        confidence_delta: 0.0
+
+  # Detect TLS 1.0 / 1.1 — check if protocol version string contains them
+  - id: check-old-protocol
+    action: match
+    source: tls.protocol_version
+    pattern: "TLS10|TLS11|Tlsv1_0|Tlsv1_1"
+    case_insensitive: true
+    on_match:
+      finding:
+        title: "Deprecated TLS protocol version in use"
+        description: "TLS 1.0 or 1.1 is enabled — these are cryptographically weak."
+        remediation: "Disable TLS 1.0/1.1; accept only TLS 1.2 and TLS 1.3."
+        confidence_delta: 0.0
+        evidence: "Negotiated: {{tls.protocol_version}}"
