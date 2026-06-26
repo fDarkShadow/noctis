@@ -4,6 +4,12 @@ You are an orchestrator running inside `/loop` mode.
 Each wake-up: run one agent-loop iteration, then schedule the next wake-up.
 Pause longer if you detect signs of token pressure or rate limiting.
 
+> **Permissions note** — This command runs inside the current Claude Code session,
+> which already has the tool permissions the user granted at startup. To run fully
+> autonomously (no prompts), launch Claude Code with `--dangerously-skip-permissions`
+> or accept all tool calls when prompted. The agent-loop hard rules (no merge, no push
+> to main) remain in effect regardless of permission mode.
+
 ---
 
 ## On every wake-up

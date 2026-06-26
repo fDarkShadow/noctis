@@ -6,6 +6,20 @@
 #   ./scripts/run-agents.sh --max 3      # stop after 3 iterations
 #   ./scripts/run-agents.sh --delay 120  # 120s pause between iterations (default: 60)
 #
+# ⚠  PERMISSIONS
+#   This script runs 'claude --dangerously-skip-permissions', which bypasses all
+#   tool-call permission prompts. The agent can freely run bash commands, edit
+#   files, call gh/git, and run ansible-playbook — without asking.
+#
+#   Guardrails that remain active (enforced by agent-loop.md hard rules):
+#     - Never merges a PR (only opens one)
+#     - Never pushes directly to main
+#     - Never deletes branches or worktrees without completing work
+#     - Stops and labels needs-help after 3 test failures
+#
+#   Only run this script in a working directory you trust and on a branch/repo
+#   where unattended tool execution is acceptable.
+#
 # Token budget strategy:
 #   Each claude invocation consumes tokens. If the CLI returns a rate-limit error
 #   (exit code 2 or "rate limit" in output), the script backs off exponentially
@@ -44,11 +58,13 @@ available_issues() {
 
 run_agent() {
   # Run one agent-loop iteration in non-interactive mode.
+  # --dangerously-skip-permissions: suppresses all tool-call prompts so the
+  # agent can run git/gh/ansible/file edits autonomously. See warning above.
   # Exit codes:
   #   0 = completed (issue picked and PR opened, or no issue found)
   #   2 = rate limited
   #   1 = other error
-  claude --print "/agent-loop" 2>&1
+  claude --dangerously-skip-permissions --print "/agent-loop" 2>&1
 }
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
