@@ -106,3 +106,15 @@
     cmd: "{{ container_runtime }} build -t noctis/confluence-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/confluence-mock"
   changed_when: true
+
+- name: Build ownCloud graphapi mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/owncloud-graphapi-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/owncloud-graphapi-mock"
+  changed_when: true
+
+- name: Build ownCloud graphapi mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/owncloud-graphapi-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/owncloud-graphapi-mock"
+  changed_when: true
