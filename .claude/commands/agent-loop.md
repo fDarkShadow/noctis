@@ -99,6 +99,9 @@ On failure:
 - Retry up to 3 times
 - After 3 failures: open the PR anyway with label `needs-help`, document the error in the PR body
 
+**If the failure is caused by a bug in the Rust engine** (not in the feed or the mock):
+→ see [Handling engine bugs](#handling-engine-bugs) below.
+
 ### 8. Validate the schema
 
 ```bash
@@ -173,6 +176,116 @@ gh issue comment $ISSUE --body "PR opened: <pr_url>"
 cd /home/flo/workspace/iscan
 git worktree remove "../noctis-$CVE" --force
 ```
+
+---
+
+## Handling engine bugs
+
+During implementation you may discover a bug in the noctis Rust source (wrong field name,
+missing action support, broken parser, unexpected behaviour in `tcp_connect` / `http_request`,
+etc.). The response depends on the scope of the bug.
+
+### Criterion: is the fix self-contained?
+
+A fix is **self-contained** if ALL of the following are true:
+- It touches ≤ 3 lines in a single file under `src/`
+- It does not change any public interface (structs, enums, function signatures)
+- `cargo test` still passes after the change
+- The reason the fix is correct is immediately obvious from the code
+
+Examples of self-contained fixes:
+- Wrong field name in a struct (`resp.data` → `resp.banner`)
+- Missing `serde` attribute on a new field
+- Off-by-one in a condition
+- Missing `services:` field allowed to be empty when it shouldn't be
+
+Examples that are **not** self-contained:
+- Behaviour change in `tcp_connect`, `http_request`, or `runner.rs`
+- Concurrency or timeout issues
+- TLS handshake or crypto provider problems
+- Anything that could affect feeds already passing their tests
+
+---
+
+### Case A — Self-contained fix
+
+Fix it on the current branch. Then:
+
+```bash
+cargo build 2>&1
+cargo test 2>&1
+```
+
+Both must pass before continuing. Include the fix in the commit:
+
+```
+feat(<CVE>): add feed + fix <what> in src/<file>.rs
+
+- Feed YAML with <detection_method>
+- Python/Docker mock (vuln + patched), HTTP + HTTPS
+- Ansible inventory + playbook, 4 test cases
+- Fix: <one-line description of the engine fix>
+
+Closes #<ISSUE>
+```
+
+Add to the PR checklist:
+```
+- [x] Engine fix included — <description> (src/<file>.rs)
+- [ ] cargo test passes
+```
+
+---
+
+### Case B — Non-trivial engine bug
+
+Do not attempt to fix it on this branch. Instead:
+
+**1. Open a bug issue:**
+```bash
+gh issue create \
+  --title "bug: <short description of the engine problem>" \
+  --label "type:bug,priority:high" \
+  --body "$(cat <<'BODY'
+## Discovered while implementing #<ISSUE>
+
+### Symptom
+<What happened — exact error or wrong behaviour>
+
+### Reproduction
+<Minimal YAML step or cargo test that triggers it>
+
+### Expected behaviour
+<What should happen>
+
+### Affected code
+`src/<file>.rs` line <N> — <brief diagnosis>
+
+### Workaround used in #<ISSUE>
+<If you found a workaround, describe it here>
+BODY
+)"
+```
+
+**2. Work around it in the feed if possible:**
+Adjust the YAML steps to avoid triggering the broken code path (different action,
+different payload structure, etc.). Document the workaround in the feed with a comment.
+
+**3. If no workaround is possible:**
+Open the PR with label `needs-help`. In the PR body:
+- Reference the bug issue
+- Explain exactly what blocks implementation
+- Leave the test results showing the failure
+
+**4. Either way:** unblock the issue and move on:
+```bash
+gh issue edit $ISSUE \
+  --add-label "status:review" \
+  --remove-label "status:in-progress"
+gh issue comment $ISSUE --body "PR opened: <pr_url> — blocked by engine bug <bug_issue_url>"
+```
+
+---
 
 ## Hard rules
 
