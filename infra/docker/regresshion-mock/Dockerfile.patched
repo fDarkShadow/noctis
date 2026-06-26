@@ -1,0 +1,13 @@
+FROM docker.io/library/alpine:3.21
+
+# OpenSSH 9.9p1 — patched (CVE-2024-6387 regreSSHion fixed in 9.8p1)
+# Alpine 3.21 ships OpenSSH 9.9p1 which is >= 9.8p1 (patched)
+
+RUN apk add --no-cache openssh && \
+    ssh-keygen -A && \
+    mkdir -p /run/sshd
+
+COPY sshd_config /etc/ssh/sshd_config
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D", "-e"]
