@@ -1,0 +1,13 @@
+FROM docker.io/library/alpine:3.19
+
+# OpenSSH 9.5p1 — vulnerable to CVE-2024-6387 (regreSSHion)
+# Alpine 3.19 ships OpenSSH 9.5p1, which is in the affected range 8.5p1–9.7p1
+
+RUN apk add --no-cache openssh && \
+    ssh-keygen -A && \
+    mkdir -p /run/sshd
+
+COPY sshd_config /etc/ssh/sshd_config
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D", "-e"]

@@ -107,6 +107,16 @@
     chdir: "{{ docker_dir }}/confluence-mock"
   changed_when: true
 
+- name: Build regreSSHion mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/regresshion-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/regresshion-mock"
+  changed_when: true
+
+- name: Build regreSSHion mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/regresshion-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/regresshion-mock"
 - name: Build ownCloud graphapi mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/owncloud-graphapi-mock:vuln -f Dockerfile.vuln ."
