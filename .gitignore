@@ -2,6 +2,6 @@
 openvas
 .claude/settings*
 .claude/projects/
-scripts
+# scripts/  (now tracked)
 .sofa/
 .vscode

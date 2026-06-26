@@ -1,0 +1,55 @@
+{
+  "name": "noctis",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // Docker-in-Docker so task build / task test-all can spin up containers
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "none"
+    }
+  },
+
+  "runArgs": ["--init"],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "vadimcn.vscode-lldb",
+        "redhat.vscode-yaml",
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-pull-request-github",
+        "github.vscode-github-actions"
+      ],
+      "settings": {
+        // Feed schema autocomplete (replaces gitignored .vscode/settings.json)
+        "yaml.schemas": {
+          "${containerWorkspaceFolder}/schemas/feed.schema.json": [
+            "tests/cve/*.yaml",
+            "tests/misconfig/*.yaml"
+          ]
+        },
+        "yaml.validate": true,
+        "yaml.completion": true,
+        // rust-analyzer: clippy on save
+        "rust-analyzer.checkOnSave": true,
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.check.extraArgs": ["--", "-D", "warnings"],
+        // Formatters
+        "editor.formatOnSave": true,
+        "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" },
+        "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+        "[toml]": { "editor.defaultFormatter": "tamasfe.even-better-toml" }
+      }
+    }
+  },
+
+  "remoteEnv": {
+    "RUST_LOG": "info"
+  }
+}
