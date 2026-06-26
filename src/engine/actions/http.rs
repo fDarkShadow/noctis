@@ -17,8 +17,11 @@ pub(super) fn resolve_port(port: &Option<String>, ctx: &Context) -> Option<u16> 
 pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
     let method = step.method.as_deref().unwrap_or("GET");
     let path = step.path.as_deref().unwrap_or("/");
-    let port = resolve_port(&step.port, ctx).unwrap_or(if step.tls_insecure { 80 } else { 443 });
-    let scheme = if step.tls_insecure || port == 80 { "http" } else { "https" };
+
+    // Scheme comes from {{scheme}} injected by the runner (derived from the discovered service
+    // name: "http" or "https"). tls_insecure only controls certificate validation.
+    let scheme = ctx.vars.get("scheme").and_then(|v| v.as_str()).unwrap_or("http");
+    let port = resolve_port(&step.port, ctx).unwrap_or(if scheme == "https" { 443 } else { 80 });
 
     let url = expr::interpolate(
         &format!("{scheme}://{}:{}{}", ctx.target_host, port, path),

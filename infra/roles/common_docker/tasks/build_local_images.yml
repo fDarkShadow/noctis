@@ -2,59 +2,107 @@
 - name: Build Apache CVE-2021-41773 (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-41773:vuln -f Dockerfile.vuln ."
-    chdir: "{{ playbook_dir }}/../docker/apache-cve-2021-41773"
+    chdir: "{{ docker_dir }}/apache-cve-2021-41773"
   changed_when: true
 
 - name: Build Apache CVE-2021-41773 (patched)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-41773:patched -f Dockerfile.patched ."
-    chdir: "{{ playbook_dir }}/../docker/apache-cve-2021-41773"
+    chdir: "{{ docker_dir }}/apache-cve-2021-41773"
   changed_when: true
 
 - name: Build BIG-IP mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/bigip-mock:vuln -f Dockerfile.vuln ."
-    chdir: "{{ playbook_dir }}/../docker/bigip-mock"
+    chdir: "{{ docker_dir }}/bigip-mock"
   changed_when: true
 
 - name: Build BIG-IP mock (patched)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/bigip-mock:patched -f Dockerfile.patched ."
-    chdir: "{{ playbook_dir }}/../docker/bigip-mock"
+    chdir: "{{ docker_dir }}/bigip-mock"
   changed_when: true
 
 - name: Build Exchange mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/exchange-mock:vuln -f Dockerfile.vuln ."
-    chdir: "{{ playbook_dir }}/../docker/exchange-mock"
+    chdir: "{{ docker_dir }}/exchange-mock"
   changed_when: true
 
 - name: Build Exchange mock (patched)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/exchange-mock:patched -f Dockerfile.patched ."
-    chdir: "{{ playbook_dir }}/../docker/exchange-mock"
+    chdir: "{{ docker_dir }}/exchange-mock"
   changed_when: true
 
 - name: Build Pulse Secure mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/pulse-secure-mock:vuln -f Dockerfile.vuln ."
-    chdir: "{{ playbook_dir }}/../docker/pulse-secure-mock"
+    chdir: "{{ docker_dir }}/pulse-secure-mock"
   changed_when: true
 
 - name: Build Pulse Secure mock (patched)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/pulse-secure-mock:patched -f Dockerfile.patched ."
-    chdir: "{{ playbook_dir }}/../docker/pulse-secure-mock"
+    chdir: "{{ docker_dir }}/pulse-secure-mock"
   changed_when: true
 
-- name: Build OpenSSH 9.5 (vuln)
+- name: Build SSH Terrapin mock (vuln)
   ansible.builtin.command:
-    cmd: "{{ container_runtime }} build -t noctis/openssh-9.5:local ."
-    chdir: "{{ playbook_dir }}/../docker/openssh-9.5"
+    cmd: "{{ container_runtime }} build -t noctis/ssh-terrapin-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ssh-terrapin-mock"
   changed_when: true
 
-- name: Build OpenSSH 9.6 (patched)
+- name: Build SSH Terrapin mock (patched)
   ansible.builtin.command:
-    cmd: "{{ container_runtime }} build -t noctis/openssh-9.6:local ."
-    chdir: "{{ playbook_dir }}/../docker/openssh-9.6"
+    cmd: "{{ container_runtime }} build -t noctis/ssh-terrapin-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ssh-terrapin-mock"
+  changed_when: true
+
+- name: Build PHPUnit vuln
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/phpunit-vuln:local ."
+    chdir: "{{ docker_dir }}/phpunit-vuln"
+  changed_when: true
+
+- name: Build PHPUnit patched
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/phpunit-patched:local ."
+    chdir: "{{ docker_dir }}/phpunit-patched"
+  changed_when: true
+
+- name: Build Shellshock mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/shellshock-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/shellshock-mock"
+  changed_when: true
+
+- name: Build Shellshock mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/shellshock-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/shellshock-mock"
+  changed_when: true
+
+- name: Build Log4Shell mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/log4shell-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/log4shell-mock"
+  changed_when: true
+
+- name: Build Log4Shell mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/log4shell-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/log4shell-mock"
+  changed_when: true
+
+- name: Build Confluence mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/confluence-mock"
+  changed_when: true
+
+- name: Build Confluence mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/confluence-mock"
   changed_when: true

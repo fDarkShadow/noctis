@@ -54,7 +54,20 @@ class BigIPHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
 
+def _make_https_server(handler, port):
+    import ssl
+    srv = HTTPServer(("0.0.0.0", port), handler)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain("/app/cert.pem", "/app/key.pem")
+    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
+    return srv
+
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 443))
-    print(f"BIG-IP mock running on :{port} (mode={'vuln' if VULN_MODE else 'patched'})")
-    HTTPServer(("0.0.0.0", port), BigIPHandler).serve_forever()
+    import threading
+    mode = "vuln" if VULN_MODE else "patched"
+    http_srv = HTTPServer(("0.0.0.0", 80), BigIPHandler)
+    https_srv = _make_https_server(BigIPHandler, 443)
+    print(f"BIG-IP mock on :80/:443 (mode={mode})", flush=True)
+    threading.Thread(target=http_srv.serve_forever, daemon=True).start()
+    https_srv.serve_forever()

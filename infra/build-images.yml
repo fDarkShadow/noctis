@@ -5,6 +5,9 @@
 - name: Build local Docker images for noctis CVE tests
   hosts: localhost
   gather_facts: false
+  vars:
+    container_runtime: podman
+    docker_dir: "{{ playbook_dir }}/docker"
   tasks:
     - name: Include build tasks
       ansible.builtin.include_tasks:

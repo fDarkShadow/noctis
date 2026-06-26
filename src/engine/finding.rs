@@ -172,7 +172,7 @@ mod tests {
     }
 
     fn ctx() -> Context {
-        Context::new("10.0.0.1", Some(8080), None)
+        Context::new("10.0.0.1", Some(8080), "http", None)
     }
 
     // ── to_json ───────────────────────────────────────────────────────────

@@ -19,7 +19,9 @@ pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
         None => None,
     };
 
-    match tcp::connect_and_grab(&ctx.target_host, port, send.as_deref(), step.timeout_secs).await {
+    let use_tls = ctx.vars.get("scheme").and_then(|v| v.as_str()) == Some("https");
+
+    match tcp::connect_and_grab(&ctx.target_host, port, send.as_deref(), step.timeout_secs, use_tls).await {
         Ok(r) => {
             if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
             if r.connected {

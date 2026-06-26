@@ -1,0 +1,262 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://noctis/schemas/feed.schema.json",
+  "title": "Noctis test feed",
+  "description": "Schema for YAML vulnerability / misconfiguration feeds consumed by noctis.",
+  "type": "object",
+  "required": ["uid", "name", "type", "severity", "services", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "uid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Stable UUID v4 — never change after first commit."
+    },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["cve", "misconfig"],
+      "description": "Feed category."
+    },
+    "cve": {
+      "type": "string",
+      "pattern": "^CVE-\\d{4}-\\d+$",
+      "description": "Required when type is cve."
+    },
+    "cvss": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "low", "medium", "high", "critical"]
+    },
+    "confidence_base": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.75,
+      "description": "Starting confidence before any step runs. Keep low (0.15–0.30) when detection is indirect."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "services": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Service names the feed targets (http, https, ssh, …). Empty = all ports."
+    },
+    "author": { "type": "string" },
+    "version": { "type": "string" },
+    "category": {
+      "type": "string",
+      "description": "Misconfig category (required when type is misconfig)."
+    },
+    "references": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "includes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Relative paths to YAML files whose steps are prepended."
+    },
+    "vars": {
+      "type": "object",
+      "description": "Test-scoped variables available as {{key}} in all steps.",
+      "additionalProperties": true
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    }
+  },
+
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["id", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier within this feed." },
+        "action": {
+          "type": "string",
+          "enum": ["http_request", "tcp_connect", "tls_check", "ssh_check", "match", "script", "wait_oob", "set_var"]
+        },
+        "condition": {
+          "type": "string",
+          "description": "Rhai expression. Step is skipped when it evaluates to false."
+        },
+        "store_as": {
+          "type": "string",
+          "description": "Variable name where the step result is stored (e.g. resp → resp.body, resp.status, resp.headers, resp.banner)."
+        },
+        "loop": { "$ref": "#/$defs/loop_config" },
+        "on_success": { "$ref": "#/$defs/outcome" },
+        "on_failure": { "$ref": "#/$defs/outcome" },
+        "on_match":   { "$ref": "#/$defs/outcome" },
+
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+          "description": "http_request only."
+        },
+        "path": {
+          "type": "string",
+          "description": "URL path — supports {{var}} templates. http_request and tcp_connect."
+        },
+        "port": {
+          "type": "string",
+          "description": "Port as string to allow templates: \"{{port}}\". Defaults to context port."
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "http_request only."
+        },
+        "body": {
+          "type": "string",
+          "description": "Request body. http_request only."
+        },
+        "follow_redirects": {
+          "type": "boolean",
+          "description": "http_request only. Default false."
+        },
+        "tls_insecure": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip TLS certificate validation (self-signed certs in test targets). http_request only."
+        },
+        "send": {
+          "type": "string",
+          "description": "Raw bytes to send after connect. tcp_connect only. Supports {{var}} templates."
+        },
+        "auth_methods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "ssh_check only."
+        },
+        "source": {
+          "type": "string",
+          "description": "Dot-path into context to match against (e.g. resp.body, resp.banner, resp.headers). match only."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern (Rust regex syntax). match only."
+        },
+        "negate": {
+          "type": "boolean",
+          "default": false,
+          "description": "Invert the match result. match only."
+        },
+        "case_insensitive": {
+          "type": "boolean",
+          "default": false,
+          "description": "match only."
+        },
+        "code": {
+          "type": "string",
+          "description": "Rhai script body. script only."
+        },
+        "oob_timeout_secs": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 15,
+          "description": "wait_oob only."
+        },
+        "var_name": {
+          "type": "string",
+          "description": "set_var only — variable to create/update."
+        },
+        "var_value": {
+          "description": "set_var only — value to assign (any scalar or object)."
+        },
+        "timeout_secs": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10
+        }
+      }
+    },
+
+    "loop_config": {
+      "type": "object",
+      "required": ["var"],
+      "additionalProperties": false,
+      "properties": {
+        "over": {
+          "type": "array",
+          "description": "List of values; the step runs once per element."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Repeat N times (var is set to 0..N-1)."
+        },
+        "var": {
+          "type": "string",
+          "description": "Context variable injected with the current element."
+        }
+      }
+    },
+
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "finding": { "$ref": "#/$defs/finding_spec" },
+        "set_vars": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Variables to inject into context when this outcome fires."
+        },
+        "stop": {
+          "type": "boolean",
+          "default": false,
+          "description": "Halt execution of remaining steps when true."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Rhai guard — outcome is suppressed when false."
+        }
+      }
+    },
+
+    "finding_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "confidence_delta": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Added to confidence_base. Final confidence = base + delta, clamped to [0, 1]."
+        },
+        "qod": {
+          "type": "integer",
+          "enum": [50, 70, 75, 97, 100],
+          "default": 70,
+          "description": "Quality of Detection: 50=general, 70=banner, 75=response analysis, 97=OOB/callback, 100=full exploit."
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Human-readable description — supports {{var}} templates."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "low", "medium", "high", "critical"],
+          "description": "Overrides the feed-level severity for this specific finding."
+        },
+        "cve": { "type": "string", "pattern": "^CVE-\\d{4}-\\d+$" },
+        "cvss": { "type": "number", "minimum": 0, "maximum": 10 },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "remediation": { "type": "string" }
+      }
+    }
+  }
+}

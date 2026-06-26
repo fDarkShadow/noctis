@@ -158,13 +158,13 @@ impl ScanManager {
             }
         }
 
-        // Expand each def to one task per matched port.
-        let tasks: Vec<(TestDef, u16)> = defs
+        // Expand each def to one task per matched (port, service_name).
+        let tasks: Vec<(TestDef, u16, String)> = defs
             .into_iter()
             .flat_map(|def| {
-                matched_ports(&def, &request)
+                matched_services(&def, &request)
                     .into_iter()
-                    .map(move |p| (def.clone(), p))
+                    .map(move |(p, svc)| (def.clone(), p, svc))
             })
             .collect();
 
@@ -196,7 +196,7 @@ impl ScanManager {
 
         let mut handles = Vec::with_capacity(total);
 
-        for (def, port) in tasks {
+        for (def, port, svc) in tasks {
             let runner = runner.clone();
             let sem = semaphore.clone();
             let host = host.clone();
@@ -219,7 +219,7 @@ impl ScanManager {
                     }
                 }
 
-                let findings = match runner.run(&def, host.as_str(), Some(port)).await {
+                let findings = match runner.run(&def, host.as_str(), Some(port), &svc).await {
                     Ok(f) => f,
                     Err(e) => {
                         tracing::warn!(test = %def.uid, "test error: {e}");
@@ -282,20 +282,19 @@ impl ScanManager {
     }
 }
 
-/// Return the list of ports on which `def` should run, given the discovered services.
+/// Return (port, service_name) pairs on which `def` should run.
 ///
 /// Rules:
-/// - No discovered services (legacy `--port` mode): run `def` on `request.port`.
-/// - Discovered services, `def.services` empty: run on every discovered port.
-/// - Discovered services, `def.services` non-empty: only ports whose service name matches.
-fn matched_ports(def: &TestDef, request: &ScanRequest) -> Vec<u16> {
+/// - `def.services` empty: run on every discovered (port, service).
+/// - `def.services` non-empty: only entries whose service name matches.
+fn matched_services(def: &TestDef, request: &ScanRequest) -> Vec<(u16, String)> {
     if def.services.is_empty() {
-        return request.services.iter().map(|s| s.port).collect();
+        return request.services.iter().map(|s| (s.port, s.service.clone())).collect();
     }
     request
         .services
         .iter()
         .filter(|s| def.services.contains(&s.service))
-        .map(|s| s.port)
+        .map(|s| (s.port, s.service.clone()))
         .collect()
 }

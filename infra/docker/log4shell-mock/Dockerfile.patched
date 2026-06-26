@@ -1,0 +1,13 @@
+FROM docker.io/library/python:3.11-slim
+RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+
+# Log4Shell-patched mock — CVE-2021-44228
+# Exposes pom.properties with log4j-core version 2.17.1 (patched).
+
+COPY server.py /app/server.py
+WORKDIR /app
+RUN openssl req -x509 -newkey rsa:2048 -keyout /app/key.pem -out /app/cert.pem \
+    -days 3650 -nodes -subj "/CN=localhost"
+ENV LOG4SHELL_MODE=patched
+EXPOSE 80 443
+CMD ["python3", "server.py"]

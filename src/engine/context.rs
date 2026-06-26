@@ -34,13 +34,20 @@ impl Context {
     pub fn new(
         target_host: impl Into<String>,
         target_port: Option<u16>,
+        target_service: &str,
         oob_server: Option<Arc<OobServer>>,
     ) -> Self {
         let oob_token = uuid::Uuid::new_v4().to_string();
         let target_host = target_host.into();
 
+        let scheme = match target_service {
+            "https" | "ssl" => "https",
+            _ => "http",
+        };
+
         let mut vars = HashMap::new();
         vars.insert("target_host".to_string(), Value::String(target_host.clone()));
+        vars.insert("scheme".to_string(), Value::String(scheme.to_string()));
         if let Some(p) = target_port {
             vars.insert("target_port".to_string(), Value::Number(p.into()));
             // "port" est le nom conventionnel dans les feeds — prend le dessus sur les vars YAML

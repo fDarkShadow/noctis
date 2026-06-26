@@ -107,6 +107,7 @@ fn init_logging(verbosity: u8) {
 
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env().add_directive(level.into()))
+        .with_writer(std::io::stderr)
         .with_ansi(std::io::stderr().is_terminal())
         .with_target(false)
         .init();

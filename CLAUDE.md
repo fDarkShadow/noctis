@@ -11,7 +11,7 @@ noctis/
 │   ├── cli.rs              # Clap — ScanArgs, ServeArgs
 │   ├── api/                # REST API (axum 0.8) — POST/GET /scans
 │   ├── scan/               # Scan orchestration
-│   │   ├── manager.rs      # ScanManager — submit, execute, matched_ports
+│   │   ├── manager.rs      # ScanManager — submit, execute, matched_services
 │   │   ├── request.rs      # ScanRequest, DiscoveredService, ScanFilters
 │   │   └── state.rs        # ScanState, ScanStatus, ScanSummary
 │   ├── engine/             # YAML test execution engine
@@ -100,9 +100,24 @@ confidence_base: 0.30          # confidence before steps run
 - Feed `services: [http]` → only ports whose `service == "http"`
 - No match → feed does not run (no task created)
 
-### Context and `{{port}}` variable
-`{{port}}` is injected into the context **from the matched service**, before `seed_vars()`.
-YAML feeds must not redefine `port:` in their `vars:` section — it would be overwritten anyway.
+### Context variables (injected automatically)
+
+| Variable | Value |
+|----------|-------|
+| `{{target_host}}` | Target IP / hostname |
+| `{{port}}` | Port of the matched service |
+| `{{scheme}}` | `http` or `https` — derived from the service name |
+| `{{oob_token}}` | UUID unique to this test run |
+| `{{oob_url}}` | Full OOB callback URL |
+| `{{oob_host}}` | OOB server host (only when `--oob` is configured) |
+| `{{oob_port}}` | OOB server port |
+| `{{oob_enabled}}` | `true` when OOB is active, `false` otherwise |
+
+`{{port}}` and `{{scheme}}` are injected **from the matched service**, before `seed_vars()`.
+YAML feeds must not redefine `port:` or `scheme:` in their `vars:` section — they would be overwritten.
+
+### `tcp_connect` and HTTPS
+`tcp_connect` auto-detects TLS from `{{scheme}}`: when the matched service is `https`, the raw TCP connection is wrapped in TLS (self-signed certs are accepted via `NoCertVerifier`). No change needed in the YAML — the same step works for both HTTP and HTTPS targets.
 
 ## YAML feed conventions
 
@@ -166,11 +181,15 @@ resp.duration_ms u64
 
 1. **Feed**: `tests/cve/CVE-XXXX-XXXXX.yaml` with a stable UUID v4 uid
 2. **Inventory**: `infra/inventories/CVE-XXXX-XXXXX/hosts.yml`
-   - Two hosts: `<cve>_vuln` and `<cve>_patched`
+   - Four hosts: `<cve>_vuln`, `<cve>_vuln_https`, `<cve>_patched`, `<cve>_patched_https`
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
+   - HTTPS hosts: add `container_port: 443` and `target_service: https`
    - **No `target_port`** — port is allocated dynamically
 3. **Docker images**: `infra/docker/<cve-name>/Dockerfile.vuln` + `Dockerfile.patched`
-   - For proprietary appliances (BIG-IP, Exchange, Pulse): minimal Python/Flask mock
+   - All mocks serve HTTP:80 **and** HTTPS:443 (self-signed cert generated at build time via openssl)
+   - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)
+   - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
+   - EOL base images (e.g. httpd:2.4.49 on Debian Buster): patch apt sources to `archive.debian.org` before installing openssl
 4. **Playbook**: `infra/playbooks/CVE-XXXX-XXXXX.yml` (copy an existing one)
 5. **site.yml**: add `import_playbook: playbooks/CVE-XXXX-XXXXX.yml`
 6. **Taskfile.yml**: add the CVE to `vars.INVENTORIES`
@@ -187,6 +206,15 @@ Never hardcode `target_port` in an inventory.
 - `noctis_bin` = `{{ playbook_dir }}/../../target/debug/noctis`
 - `noctis_feeds_dir` = `{{ playbook_dir }}/../../tests`
 
+## Feed authoring tooling
+
+`schemas/feed.schema.json` — JSON Schema draft-07 for YAML feeds. Provides validation and autocomplete via the Red Hat YAML extension (already wired in `.vscode/settings.json` for `tests/cve/*.yaml` and `tests/misconfig/*.yaml`).
+
+CLI validation:
+```sh
+npx ajv-cli validate -s schemas/feed.schema.json -d "tests/cve/*.yaml" --spec=draft7 --allow-union-types
+```
+
 ## Known pitfalls
 
 - **`resp.data` does not exist** — the field is called `resp.banner` on `TcpResult`
@@ -195,3 +223,8 @@ Never hardcode `target_port` in an inventory.
 - **Port conflict** — never leave a manual test container running before calling `task test`
 - **HTTP Content-Length** — count exact bytes in the body, not characters
 - **Local Podman image** — prefix `noctis/` in `docker_image` so the pull is skipped (condition `not docker_image.startswith('noctis/')`)
+- **`SSLSessionCache shmcb`** — crashes in rootless Podman (`Invalid argument: Couldn't set permissions on ssl-cache mutex`). Use `SSLSessionCache none` + `Mutex file:/path ssl-cache` instead
+- **Debian Buster EOL** (httpd:2.4.49) — `apt-get update` fails. Prefix with: `sed -i 's|deb.debian.org|archive.debian.org|g; s|security.debian.org|archive.debian.org|g; /buster-updates/d' /etc/apt/sources.list`
+- **`rustls` CryptoProvider** — `ClientConfig::builder().dangerous()` panics unless the provider is set. Always use `ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))`
+- **Condition on undefined Rhai var** — accessing an undefined variable in a condition throws, `unwrap_or(false)` silently skips the step. Initialise with `action: set_var` before use
+- **`maven_resp_status`** does not exist — use `maven_resp.status` (dot notation into the stored result)

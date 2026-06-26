@@ -1,0 +1,9 @@
+FROM docker.io/library/python:3.11-slim
+
+COPY server.py /app/server.py
+WORKDIR /app
+ENV SSH_MOCK_MODE=patched
+ENV PORT=22
+
+EXPOSE 22
+CMD ["python3", "server.py"]

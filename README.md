@@ -158,8 +158,12 @@ The engine computes which ports to run each feed against:
 |----------|-------|
 | `{{target_host}}` | Target host |
 | `{{port}}` | Current service port (injected by the engine) |
+| `{{scheme}}` | `http` or `https` — derived from the matched service name |
 | `{{oob_token}}` | Unique UUID for this run |
 | `{{oob_url}}` | Full OOB server URL |
+| `{{oob_host}}` | OOB server host |
+| `{{oob_port}}` | OOB server port |
+| `{{oob_enabled}}` | `true` when OOB is configured, `false` otherwise |
 
 ### Available actions
 
@@ -240,13 +244,22 @@ steps:
 |------|---------|----------|-----------------|
 | `CVE-2014-6271.yaml` | GNU Bash (Shellshock) | http, https | `() {:;};` header injection + RCE pattern |
 | `CVE-2017-9841.yaml` | PHPUnit | http, https | `eval-stdin.php` + MD5 RCE proof |
-| `CVE-2019-11510.yaml` | Pulse Connect Secure | https | `%2F` path traversal + `/etc/passwd` |
-| `CVE-2021-26855.yaml` | Exchange ProxyLogon | https | SSRF NTLM via `X-BEResource` |
+| `CVE-2019-11510.yaml` | Pulse Connect Secure | http, https | `%2F` path traversal + `/etc/passwd` |
+| `CVE-2021-26855.yaml` | Exchange ProxyLogon | http, https | SSRF cookie → `X-CalculatedBETarget` header |
 | `CVE-2021-41773.yaml` | Apache 2.4.49 | http, https | LFI `/icons/` + RCE via mod_cgi |
-| `CVE-2021-44228.yaml` | Log4j2 (Log4Shell) | http, https | OOB JNDI — requires `--oob` |
-| `CVE-2022-1388.yaml` | F5 BIG-IP | https | iControl REST auth bypass |
+| `CVE-2021-44228.yaml` | Log4j2 (Log4Shell) | http, https | Version via `pom.properties` (QoD 75) + OOB JNDI (QoD 97, requires `--oob`) |
+| `CVE-2022-1388.yaml` | F5 BIG-IP | http, https | iControl REST auth bypass |
 | `CVE-2022-26134.yaml` | Confluence | http, https | OGNL injection RCE |
 | `CVE-2023-48795.yaml` | SSH (Terrapin) | ssh | ChaCha20-Poly1305 negotiation + banner |
+
+## Feed validation
+
+`schemas/feed.schema.json` provides JSON Schema draft-07 validation and autocomplete for all YAML feeds. The Red Hat YAML extension picks it up automatically via `.vscode/settings.json`.
+
+```sh
+# CLI validation
+npx ajv-cli validate -s schemas/feed.schema.json -d "tests/cve/*.yaml" --spec=draft7 --allow-union-types
+```
 
 ## Test infrastructure (infra/)
 
@@ -302,6 +315,16 @@ all:
           docker_image: "noctis/app-cve-xxxx:vuln"
           expected_result: vulnerable # feed MUST produce a finding
 
+        app_vuln_https:
+          ansible_host: localhost
+          ansible_connection: local
+          target_host: "127.0.0.1"
+          target_service: https
+          container_port: 443         # container port to map (HTTP uses 80 by default)
+          container_name: noctis_cve_xxxx_vuln_https
+          docker_image: "noctis/app-cve-xxxx:vuln"
+          expected_result: vulnerable
+
         app_patched:
           ansible_host: localhost
           ansible_connection: local
@@ -310,9 +333,20 @@ all:
           container_name: noctis_cve_xxxx_patched
           docker_image: "noctis/app-cve-xxxx:patched"
           expected_result: clean      # feed MUST NOT produce a finding
+
+        app_patched_https:
+          ansible_host: localhost
+          ansible_connection: local
+          target_host: "127.0.0.1"
+          target_service: https
+          container_port: 443
+          container_name: noctis_cve_xxxx_patched_https
+          docker_image: "noctis/app-cve-xxxx:patched"
+          expected_result: clean
 ```
 
 **`target_port` must not appear in the inventory** — it is allocated dynamically at each run.
+`container_port` defaults to `80`; set it to `443` for HTTPS hosts.
 
 ### Adding a new CVE
 

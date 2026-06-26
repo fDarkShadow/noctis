@@ -1,13 +1,15 @@
-FROM nginx:alpine
+FROM docker.io/library/python:3.11-slim
+RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 
 # Pulse Secure 9.0.x mock — vulnerable to CVE-2019-11510
-# Reproduces the behaviour: path traversal dana-na/../dana/html5acc/...
-# is resolved server-side without validation → arbitrary file read.
+# Python HTTPServer does not normalize ../  sequences, so path traversal
+# payloads reach the handler intact and are resolved server-side.
 
-RUN apk add --no-cache bash
+COPY server.py /app/server.py
+WORKDIR /app
+ENV PULSE_MODE=vuln
 
-COPY nginx-vuln.conf /etc/nginx/nginx.conf
-COPY passwd /etc/passwd.fake
-
-EXPOSE 443
-CMD ["nginx", "-g", "daemon off;"]
+RUN openssl req -x509 -newkey rsa:2048 -keyout /app/key.pem -out /app/cert.pem \
+    -days 3650 -nodes -subj "/CN=localhost"
+EXPOSE 80 443
+CMD ["python3", "server.py"]

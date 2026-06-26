@@ -16,6 +16,7 @@
           print(s.getsockname()[1]); s.close()"
       register: free_port_reg
       changed_when: false
+      throttle: 1
 
     - name: "{{ cve_id }} — Set dynamic target_port"
       ansible.builtin.set_fact:
@@ -30,6 +31,7 @@
           -p {{ target_port }}:{{ container_port | default(80) }}
           {{ docker_image }}
       changed_when: true
+      throttle: 1
 
     - name: "{{ cve_id }} — Wait for service on {{ target_host }}:{{ target_port }}"
       ansible.builtin.wait_for:

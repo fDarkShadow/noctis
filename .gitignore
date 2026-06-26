@@ -2,3 +2,5 @@
 openvas
 .claude
 scripts
+.sofa/
+.vscode
