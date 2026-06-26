@@ -1,11 +1,11 @@
 # noctis — agent loop
 
-Tu es un agent d'implémentation autonome pour le scanner noctis.
-Ton rôle : prendre un ticket GitHub, implémenter le feed + l'infra de test, ouvrir une PR.
+You are an autonomous implementation agent for the noctis scanner.
+Your role: pick a GitHub issue, implement the feed + test infrastructure, open a PR.
 
-## Cycle d'une itération
+## Iteration cycle
 
-### 1. Trouver le prochain ticket disponible
+### 1. Find the next available issue
 
 ```bash
 gh issue list \
@@ -15,9 +15,9 @@ gh issue list \
   --jq 'sort_by(.labels | map(select(.name == "priority:high")) | length) | reverse | .[0]'
 ```
 
-Si aucun ticket disponible : affiche "No available issues." et termine.
+If no issue is available: print "No available issues." and stop.
 
-### 2. Revendiquer le ticket (verrou distribué)
+### 2. Claim the issue (distributed lock)
 
 ```bash
 ISSUE=<number>
@@ -27,92 +27,92 @@ gh issue edit $ISSUE \
   --assignee "@me"
 ```
 
-### 3. Parser le contenu de l'issue
+### 3. Parse the issue body
 
-Extraire depuis le body (format GitHub Forms) :
-- CVE ID ou nom du check
-- Produit, versions affectées, sévérité, services
-- Description, stratégie de détection, références, notes mock
+Extract from the body:
+- CVE ID or check name
+- Product, affected versions, severity, target services
+- Description, detection strategy, references, Docker mock notes
 
-### 4. Créer un worktree isolé
+### 4. Create an isolated worktree
 
 ```bash
-CVE=<cve-id>   # ex: CVE-2024-1234
+CVE=<cve-id>   # e.g. CVE-2024-1234
 BRANCH="feat/$CVE"
 git worktree add "../noctis-$CVE" -b "$BRANCH"
 cd "../noctis-$CVE"
 ```
 
-### 5. Implémenter
+### 5. Implement
 
-Suivre scrupuleusement CLAUDE.md. Pour chaque CVE/misconfig :
+Follow CLAUDE.md strictly. For each CVE/misconfig:
 
-**a) Feed YAML** — `tests/cve/<CVE>.yaml` ou `tests/misconfig/<name>.yaml`
-  - Générer un UUID v4 valide (variant `[89ab]`)
-  - `services:` toujours renseigné
-  - `tcp_connect` pour tout payload encodé dans le path
-  - Utiliser `resp.banner` (jamais `resp.data`)
-  - Ne pas définir `port:` ou `scheme:` dans `vars:`
+**a) YAML feed** — `tests/cve/<CVE>.yaml` or `tests/misconfig/<name>.yaml`
+  - Generate a fresh valid UUID v4 (variant byte `[89ab]`)
+  - Always set `services:`
+  - Use `tcp_connect` for any URL-encoded path payload
+  - Use `resp.banner` (never `resp.data`)
+  - Never define `port:` or `scheme:` in `vars:`
 
-**b) Mock Docker** — `infra/docker/<name>/`
+**b) Docker mock** — `infra/docker/<name>/`
   - `Dockerfile.vuln` + `Dockerfile.patched`
-  - Base Python `python:3.11-slim` si appliance propriétaire
-  - HTTP:80 + HTTPS:443 (cert auto-signé via openssl)
-  - Pattern `_make_https_server()` + `threading.Thread` pour les mocks Python
-  - `SSLSessionCache none` + `Mutex file:` pour Apache (pas shmcb)
-  - Debian Buster EOL : patcher sources.list → archive.debian.org
+  - Use `python:3.11-slim` base for proprietary appliances
+  - Serve HTTP:80 + HTTPS:443 (self-signed cert via openssl)
+  - Use `_make_https_server()` + `threading.Thread` pattern for Python mocks
+  - Use `SSLSessionCache none` + `Mutex file:` for Apache (not shmcb)
+  - Debian Buster EOL: patch sources.list to archive.debian.org first
 
-**c) Inventaire** — `infra/inventories/<CVE>/hosts.yml`
-  - 4 hôtes : `_vuln`, `_vuln_https`, `_patched`, `_patched_https`
-  - `container_port: 443` sur les hôtes https
-  - Jamais de `target_port`
+**c) Inventory** — `infra/inventories/<CVE>/hosts.yml`
+  - 4 hosts: `_vuln`, `_vuln_https`, `_patched`, `_patched_https`
+  - Add `container_port: 443` on HTTPS hosts
+  - Never add `target_port`
 
-**d) Playbook** — `infra/playbooks/<CVE>.yml` (copier un existant)
+**d) Playbook** — `infra/playbooks/<CVE>.yml` (copy an existing one)
 
-**e) site.yml** — ajouter `import_playbook: playbooks/<CVE>.yml`
+**e) site.yml** — add `import_playbook: playbooks/<CVE>.yml`
 
-**f) Taskfile.yml** — ajouter le CVE à `vars.INVENTORIES`
+**f) Taskfile.yml** — add the CVE to `vars.INVENTORIES`
 
-**g) build_local_images.yml** — ajouter les tâches de build des nouvelles images
+**g) build_local_images.yml** — add build tasks for the new images
 
-### 6. Builder les images
+### 6. Build images
 
 ```bash
 cd infra
 task build
 ```
 
-Si échec : diagnostiquer, corriger, recommencer. Ne pas passer à l'étape suivante.
+If it fails: diagnose, fix, retry. Do not proceed until images build successfully.
 
-### 7. Lancer les tests
+### 7. Run tests
 
 ```bash
 task test CVE=<CVE>
 ```
 
-Résultat attendu : 4 tests passants (vuln HTTP, vuln HTTPS, patched HTTP, patched HTTPS).
+Expected: 4 passing tests (vuln HTTP, vuln HTTPS, patched HTTP, patched HTTPS).
 
-Si échec :
-- Analyser la sortie Ansible
-- Corriger le feed ou le mock
-- Re-builder si nécessaire
-- Relancer jusqu'à 3 tentatives
-- Si toujours en échec après 3 tentatives : créer la PR avec label `needs-help` et documenter l'erreur dans le body
+On failure:
+- Analyse the Ansible output
+- Fix the feed or the mock
+- Rebuild if needed
+- Retry up to 3 times
+- After 3 failures: open the PR anyway with label `needs-help`, document the error in the PR body
 
-### 8. Valider le schéma
+### 8. Validate the schema
 
 ```bash
-cd ..  # racine du repo
+cd ..  # repo root
 npx ajv-cli validate -s schemas/feed.schema.json \
   -d "tests/cve/<CVE>.yaml" --spec=draft7 --allow-union-types
 ```
 
-Corriger toute erreur de validation avant de continuer.
+Fix any validation error before continuing.
 
-### 9. Commiter et pousser
+### 9. Commit and push
 
 ```bash
-git add tests/ infra/ schemas/
+git add tests/ infra/
 git commit -m "feat(<CVE>): add detection feed and test infrastructure
 
 - Feed YAML with <detection_method>
@@ -123,7 +123,7 @@ Closes #<ISSUE>"
 git push origin "$BRANCH"
 ```
 
-### 10. Ouvrir la PR
+### 10. Open the PR
 
 ```bash
 gh pr create \
@@ -136,48 +136,48 @@ gh pr create \
 **Product:** <product>
 **CVSS:** <cvss>
 
-## Implémentation
+## Implementation
 
 - Feed: `tests/cve/<CVE>.yaml`
 - Mock: `infra/docker/<name>/` (HTTP:80 + HTTPS:443)
-- Tests: 4 cas (vuln/patched × HTTP/HTTPS)
+- Tests: 4 cases (vuln/patched × HTTP/HTTPS)
 
-## Résultats des tests
+## Test results
 
-```
-<coller la sortie de task test>
-```
+\`\`\`
+<paste task test output here>
+\`\`\`
 
 ## Checklist
 
-- [ ] Feed YAML validé par ajv-cli
-- [ ] UUID v4 valide
-- [ ] 4 tests passants (TP×2 + TN×2)
-- [ ] Schéma respecté (additionalProperties)
+- [ ] YAML feed validated by ajv-cli
+- [ ] Valid UUID v4
+- [ ] 4 passing tests (TP×2 + TN×2)
+- [ ] Schema respected (additionalProperties)
 EOF
 )"
 ```
 
-### 11. Mettre à jour l'issue
+### 11. Update the issue
 
 ```bash
 gh issue edit $ISSUE \
   --add-label "status:review" \
   --remove-label "status:in-progress"
-gh issue comment $ISSUE --body "PR ouverte : <pr_url>"
+gh issue comment $ISSUE --body "PR opened: <pr_url>"
 ```
 
-### 12. Nettoyer le worktree
+### 12. Clean up the worktree
 
 ```bash
 cd /home/flo/workspace/iscan
 git worktree remove "../noctis-$CVE" --force
 ```
 
-## Règles absolues
+## Hard rules
 
-- Ne jamais merger une PR
-- Ne jamais hardcoder `target_port` dans un inventaire
-- Ne jamais commiter sur `main` directement
-- Si un test échoue et que tu ne sais pas pourquoi après 3 tentatives : ouvrir la PR avec le label `needs-help`
-- Toujours générer un UUID v4 frais (ne pas réutiliser un UUID existant)
+- Never merge a PR
+- Never hardcode `target_port` in an inventory
+- Never commit directly to `main`
+- After 3 test failures with no resolution: open a PR with label `needs-help`
+- Always generate a fresh UUID v4 — never reuse an existing one
