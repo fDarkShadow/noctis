@@ -1,0 +1,69 @@
+name: Misconfig — nouveau feed
+description: Implémenter la détection d'une mauvaise configuration
+labels: ["type:misconfig", "status:available", "priority:medium"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Nom du check
+      placeholder: "SSH root login enabled"
+    validations:
+      required: true
+
+  - type: input
+    id: product
+    attributes:
+      label: Produit / protocole ciblé
+      placeholder: "OpenSSH"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Sévérité
+      options:
+        - critical
+        - high
+        - medium
+        - low
+        - info
+    validations:
+      required: true
+
+  - type: dropdown
+    id: services
+    attributes:
+      label: Services ciblés
+      multiple: true
+      options:
+        - http
+        - https
+        - ssh
+        - tcp
+        - ftp
+        - smtp
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Quelle mauvaise configuration ? Quel est le risque ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: detection_strategy
+    attributes:
+      label: Stratégie de détection
+      description: Comment la détecter (banner, endpoint, header, certificat…) ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Références
+      description: CIS Benchmark, NIST, best practices (une URL par ligne)

@@ -1,0 +1,100 @@
+name: CVE — nouveau feed
+description: Implémenter la détection d'une CVE dans noctis
+labels: ["type:cve", "status:available", "priority:medium"]
+body:
+  - type: input
+    id: cve_id
+    attributes:
+      label: CVE ID
+      placeholder: "CVE-2024-XXXXX"
+    validations:
+      required: true
+
+  - type: input
+    id: product
+    attributes:
+      label: Produit / composant
+      placeholder: "Apache Struts 2"
+    validations:
+      required: true
+
+  - type: input
+    id: affected_versions
+    attributes:
+      label: Versions affectées
+      placeholder: "< 2.5.33"
+    validations:
+      required: true
+
+  - type: input
+    id: cvss
+    attributes:
+      label: Score CVSS v3
+      placeholder: "9.8"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Sévérité
+      options:
+        - critical
+        - high
+        - medium
+        - low
+        - info
+    validations:
+      required: true
+
+  - type: dropdown
+    id: services
+    attributes:
+      label: Services ciblés
+      multiple: true
+      options:
+        - http
+        - https
+        - ssh
+        - tcp
+        - ftp
+        - smtp
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description de la vulnérabilité
+      description: Mécanisme d'exploitation, impact, contexte.
+    validations:
+      required: true
+
+  - type: textarea
+    id: detection_strategy
+    attributes:
+      label: Stratégie de détection
+      description: |
+        Comment détecter la vulnérabilité ?
+        Ex: path traversal sur /dana-na/../ → vérifier /etc/passwd
+            header injection → marker string dans la réponse
+            version via endpoint /pom.properties
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Références
+      description: NVD, advisory, PoC, writeup (une URL par ligne)
+      placeholder: |
+        https://nvd.nist.gov/vuln/detail/CVE-2024-XXXXX
+        https://...
+    validations:
+      required: true
+
+  - type: textarea
+    id: mock_notes
+    attributes:
+      label: Notes pour le mock Docker
+      description: |
+        Indications pour construire le container vuln/patched.
+        Ex: image de base, endpoint à exposer, comportement attendu.

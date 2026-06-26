@@ -1,6 +1,7 @@
 /target
 openvas
-.claude
+.claude/settings*
+.claude/projects/
 scripts
 .sofa/
 .vscode
