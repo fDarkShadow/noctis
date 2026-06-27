@@ -260,3 +260,15 @@
     cmd: "{{ container_runtime }} build -t noctis/chamilo-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/chamilo-mock"
   changed_when: true
+
+- name: Build FortiGate mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortigate-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/fortigate-mock"
+  changed_when: true
+
+- name: Build FortiGate mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortigate-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/fortigate-mock"
+  changed_when: true
