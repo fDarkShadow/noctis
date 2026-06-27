@@ -296,3 +296,15 @@
     cmd: "{{ container_runtime }} build -t noctis/teamcity-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/teamcity-mock"
   changed_when: true
+
+- name: Build MOVEit mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/moveit-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/moveit-mock"
+  changed_when: true
+
+- name: Build MOVEit mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/moveit-mock"
+  changed_when: true
