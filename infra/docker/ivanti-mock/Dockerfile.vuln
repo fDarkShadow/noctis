@@ -1,0 +1,15 @@
+FROM docker.io/library/python:3.11-slim
+RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+
+# Ivanti Connect Secure mock — vulnerable (CVE-2023-46805)
+# Resolves ../ traversal in /api/v1/totp/user-backup-code/ and serves
+# system-information JSON without authentication.
+
+COPY server.py /app/server.py
+WORKDIR /app
+ENV IVANTI_MODE=vuln
+
+RUN openssl req -x509 -newkey rsa:2048 -keyout /app/key.pem -out /app/cert.pem \
+    -days 3650 -nodes -subj "/CN=localhost"
+EXPOSE 80 443
+CMD ["python3", "server.py"]
