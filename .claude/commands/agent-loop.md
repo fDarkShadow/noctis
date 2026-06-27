@@ -17,7 +17,56 @@ CLAUDE.md contains every convention, result field, known pitfall, Python mock te
 and reference feed you need. Do not skip this step — it will save you from rediscovering
 patterns the hard way mid-implementation.
 
-### 1. Find the next available issue
+### 1. Resume check (context loss recovery)
+
+Before picking a new issue, check if a previous iteration was interrupted (token pressure,
+context summarization, crash). An interrupted run leaves an issue assigned to @me with
+`status:in-progress` and possibly a worktree on disk.
+
+```bash
+# Is there already an in-progress issue assigned to me?
+gh issue list \
+  --label "status:in-progress" \
+  --assignee "@me" \
+  --state open \
+  --json number,title,body \
+  --jq '.[0]'
+```
+
+**If an in-progress issue is found**, reconstruct state and resume:
+
+```bash
+ISSUE=<number from above>
+CVE=<cve id parsed from issue title/body>
+BRANCH="feat/$CVE"
+
+# Is the worktree still on disk?
+git worktree list | grep "noctis-$CVE"
+
+# Was a PR already opened?
+gh pr list --head "$BRANCH" --json number,url --jq '.[0]'
+```
+
+Determine the resume point by checking what already exists:
+
+| What exists | Resume at |
+|-------------|-----------|
+| PR already open | Step 12 (update issue → status:review) |
+| Worktree exists, feed + mock present | Step 8 (run tests) |
+| Worktree exists, feed present, no mock | Step 6c (Docker mock) |
+| Worktree exists but mostly empty | Step 6a (feed) |
+| No worktree | Step 5 (create worktree) |
+
+If the worktree is gone but no PR exists, recreate it:
+```bash
+git worktree add "../noctis-$CVE" "$BRANCH"
+```
+
+Once resumed, continue from the identified step and complete the iteration normally.
+
+**If no in-progress issue is found**, continue to Step 2.
+
+### 2. Find the next available issue
 
 ```bash
 gh issue list \
@@ -29,7 +78,7 @@ gh issue list \
 
 If no issue is available: print "No available issues." and stop.
 
-### 2. Claim the issue (distributed lock)
+### 3. Claim the issue (distributed lock)
 
 ```bash
 ISSUE=<number>
@@ -39,14 +88,14 @@ gh issue edit $ISSUE \
   --assignee "@me"
 ```
 
-### 3. Parse the issue body
+### 4. Parse the issue body
 
 Extract from the body:
 - CVE ID or check name
 - Product, affected versions, severity, target services
 - Description, detection strategy, references, Docker mock notes
 
-### 4. Create an isolated worktree
+### 5. Create an isolated worktree
 
 ```bash
 CVE=<cve-id>   # e.g. CVE-2024-1234
@@ -55,7 +104,7 @@ git worktree add "../noctis-$CVE" -b "$BRANCH"
 cd "../noctis-$CVE"
 ```
 
-### 5. Implement
+### 6. Implement
 
 Follow CLAUDE.md strictly. For each CVE/misconfig:
 
@@ -87,7 +136,7 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
 
 **g) build_local_images.yml** — add build tasks for the new images
 
-### 6. Build images
+### 7. Build images
 
 ```bash
 cd infra
@@ -96,7 +145,7 @@ task build
 
 If it fails: diagnose, fix, retry. Do not proceed until images build successfully.
 
-### 7. Run tests
+### 8. Run tests
 
 ```bash
 task test CVE=<CVE>
@@ -114,7 +163,7 @@ On failure:
 **If the failure is caused by a bug in the Rust engine** (not in the feed or the mock):
 → see [Handling engine bugs](#handling-engine-bugs) below.
 
-### 8. Validate the schema
+### 9. Validate the schema
 
 ```bash
 cd ..  # repo root
@@ -124,7 +173,7 @@ npx ajv-cli validate -s schemas/feed.schema.json \
 
 Fix any validation error before continuing.
 
-### 9. Commit and push
+### 10. Commit and push
 
 ```bash
 git add tests/ infra/
@@ -138,7 +187,7 @@ Closes #<ISSUE>"
 git push origin "$BRANCH"
 ```
 
-### 10. Open the PR
+### 11. Open the PR
 
 ```bash
 gh pr create \
@@ -174,7 +223,7 @@ EOF
 )"
 ```
 
-### 11. Update the issue
+### 12. Update the issue
 
 ```bash
 gh issue edit $ISSUE \
@@ -183,14 +232,14 @@ gh issue edit $ISSUE \
 gh issue comment $ISSUE --body "PR opened: <pr_url>"
 ```
 
-### 12. Clean up the worktree
+### 13. Clean up the worktree
 
 ```bash
 cd /home/flo/workspace/iscan
 git worktree remove "../noctis-$CVE" --force
 ```
 
-### 13. Stop
+### 14. Stop
 
 Print a one-line summary and exit:
 ```
