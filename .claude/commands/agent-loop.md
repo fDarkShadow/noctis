@@ -143,6 +143,7 @@ git push origin "$BRANCH"
 ```bash
 gh pr create \
   --title "feat(<CVE>): <product> — <short description>" \
+  --reviewer fDarkShadow \
   --body "$(cat <<'EOF'
 ## CVE / Check
 
