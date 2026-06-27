@@ -224,3 +224,15 @@
     cmd: "{{ container_runtime }} build -t noctis/drupal-sqli-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/drupal-sqli-mock"
   changed_when: true
+
+- name: Build GitLab password reset mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/gitlab-password-reset-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/gitlab-password-reset-mock"
+  changed_when: true
+
+- name: Build GitLab password reset mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/gitlab-password-reset-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/gitlab-password-reset-mock"
+  changed_when: true

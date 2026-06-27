@@ -20,3 +20,4 @@
 - import_playbook: playbooks/CVE-2021-22205.yml
 - import_playbook: playbooks/CVE-2024-21893.yml
 - import_playbook: playbooks/CVE-2026-9082.yml
+- import_playbook: playbooks/CVE-2023-7028.yml
