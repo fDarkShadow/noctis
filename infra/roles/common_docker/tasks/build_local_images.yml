@@ -138,3 +138,15 @@
     cmd: "{{ container_runtime }} build -t noctis/php-cgi-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/php-cgi-mock"
   changed_when: true
+
+- name: Build Ivanti RCE mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-rce-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ivanti-rce-mock"
+  changed_when: true
+
+- name: Build Ivanti RCE mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-rce-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ivanti-rce-mock"
+  changed_when: true
