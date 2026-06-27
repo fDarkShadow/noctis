@@ -149,4 +149,34 @@
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/ivanti-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/ivanti-mock"
+- name: Build Spring4Shell mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/spring4shell-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/spring4shell-mock"
+  changed_when: true
+
+- name: Build Spring4Shell mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/spring4shell-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/spring4shell-mock"
+- name: Build Grafana mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/grafana-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/grafana-mock"
+  changed_when: true
+
+- name: Build Grafana mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/grafana-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/grafana-mock"
+- name: Build Confluence SSTI mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-ssti-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/confluence-ssti-mock"
+  changed_when: true
+
+- name: Build Confluence SSTI mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-ssti-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/confluence-ssti-mock"
   changed_when: true
