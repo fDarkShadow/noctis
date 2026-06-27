@@ -2,6 +2,11 @@
 
 Working instructions for Claude Code on this project.
 
+> **Autonomous agents** — read this file in full before writing a single line of code.
+> It documents every convention, pitfall, and pattern you need. Existing feeds and mocks
+> in `tests/cve/` and `infra/docker/` are your primary reference — copy and adapt them
+> rather than inventing new patterns.
+
 ## Architecture
 
 ```
@@ -175,6 +180,26 @@ resp.banner      string | null   ← always use .banner, not .data
 resp.duration_ms u64
 ```
 
+### `http_request` — result fields
+The result stored via `store_as` is an `HttpResult`:
+```
+resp.status      integer         ← HTTP status code (200, 404, …)
+resp.body        string          ← response body as UTF-8
+resp.headers     map             ← response headers, keys lowercased
+                                   e.g. resp.headers["x-powered-by"]
+resp.duration_ms u64
+```
+
+Access headers in conditions: `resp_headers["content-type"]` (Rhai flattens
+the stored result into prefixed vars: `resp_status`, `resp_body`, `resp_headers`).
+
+### `ssh_check` — result fields
+```
+resp.banner          string | null   ← SSH version string (e.g. "SSH-2.0-OpenSSH_9.5")
+resp.auth_methods    [string]        ← ["publickey", "password", …]
+resp.connected       bool
+```
+
 ## Test infrastructure (infra/)
 
 ### Adding a new CVE
@@ -193,6 +218,106 @@ resp.duration_ms u64
 4. **Playbook**: `infra/playbooks/CVE-XXXX-XXXXX.yml` (copy an existing one)
 5. **site.yml**: add `import_playbook: playbooks/CVE-XXXX-XXXXX.yml`
 6. **Taskfile.yml**: add the CVE to `vars.INVENTORIES`
+7. **build_local_images.yml**: add two tasks (vuln + patched) — see pattern below
+
+### Python mock template (copy from `infra/docker/bigip-mock/server.py`)
+
+All Python mocks follow this exact structure — copy it, do not invent a new one:
+
+```python
+#!/usr/bin/env python3
+import os, ssl, threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+VULN_MODE = os.environ.get("MYPRODUCT_MODE", "patched") == "vuln"
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args): pass
+
+    def _send(self, code, body, ct="text/plain"):
+        if isinstance(body, str): body = body.encode()
+        self.send_response(code)
+        self.send_header("Content-Type", ct)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        if VULN_MODE and self.path == "/vulnerable-endpoint":
+            self._send(200, "NOCTIS_MYPRODUCT_CONFIRMED")
+        else:
+            self._send(404, "Not found")
+
+    def do_POST(self): self.do_GET()
+
+def _make_https_server(port):
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain("/certs/server.crt", "/certs/server.key")
+    srv = HTTPServer(("0.0.0.0", port), Handler)
+    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
+    return srv
+
+if __name__ == "__main__":
+    https = _make_https_server(443)
+    threading.Thread(target=https.serve_forever, daemon=True).start()
+    HTTPServer(("0.0.0.0", 80), Handler).serve_forever()
+```
+
+Dockerfile.vuln (same pattern for all Python mocks):
+```dockerfile
+FROM python:3.11-slim
+RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /certs \
+    && openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key \
+       -out /certs/server.crt -days 3650 -nodes \
+       -subj "/CN=noctis-mock"
+COPY server.py /app/server.py
+ENV MYPRODUCT_MODE=vuln
+EXPOSE 80 443
+CMD ["python3", "/app/server.py"]
+```
+
+Dockerfile.patched: identical but `ENV MYPRODUCT_MODE=patched`.
+
+### build_local_images.yml — adding new image tasks
+
+In `infra/roles/common_docker/tasks/build_local_images.yml`, add two tasks per mock
+(copy an existing block, e.g. the bigip-mock block):
+
+```yaml
+- name: Build MyProduct mock (vuln)
+  community.docker.docker_image:
+    name: "noctis/myproduct-mock"
+    tag: vuln
+    build:
+      path: "{{ playbook_dir }}/../../infra/docker/myproduct-mock"
+      dockerfile: Dockerfile.vuln
+    source: build
+    force_source: true
+
+- name: Build MyProduct mock (patched)
+  community.docker.docker_image:
+    name: "noctis/myproduct-mock"
+    tag: patched
+    build:
+      path: "{{ playbook_dir }}/../../infra/docker/myproduct-mock"
+      dockerfile: Dockerfile.patched
+    source: build
+    force_source: true
+```
+
+### Reference feeds to copy from
+
+| Pattern | Best example |
+|---------|-------------|
+| HTTP path traversal (tcp_connect) | `tests/cve/CVE-2019-11510.yaml` |
+| HTTP header injection | `tests/cve/CVE-2014-6271.yaml` |
+| HTTP auth bypass (http_request) | `tests/cve/CVE-2022-1388.yaml` |
+| SSH banner version check | `tests/cve/CVE-2024-6387.yaml` |
+| Version via endpoint + OOB | `tests/cve/CVE-2021-44228.yaml` |
+| OGNL/template injection | `tests/cve/CVE-2022-26134.yaml` |
+| Multi-step with condition | `tests/cve/CVE-2023-46805.yaml` |
 
 ### Dynamic port allocation
 The `common_docker` role finds a free port via Python before each test:

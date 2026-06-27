@@ -5,6 +5,18 @@ Your role: pick a GitHub issue, implement the feed + test infrastructure, open a
 
 ## Iteration cycle
 
+### 0. Read CLAUDE.md
+
+Before touching any file, read the project instructions in full:
+
+```bash
+cat CLAUDE.md
+```
+
+CLAUDE.md contains every convention, result field, known pitfall, Python mock template,
+and reference feed you need. Do not skip this step — it will save you from rediscovering
+patterns the hard way mid-implementation.
+
 ### 1. Find the next available issue
 
 ```bash
