@@ -138,3 +138,15 @@
     cmd: "{{ container_runtime }} build -t noctis/php-cgi-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/php-cgi-mock"
   changed_when: true
+
+- name: Build Ivanti Connect Secure mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ivanti-mock"
+  changed_when: true
+
+- name: Build Ivanti Connect Secure mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ivanti-mock"
+  changed_when: true
