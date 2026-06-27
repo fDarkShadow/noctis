@@ -353,3 +353,5 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/cve/*.yaml" --spec=dr
 - **`rustls` CryptoProvider** — `ClientConfig::builder().dangerous()` panics unless the provider is set. Always use `ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))`
 - **Condition on undefined Rhai var** — accessing an undefined variable in a condition throws, `unwrap_or(false)` silently skips the step. Initialise with `action: set_var` before use
 - **`maven_resp_status`** does not exist — use `maven_resp.status` (dot notation into the stored result)
+- **`action: set_var` uses `var_name:` / `var_value:` fields, NOT a `vars:` map** — using `vars:` silently drops the step (unknown field ignored by serde), `var_name` is None, `run_set_var` returns `MissingField`, the scan runner swallows the error as `vec![]` findings. Always write `var_name: foo` / `var_value: false` on separate lines.
+- **`&&` in Rhai conditions works and short-circuits** — `cond_a == true && resp.status == 200` is safe even if `resp` is undefined: if `cond_a` is false, `resp.status` is never evaluated.
