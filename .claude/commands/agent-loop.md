@@ -33,31 +33,53 @@ gh issue list \
   --jq '.[0]'
 ```
 
-**If an in-progress issue is found**, reconstruct state and resume:
+**If an in-progress issue is found**, first check if it is already fully done:
 
 ```bash
 ISSUE=<number from above>
 CVE=<cve id parsed from issue title/body>
 BRANCH="feat/$CVE"
 
+# Does the issue already carry status:review?
+gh issue view $ISSUE --json labels --jq '[.labels[].name] | contains(["status:review"])'
+
+# Is a PR already open on this branch?
+gh pr list --head "$BRANCH" --json number,url --jq '.[0]'
+```
+
+**If `status:review` is present OR a PR is already open** — the iteration was completed but
+cleanup was skipped. Finish the cleanup now and move on:
+
+```bash
+# Ensure labels are correct
+gh issue edit $ISSUE \
+  --add-label "status:review" \
+  --remove-label "status:in-progress"
+
+# Remove stale worktree if still on disk
+git worktree list | grep "noctis-$CVE" \
+  && git worktree remove "../noctis-$CVE" --force || true
+```
+
+Then continue to Step 2 — do not re-implement this issue.
+
+**Otherwise** (issue is genuinely in-progress), reconstruct state and resume:
+
+```bash
 # Is the worktree still on disk?
 git worktree list | grep "noctis-$CVE"
-
-# Was a PR already opened?
-gh pr list --head "$BRANCH" --json number,url --jq '.[0]'
 ```
 
 Determine the resume point by checking what already exists:
 
 | What exists | Resume at |
 |-------------|-----------|
-| PR already open | Step 12 (update issue → status:review) |
 | Worktree exists, feed + mock present | Step 8 (run tests) |
 | Worktree exists, feed present, no mock | Step 6c (Docker mock) |
 | Worktree exists but mostly empty | Step 6a (feed) |
 | No worktree | Step 5 (create worktree) |
 
-If the worktree is gone but no PR exists, recreate it:
+If the worktree is gone, recreate it:
 ```bash
 git worktree add "../noctis-$CVE" "$BRANCH"
 ```
