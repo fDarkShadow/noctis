@@ -201,4 +201,14 @@
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/gitlab-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/gitlab-mock"
+- name: Build Ivanti SAML mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-saml-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ivanti-saml-mock"
+  changed_when: true
+
+- name: Build Ivanti SAML mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-saml-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ivanti-saml-mock"
   changed_when: true
