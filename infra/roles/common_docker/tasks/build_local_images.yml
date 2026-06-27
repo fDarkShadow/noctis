@@ -139,6 +139,16 @@
     chdir: "{{ docker_dir }}/php-cgi-mock"
   changed_when: true
 
+- name: Build Grafana mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/grafana-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/grafana-mock"
+  changed_when: true
+
+- name: Build Grafana mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/grafana-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/grafana-mock"
 - name: Build Confluence SSTI mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/confluence-ssti-mock:vuln -f Dockerfile.vuln ."
