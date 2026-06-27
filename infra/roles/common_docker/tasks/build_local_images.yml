@@ -202,3 +202,15 @@
     cmd: "{{ container_runtime }} build -t noctis/ivanti-saml-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/ivanti-saml-mock"
   changed_when: true
+
+- name: Build Drupal SQLi mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/drupal-sqli-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/drupal-sqli-mock"
+  changed_when: true
+
+- name: Build Drupal SQLi mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/drupal-sqli-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/drupal-sqli-mock"
+  changed_when: true
