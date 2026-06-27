@@ -56,15 +56,18 @@ available_issues() {
     --jq 'length' 2>/dev/null || echo 0
 }
 
+AGENT_LOOP_PROMPT="$(cat "$(git rev-parse --show-toplevel)/.claude/commands/agent-loop.md")"
+
 run_agent() {
   # Run one agent-loop iteration in non-interactive mode.
+  # --print does not process slash commands — pass the file content directly.
   # --dangerously-skip-permissions: suppresses all tool-call prompts so the
   # agent can run git/gh/ansible/file edits autonomously. See warning above.
   # Exit codes:
   #   0 = completed (issue picked and PR opened, or no issue found)
   #   2 = rate limited
   #   1 = other error
-  claude --dangerously-skip-permissions --print "/agent-loop" 2>&1
+  claude --dangerously-skip-permissions --print "$AGENT_LOOP_PROMPT" 2>&1
 }
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
