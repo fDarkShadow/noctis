@@ -272,3 +272,15 @@
     cmd: "{{ container_runtime }} build -t noctis/fortigate-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/fortigate-mock"
   changed_when: true
+
+- name: Build Jenkins mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/jenkins-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/jenkins-mock"
+  changed_when: true
+
+- name: Build Jenkins mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/jenkins-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/jenkins-mock"
+  changed_when: true
