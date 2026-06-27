@@ -1,96 +1,115 @@
 # noctis
 
-Rust vulnerability scanner driven by YAML feeds. A lightweight OpenVAS alternative with reproducible tests, Podman isolation, and a REST API.
+**Rust vulnerability scanner driven by YAML feeds.**
 
-## Key concepts
+Noctis detects CVEs and misconfigurations by running structured YAML test sequences against live services — no agent, no shared cache, no false-positive-prone version guessing. Each feed is a self-contained, reproducible detection unit.
 
-- **Autonomous YAML feeds** — one file per CVE or misconfig, no shared cache
-- **Service-based scanning** — feeds declare which services they target (`http`, `https`, `ssh`…), the engine maps them to ports discovered by nmap
-- **Graduated confidence** — each finding has a 0–1 confidence score built step by step (OpenVAS QoD compatible)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-%3E%3D1.75-orange)](https://www.rust-lang.org)
+
+---
+
+## Features
+
+- **YAML feeds** — one file per CVE or misconfig; declare steps, patterns, and confidence deltas
+- **Service-aware** — feeds declare target services (`http`, `https`, `ssh`…); the engine maps them to discovered ports
 - **Raw TCP** — `tcp_connect` sends bytes verbatim for encoded payloads (path traversal, injections), bypassing HTTP normalisation
-- **Integrated OOB** — HTTP callback server for blind detections (Log4Shell, SSRF, XXE)
-- **Protocols** — HTTP/HTTPS, raw TCP, TLS, SSH
+- **Graduated confidence** — each finding carries a QoD score (OpenVAS-compatible)
+- **OOB detection** — built-in HTTP callback server for blind detections (Log4Shell, SSRF, XXE)
+- **Protocols** — HTTP/HTTPS (reqwest), raw TCP, TLS (rustls), SSH (libssh2)
+- **REST API** — `noctis serve` exposes scan submission, status polling, and findings retrieval
 - **Reproducible tests** — Ansible + rootless Podman, dynamic port allocation, automated TP/TN assertions
 
-## Requirements
+---
 
-- Rust ≥ 1.75
-- Ansible-core ≥ 2.15 (e2e tests only)
-- Podman ≥ 4.0 (e2e tests only)
-- [Task](https://taskfile.dev) (e2e tests only)
-
-## Installation
+## Quick start
 
 ```sh
-git clone <repo>
+# Build
+git clone https://github.com/fDarkShadow/noctis
 cd noctis
 cargo build --release
-# binary: target/release/noctis
-```
 
-## Usage
-
-### CLI mode (one-shot scan)
-
-```sh
-noctis scan \
-  --host <target> \
+# Scan a host — HTTP on port 80, HTTPS on 443, all CVE feeds
+./target/release/noctis scan \
+  --host 10.0.0.1 \
   --service http:80 \
   --service https:443 \
   --tests tests/cve/
 
-# Single service, single feed
-noctis scan --host 10.0.0.1 --service ssh:22 --tests tests/cve/CVE-2023-48795.yaml
-
-# Verbosity
-noctis -v scan ...    # INFO
-noctis -vv scan ...   # DEBUG
+# Single feed
+./target/release/noctis scan \
+  --host 10.0.0.1 \
+  --service http:80 \
+  --tests tests/cve/CVE-2021-41773.yaml
 ```
 
 Output is JSON on stdout:
 
 ```json
 {
-  "id": "550e8400-...",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "status": "completed",
   "target": "10.0.0.1",
   "findings": [
     {
-      "test_id": "a3c7f4e2-...",
+      "test_id": "a3c7f4e2-1b9d-4f6a-8e3c-2d5a0f1e9b4c",
       "cve": "CVE-2021-41773",
       "severity": "critical",
       "confidence": 0.95,
       "qod": 75,
-      "evidence": "LFI confirmed — /etc/passwd via path traversal"
+      "evidence": "LFI confirmed — /etc/passwd readable via path traversal"
     }
-  ],
-  "error": null
+  ]
 }
 ```
 
-Exit code `1` on execution error, `0` otherwise (even with findings).
+Exit code `0` always (even with findings); `1` on execution error.
 
-### Daemon mode (REST API)
+---
+
+## Requirements
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| Rust | ≥ 1.75 | Build |
+| libssh2 + pkg-config | system | SSH checks |
+| Ansible-core | ≥ 2.15 | E2E tests only |
+| Podman | ≥ 4.0 | E2E tests only |
+| [Task](https://taskfile.dev) | ≥ 3.0 | E2E tests only |
+
+---
+
+## CLI reference
 
 ```sh
-noctis serve --host 0.0.0.0 --port 8080
+# Verbosity
+noctis -v scan ...    # INFO
+noctis -vv scan ...   # DEBUG
 
-# With OOB server for blind detections
+# Concurrency (default: 5)
+noctis scan --concurrency 20 ...
+
+# OOB for blind detections (Log4Shell, SSRF)
 noctis serve --oob --oob-host <public-ip> --oob-port 9090
 ```
 
-**Endpoints:**
+### Daemon mode
+
+```sh
+noctis serve --host 0.0.0.0 --port 8080
+```
 
 | Method | Route | Description |
 |--------|-------|-------------|
 | `GET` | `/health` | Healthcheck |
-| `POST` | `/scans` | Start a scan |
+| `POST` | `/scans` | Submit a scan |
 | `GET` | `/scans` | List scans |
-| `GET` | `/scans/{id}` | Scan state |
+| `GET` | `/scans/{id}` | Scan status |
 | `DELETE` | `/scans/{id}` | Cancel a scan |
 | `GET` | `/scans/{id}/findings` | Findings for a scan |
 
-**POST /scans example:**
+**POST /scans body:**
 
 ```json
 {
@@ -100,13 +119,56 @@ noctis serve --oob --oob-host <public-ip> --oob-port 9090
     { "port": 443, "service": "https", "protocol": "tcp" }
   ],
   "tests": ["tests/cve/", "tests/misconfig/"],
-  "concurrency": 5
+  "concurrency": 10
 }
 ```
 
+---
+
+## Available feeds
+
+### CVE detections
+
+| CVE | Product | Severity | Detection |
+|-----|---------|----------|-----------|
+| CVE-2014-6271 | GNU Bash (Shellshock) | Critical | HTTP CGI header injection + RCE proof |
+| CVE-2017-9841 | PHPUnit | Critical | `eval-stdin.php` + MD5 RCE proof |
+| CVE-2019-11510 | Pulse Connect Secure | Critical | `%2F` path traversal → `/etc/passwd` |
+| CVE-2021-21985 | VMware vCenter | Critical | vSAN pre-auth RCE endpoint |
+| CVE-2021-22205 | GitLab CE/EE | Critical | ExifTool pre-auth RCE |
+| CVE-2021-26855 | Microsoft Exchange | Critical | ProxyLogon SSRF → `X-CalculatedBETarget` |
+| CVE-2021-41773 | Apache httpd 2.4.49 | Critical | LFI `/icons/` + RCE via mod_cgi |
+| CVE-2021-43798 | Grafana | High | Plugin path traversal → `/etc/passwd` |
+| CVE-2021-44228 | Log4j2 (Log4Shell) | Critical | `pom.properties` version (QoD 75) + OOB JNDI (QoD 97) |
+| CVE-2022-1388 | F5 BIG-IP | Critical | iControl REST auth bypass |
+| CVE-2022-22965 | Spring Framework | Critical | Spring4Shell ClassLoader RCE |
+| CVE-2022-26134 | Atlassian Confluence | Critical | OGNL injection RCE |
+| CVE-2023-22527 | Atlassian Confluence | Critical | SSTI/OGNL injection RCE |
+| CVE-2023-34960 | Chamilo LMS | Critical | SOAP `wsConvertPpt` command injection |
+| CVE-2023-46805 | Ivanti Connect Secure | High | REST API auth bypass (path traversal) |
+| CVE-2023-48795 | OpenSSH / SSH servers | Medium | Terrapin — ChaCha20-Poly1305 negotiation |
+| CVE-2023-49103 | ownCloud Graph API | High | `phpinfo()` exposure → credentials |
+| CVE-2023-7028 | GitLab CE/EE | High | Account takeover via password reset injection |
+| CVE-2024-21887 | Ivanti Connect Secure | Critical | Command injection RCE |
+| CVE-2024-21893 | Ivanti Connect Secure | High | SAML SSRF |
+| CVE-2024-4577 | PHP-CGI | Critical | Argument injection RCE |
+| CVE-2024-55591 | Fortinet FortiOS/FortiProxy | Critical | Node.js WebSocket auth bypass |
+| CVE-2024-6387 | OpenSSH (regreSSHion) | High | Pre-auth RCE — banner version |
+
+### Misconfiguration checks
+
+| Feed | Detection |
+|------|-----------|
+| `exposed-paths.yaml` | Sensitive paths accessible (`.git`, `.env`, `actuator`, etc.) |
+| `http-security-headers.yaml` | Missing `X-Frame-Options`, `CSP`, `HSTS`, etc. |
+| `ssh-weak-auth.yaml` | Password authentication enabled |
+| `tls-weak-config.yaml` | TLS 1.0/1.1, RC4, export ciphers, self-signed certs |
+
+---
+
 ## YAML feed format
 
-### Full structure
+A feed is a YAML file describing metadata and a sequence of steps. Steps build up confidence toward a finding.
 
 ```yaml
 uid: a3c7f4e2-1b9d-4f6a-8e3c-2d5a0f1e9b4c   # stable UUID v4 — never change
@@ -115,24 +177,22 @@ type: cve                   # cve | misconfig
 cve: CVE-2021-41773
 cvss: 9.8
 severity: critical          # info | low | medium | high | critical
-confidence_base: 0.30       # floor before any step runs
+confidence_base: 0.30
 tags: [apache, path-traversal, rce]
-services: [http, https]     # nmap service names to target (empty = all)
+services: [http, https]     # nmap service names — empty = all ports
 author: noctis
 version: "1.0.0"
-references:
-  - "https://nvd.nist.gov/vuln/detail/CVE-2021-41773"
 
 steps:
   - id: probe
-    action: tcp_connect
+    action: tcp_connect      # raw TCP — payload sent verbatim
     port: "{{port}}"
     send: "GET /icons/.%2e/.%2e/etc/passwd HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
     store_as: resp
 
   - id: match
     action: match
-    source: resp.banner
+    source: resp.banner      # always .banner on tcp_connect results
     pattern: "root:[x*!]:0:0"
     on_match:
       finding:
@@ -142,217 +202,114 @@ steps:
       stop: true
 ```
 
-### Service → port matching
-
-The engine computes which ports to run each feed against:
-
-- `services: []` → runs on **all** discovered ports
-- `services: [http]` → only ports whose nmap service is `http`
-- `services: [https]` → only ports whose nmap service is `https`
-
-`{{port}}` is injected automatically from the matched service. **Never redefine it in `vars:`.**
-
 ### Automatic variables
 
 | Variable | Value |
 |----------|-------|
-| `{{target_host}}` | Target host |
-| `{{port}}` | Current service port (injected by the engine) |
+| `{{target_host}}` | Target IP / hostname |
+| `{{port}}` | Port of the matched service (injected by engine — do not redefine) |
 | `{{scheme}}` | `http` or `https` — derived from the matched service name |
-| `{{oob_token}}` | Unique UUID for this run |
-| `{{oob_url}}` | Full OOB server URL |
+| `{{oob_token}}` | UUID unique to this run |
+| `{{oob_url}}` | Full OOB callback URL |
 | `{{oob_host}}` | OOB server host |
 | `{{oob_port}}` | OOB server port |
-| `{{oob_enabled}}` | `true` when OOB is configured, `false` otherwise |
+| `{{oob_enabled}}` | `true` when `--oob` is configured |
 
 ### Available actions
 
 | Action | Description |
 |--------|-------------|
-| `http_request` | HTTP/HTTPS request via reqwest |
-| `tcp_connect` | Raw TCP socket + banner grab (no URL normalisation) |
-| `tls_check` | TLS inspection — version, cipher, certificate |
-| `ssh_check` | SSH banner + authentication methods |
-| `match` | Regex pattern match on a context variable |
-| `script` | Arbitrary Rhai script |
-| `wait_oob` | Wait for an OOB HTTP callback |
-| `set_var` | Assign a variable in the context |
+| `http_request` | HTTP/HTTPS request (reqwest); result fields: `resp.status`, `resp.body`, `resp.headers` |
+| `tcp_connect` | Raw TCP socket + banner grab; result field: `resp.banner` |
+| `tls_check` | TLS version, cipher, certificate inspection |
+| `ssh_check` | SSH banner + auth methods; result fields: `resp.banner`, `resp.auth_methods` |
+| `match` | Regex match on a context variable |
+| `script` | Arbitrary [Rhai](https://rhai.rs) script |
+| `wait_oob` | Wait for OOB HTTP callback |
+| `set_var` | Assign a context variable |
+
+### Confidence / QoD scale
+
+| QoD | Meaning |
+|-----|---------|
+| 50 | Banner or version match |
+| 70 | Specific header / response pattern |
+| 75 | Functional proof (LFI `/etc/passwd`, known-good response body) |
+| 97 | OOB callback received, or confirmed RCE |
+| 100 | Full exploit with verified output |
 
 ### `tcp_connect` vs `http_request`
 
-**Use `tcp_connect` for any payload encoded in the path** (path traversal, `%2e`, `%2f`, etc.).
-Reqwest normalises URLs before sending: `%2e` → `.` then resolves `../`, breaking the exploit.
-`tcp_connect` sends bytes verbatim.
+Use `tcp_connect` for any payload encoded in the path — reqwest normalises URLs before sending (`%2e` → `.` then resolves `../`), which breaks path traversal exploits.
 
 ```yaml
-# Correct — payload preserved
+# Correct — verbatim bytes, no normalisation
 - action: tcp_connect
   send: "GET /cgi-bin/.%2e/.%2e/etc/passwd HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
   store_as: resp
 
-# Result — use .banner (not .data)
 - action: match
-  source: resp.banner
+  source: resp.banner    # .banner, not .data
   pattern: "root:.*:0:0"
 ```
 
-### Confidence levels (QoD)
-
-| QoD | Meaning |
-|-----|---------|
-| 50 | General detection (banner, version) |
-| 70 | Specific banner match |
-| 75 | Functional proof (LFI /etc/passwd, application response) |
-| 97 | OOB callback received, or confirmed RCE |
-| 100 | Full exploit with verified output |
-
-### Conditions and Rhai scripting
-
-```yaml
-- id: conditional-step
-  action: match
-  source: resp.banner
-  pattern: "Apache"
-  condition: "resp_status >= 200 && resp_status < 300"
-  on_match:
-    condition: "resp_banner.len > 100"
-    finding:
-      confidence_delta: 0.20
-```
-
-### Loops
-
-```yaml
-steps:
-  - id: probe-paths
-    action: http_request
-    path: "{{current_path}}"
-    loop:
-      over: [/admin, /.git/config, /actuator/env]
-      var: current_path
-    store_as: resp
-    on_success:
-      condition: "resp_status == 200"
-      finding:
-        title: "Exposed path: {{current_path}}"
-        confidence_delta: 0.10
-```
-
-## Available feeds
-
-| Feed | Product | Services | Detection method |
-|------|---------|----------|-----------------|
-| `CVE-2014-6271.yaml` | GNU Bash (Shellshock) | http, https | `() {:;};` header injection + RCE pattern |
-| `CVE-2017-9841.yaml` | PHPUnit | http, https | `eval-stdin.php` + MD5 RCE proof |
-| `CVE-2019-11510.yaml` | Pulse Connect Secure | http, https | `%2F` path traversal + `/etc/passwd` |
-| `CVE-2021-26855.yaml` | Exchange ProxyLogon | http, https | SSRF cookie → `X-CalculatedBETarget` header |
-| `CVE-2021-41773.yaml` | Apache 2.4.49 | http, https | LFI `/icons/` + RCE via mod_cgi |
-| `CVE-2021-44228.yaml` | Log4j2 (Log4Shell) | http, https | Version via `pom.properties` (QoD 75) + OOB JNDI (QoD 97, requires `--oob`) |
-| `CVE-2022-1388.yaml` | F5 BIG-IP | http, https | iControl REST auth bypass |
-| `CVE-2022-26134.yaml` | Confluence | http, https | OGNL injection RCE |
-| `CVE-2023-48795.yaml` | SSH (Terrapin) | ssh | ChaCha20-Poly1305 negotiation + banner |
-
-## Feed validation
-
-`schemas/feed.schema.json` provides JSON Schema draft-07 validation and autocomplete for all YAML feeds. The Red Hat YAML extension picks it up automatically via `.vscode/settings.json`.
+Feed validation is available via JSON Schema:
 
 ```sh
-# CLI validation
-npx ajv-cli validate -s schemas/feed.schema.json -d "tests/cve/*.yaml" --spec=draft7 --allow-union-types
+npx ajv-cli validate -s schemas/feed.schema.json \
+  -d "tests/cve/*.yaml" --spec=draft7 --allow-union-types
 ```
 
-## Test infrastructure (infra/)
+The Red Hat YAML VS Code extension picks up the schema automatically via `.vscode/settings.json`.
 
-Reproducible end-to-end tests: Podman containers (vuln + patched), dynamic port, automatic assertions.
+---
 
-### Commands
+## Test infrastructure
+
+End-to-end tests use Ansible + rootless Podman. Each CVE has a vulnerable and a patched container; the role starts them, runs `noctis scan`, and asserts the result.
 
 ```sh
 cd infra
 
-# Build local images (proprietary mocks)
-task build
-
-# Test a single CVE (TP + TN)
-task test CVE=CVE-2021-41773
-
-# Test all CVEs sequentially
-task test-all
-
-# Check prerequisites
-task check-deps
+task build          # build local Docker/Podman images
+task test CVE=CVE-2021-41773    # true-positive + true-negative for one CVE
+task test-all       # all CVEs sequentially
+task check-deps     # verify prerequisites
 ```
 
-### CVE test structure
+Each CVE test covers four cases: `vuln` (HTTP), `vuln_https`, `patched` (HTTP), `patched_https`.
 
-Each CVE has:
-- `infra/inventories/<CVE>/hosts.yml` — two hosts: `<cve>_vuln` (TP) and `<cve>_patched` (TN)
-- `infra/playbooks/<CVE>.yml` — playbook delegating to the `common_docker` role
-- `infra/docker/<name>/Dockerfile.vuln` + `Dockerfile.patched` — images
+For full details on adding feeds and writing mocks, see [`CLAUDE.md`](CLAUDE.md).
 
-The `common_docker` role:
-1. Allocates a free port dynamically (Python socket)
-2. Starts the container
-3. Waits for the service to respond
-4. Runs `noctis scan --service <svc>:<port>`
-5. Checks the finding count (assert TP or TN)
-6. Tears down the container
+---
 
-### Inventory template
+## Performance
 
-```yaml
-# infra/inventories/CVE-XXXX-XXXXX/hosts.yml
-all:
-  children:
-    cve_xxxx:
-      hosts:
-        app_vuln:
-          ansible_host: localhost
-          ansible_connection: local
-          target_host: "127.0.0.1"
-          target_service: http        # nmap service — must match the feed
-          container_name: noctis_cve_xxxx_vuln
-          docker_image: "noctis/app-cve-xxxx:vuln"
-          expected_result: vulnerable # feed MUST produce a finding
+At default concurrency (`--concurrency 5`) and 10s step timeout, a scan of 50 services against 300 feeds generates roughly 4 000 tasks. Expected wall-clock time:
 
-        app_vuln_https:
-          ansible_host: localhost
-          ansible_connection: local
-          target_host: "127.0.0.1"
-          target_service: https
-          container_port: 443         # container port to map (HTTP uses 80 by default)
-          container_name: noctis_cve_xxxx_vuln_https
-          docker_image: "noctis/app-cve-xxxx:vuln"
-          expected_result: vulnerable
+| Concurrency | Local network | Remote / WAN |
+|-------------|--------------|--------------|
+| 5 (default) | 10–20 min | 20–40 min |
+| 20 | 3–6 min | 8–15 min |
+| 50 | 1–3 min | 3–8 min |
 
-        app_patched:
-          ansible_host: localhost
-          ansible_connection: local
-          target_host: "127.0.0.1"
-          target_service: http
-          container_name: noctis_cve_xxxx_patched
-          docker_image: "noctis/app-cve-xxxx:patched"
-          expected_result: clean      # feed MUST NOT produce a finding
+Most of the time is spent on step timeouts for non-matching services. Increase `--concurrency` and reduce `timeout_secs` in feeds to speed up large scans.
 
-        app_patched_https:
-          ansible_host: localhost
-          ansible_connection: local
-          target_host: "127.0.0.1"
-          target_service: https
-          container_port: 443
-          container_name: noctis_cve_xxxx_patched_https
-          docker_image: "noctis/app-cve-xxxx:patched"
-          expected_result: clean
-```
+---
 
-**`target_port` must not appear in the inventory** — it is allocated dynamically at each run.
-`container_port` defaults to `80`; set it to `443` for HTTPS hosts.
+## Contributing
 
-### Adding a new CVE
+See [`CLAUDE.md`](CLAUDE.md) for the full authoring guide: feed conventions, Python mock template, inventory structure, known pitfalls, and reference feeds to copy from.
 
-1. `tests/cve/CVE-XXXX-XXXXX.yaml` — feed with stable UUID v4 uid and `services:` set
-2. `infra/inventories/CVE-XXXX-XXXXX/hosts.yml` — two hosts without `target_port`
-3. `infra/docker/<name>/Dockerfile.vuln` + `Dockerfile.patched` (or Flask mock for proprietary appliances)
-4. `infra/playbooks/CVE-XXXX-XXXXX.yml` — copy an existing one
-5. `infra/site.yml` — add `import_playbook: playbooks/CVE-XXXX-XXXXX.yml`
-6. `infra/Taskfile.yml` — add the CVE to `vars.INVENTORIES`
+In short:
+1. Write a feed in `tests/cve/` with a stable UUID v4 `uid`
+2. Add a Podman mock in `infra/docker/` (HTTP:80 + HTTPS:443)
+3. Add an inventory in `infra/inventories/` (4 hosts: vuln, vuln_https, patched, patched_https)
+4. Add a playbook, register in `site.yml` and `Taskfile.yml`
+5. Run `task build && task test CVE=<your-cve>` — expect 4 passing tests
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
