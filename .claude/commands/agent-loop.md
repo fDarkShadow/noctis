@@ -177,6 +177,16 @@ cd /home/flo/workspace/iscan
 git worktree remove "../noctis-$CVE" --force
 ```
 
+### 13. Stop
+
+Print a one-line summary and exit:
+```
+✔ agent-loop done — <CVE> — PR #<N> opened — <N> issues remaining
+```
+
+**Do not pick another issue. Do not continue.** The orchestrator (run-agents.sh or
+/loop run-agents) is responsible for launching the next iteration.
+
 ---
 
 ## Handling engine bugs
