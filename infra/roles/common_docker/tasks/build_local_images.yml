@@ -236,3 +236,15 @@
     cmd: "{{ container_runtime }} build -t noctis/gitlab-password-reset-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/gitlab-password-reset-mock"
   changed_when: true
+
+- name: Build vCenter vSAN mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/vcenter-vsan-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/vcenter-vsan-mock"
+  changed_when: true
+
+- name: Build vCenter vSAN mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/vcenter-vsan-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/vcenter-vsan-mock"
+  changed_when: true
