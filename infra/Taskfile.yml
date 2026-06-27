@@ -24,6 +24,7 @@ vars:
     - CVE-2021-22205
     - CVE-2023-7028
     - CVE-2021-21985
+    - CVE-2023-34960
 
 tasks:
   check-deps:

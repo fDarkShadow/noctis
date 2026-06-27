@@ -248,3 +248,15 @@
     cmd: "{{ container_runtime }} build -t noctis/vcenter-vsan-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/vcenter-vsan-mock"
   changed_when: true
+
+- name: Build Chamilo mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/chamilo-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/chamilo-mock"
+  changed_when: true
+
+- name: Build Chamilo mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/chamilo-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/chamilo-mock"
+  changed_when: true
