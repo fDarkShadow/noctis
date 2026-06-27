@@ -308,3 +308,15 @@
     cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
+
+- name: Build Apache CVE-2021-42013 (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-42013:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/apache-cve-2021-42013"
+  changed_when: true
+
+- name: Build Apache CVE-2021-42013 (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-42013:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/apache-cve-2021-42013"
+  changed_when: true
