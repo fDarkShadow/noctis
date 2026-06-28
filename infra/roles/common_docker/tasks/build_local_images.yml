@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build Cacti mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cacti-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/cacti-mock"
+  changed_when: true
+
+- name: Build Cacti mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cacti-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/cacti-mock"
 - name: Build Confluence restore mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:vuln -f Dockerfile.vuln ."
