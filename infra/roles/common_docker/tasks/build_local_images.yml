@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build ScreenConnect mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/screenconnect-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/screenconnect-mock"
+  changed_when: true
+
+- name: Build ScreenConnect mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/screenconnect-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/screenconnect-mock"
 - name: Build BIG-IP 22986 mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/bigip-22986-mock:vuln -f Dockerfile.vuln ."
