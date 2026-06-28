@@ -19,9 +19,6 @@ pub struct Cli {
 pub enum Command {
     /// Start the REST API daemon
     Serve(ServeArgs),
-
-    /// Run a one-shot scan and print findings as JSON to stdout
-    Scan(ScanArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -47,36 +44,3 @@ pub struct ServeArgs {
     pub oob_port: u16,
 }
 
-#[derive(Parser, Debug)]
-pub struct ScanArgs {
-    /// Target host
-    #[arg(long)]
-    pub host: String,
-
-    /// Discovered open port with its service name, format <service>:<port>.
-    /// Repeat for multiple ports: --service http:80 --service https:443 --service ssh:22
-    #[arg(long = "service", required = true, value_parser = parse_service)]
-    pub services: Vec<crate::scan::request::DiscoveredService>,
-
-    /// Test files or directories (glob supported)
-    #[arg(long, required = true)]
-    pub tests: Vec<String>,
-
-    /// Concurrency (parallel tests)
-    #[arg(long, default_value_t = 5)]
-    pub concurrency: usize,
-}
-
-fn parse_service(s: &str) -> Result<crate::scan::request::DiscoveredService, String> {
-    let (svc, port_str) = s.rsplit_once(':').ok_or_else(|| {
-        format!("invalid service spec '{s}': expected <service>:<port>")
-    })?;
-    let port: u16 = port_str
-        .parse()
-        .map_err(|_| format!("invalid port '{port_str}' in '{s}'"))?;
-    Ok(crate::scan::request::DiscoveredService {
-        port,
-        service: svc.to_string(),
-        protocol: "tcp".to_string(),
-    })
-}

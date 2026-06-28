@@ -27,7 +27,6 @@ async fn main() {
 
     match cli.command {
         Command::Serve(args) => serve(args).await,
-        Command::Scan(args) => run_scan(args).await,
     }
 }
 
@@ -64,36 +63,6 @@ async fn serve(args: cli::ServeArgs) {
         .unwrap_or_else(|e| eprintln!("server error: {e}"));
 }
 
-async fn run_scan(args: cli::ScanArgs) {
-    use scan::request::ScanRequest;
-
-    let request = ScanRequest {
-        host: args.host,
-        services: args.services,
-        tests: args.tests,
-        concurrency: args.concurrency,
-        webhook_url: None,
-        oob: None,
-        filters: None,
-    };
-
-    let manager = ScanManager::new(None);
-    let state = manager.run_sync(request).await;
-
-    let output = serde_json::json!({
-        "id": state.id,
-        "status": state.status,
-        "target": state.target,
-        "findings": state.findings,
-        "error": state.error,
-    });
-
-    println!("{}", serde_json::to_string_pretty(&output).unwrap());
-
-    if state.error.is_some() {
-        std::process::exit(1);
-    }
-}
 
 fn init_logging(verbosity: u8) {
     let level = match verbosity {

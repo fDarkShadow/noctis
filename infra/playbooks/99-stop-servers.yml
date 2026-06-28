@@ -1,0 +1,33 @@
+---
+- name: "Stop noctis REST servers"
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    pids_file: "{{ playbook_dir }}/../../target/noctis-server-pids.txt"
+
+  tasks:
+    - name: Read server PIDs
+      ansible.builtin.slurp:
+        src: "{{ pids_file }}"
+      register: pids_slurp
+      failed_when: false
+
+    - name: Stop noctis servers by PID
+      ansible.builtin.shell: |
+        xargs kill < "{{ pids_file }}" 2>/dev/null || true
+        rm -f "{{ pids_file }}"
+      when: pids_slurp.content is defined
+      changed_when: true
+      failed_when: false
+
+    - name: Confirm servers are gone
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ item }}/health"
+        status_code: [000]
+      register: check
+      failed_when: check.status != -1 and check.status != 000
+      ignore_errors: true
+      loop:
+        - "8080"
+        - "8081"

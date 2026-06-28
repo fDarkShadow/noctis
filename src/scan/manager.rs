@@ -34,20 +34,6 @@ impl ScanManager {
         })
     }
 
-    /// Run a scan synchronously and return the final state (for CLI use).
-    pub async fn run_sync(self: Arc<Self>, request: ScanRequest) -> ScanState {
-        let id = Uuid::new_v4();
-        let state = Arc::new(RwLock::new(ScanState::new(id, &request)));
-        self.scans.write().await.insert(id, state.clone());
-        if let Err(e) = self.execute(id, request, state.clone()).await {
-            let mut s = state.write().await;
-            s.status = ScanStatus::Failed;
-            s.error = Some(e.to_string());
-            s.completed_at = Some(Utc::now());
-        }
-        let result = state.read().await.clone();
-        result
-    }
 
     /// Submit a scan and return its UUID immediately. Execution is async.
     pub async fn submit(self: Arc<Self>, request: ScanRequest) -> Result<Uuid> {
@@ -97,7 +83,7 @@ impl ScanManager {
         for state in states {
             summaries.push(ScanSummary::from(&*state.read().await));
         }
-        summaries.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        summaries.sort_by_key(|s| std::cmp::Reverse(s.created_at));
         summaries
     }
 

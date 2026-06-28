@@ -44,9 +44,9 @@ noctis/
 │   └── common/             # Reusable includes
 └── infra/                  # Reproducible test infrastructure
     ├── Taskfile.yml         # task test CVE=CVE-XXXX / task test-all
-    ├── site.yml             # Imports all CVE playbooks
-    ├── playbooks/           # One playbook per CVE
-    ├── roles/common_docker/ # Generic role: find port → start → scan → assert → teardown
+    ├── playbooks/           # 00-build / 01-start-servers / 10-CVE-* / 99-stop-servers
+    ├── bake/                # docker-bake HCL files, one per product family
+    ├── roles/common_docker/ # Generic role: find port → REST POST /scans → assert → teardown
     ├── inventories/         # One directory per CVE (hosts.yml)
     └── docker/              # Vuln/patched Dockerfiles per CVE
 ```
@@ -216,10 +216,9 @@ resp.connected       bool
    - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)
    - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
    - EOL base images (e.g. httpd:2.4.49 on Debian Buster): patch apt sources to `archive.debian.org` before installing openssl
-4. **Playbook**: `infra/playbooks/CVE-XXXX-XXXXX.yml` (copy an existing one)
-5. **site.yml**: add `import_playbook: playbooks/CVE-XXXX-XXXXX.yml`
-6. **Taskfile.yml**: add the CVE to `vars.INVENTORIES`
-7. **build_local_images.yml**: add two tasks (vuln + patched) — see pattern below
+4. **Playbook**: `infra/playbooks/10-CVE-XXXX-XXXXX.yml` (copy an existing one — prefix `10-` is mandatory; `task test-all` auto-discovers playbooks by sorted filename)
+5. **Taskfile.yml**: add the CVE to `vars.INVENTORIES`
+6. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
 
 ### Python mock template (copy from `infra/docker/bigip-mock/server.py`)
 
@@ -281,14 +280,10 @@ CMD ["python3", "/app/server.py"]
 
 Dockerfile.patched: identical but `ENV MYPRODUCT_MODE=patched`.
 
-### build_local_images.yml — adding new image tasks
+### Adding a bake target for new images
 
-In `infra/roles/common_docker/tasks/build_local_images.yml`, add two tasks per mock
-(copy an existing block, e.g. the bigip-mock block):
-
-```yaml
 Images are built via **Docker Buildx Bake** — one HCL file per product family in `infra/bake/`.
-Add a matrix target to the appropriate file (or create a new one for a new family):
+Add a matrix target to the appropriate file (or create a new file for a new product family):
 
 ```hcl
 # infra/bake/<family>.hcl
@@ -302,7 +297,6 @@ target "myproduct-mock" {
 ```
 
 `task build` automatically picks up all `*.hcl` files in `infra/bake/` — no other registration needed.
-```
 
 ### Reference feeds to copy from
 

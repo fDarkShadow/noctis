@@ -4,4 +4,16 @@ container_network: noctis_test_net
 docker_dir: "{{ playbook_dir }}/../docker"
 noctis_feeds_dir: "{{ playbook_dir }}/../../tests"
 noctis_bin: "{{ playbook_dir }}/../../target/debug/noctis"
-scan_timeout: 30
+scan_timeout: 60
+
+# REST API servers (started by 01-start-servers.yml, stopped by 99-stop-servers.yml)
+noctis_plain_port: 8080        # server A — no OOB
+noctis_oob_server_port: 8081   # server B — OOB enabled
+noctis_oob_callback_port: 9090 # OOB HTTP callback listener
+
+# Set noctis_use_oob: true in inventory hosts that require OOB detection (Log4Shell, SSRF…)
+noctis_use_oob: false
+
+# Gateway IP of container_network — injected by 01-start-servers.yml so containers can
+# reach the OOB callback listener on the host
+noctis_bridge_gateway: "127.0.0.1"

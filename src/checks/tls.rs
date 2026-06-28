@@ -71,35 +71,32 @@ pub async fn inspect(host: &str, port: u16, timeout_secs: u64) -> Result<TlsResu
 
     if let Some(certs) = conn.peer_certificates() {
         if let Some(leaf) = certs.first() {
-            match X509Certificate::from_der(leaf.as_ref()) {
-                Ok((_, cert)) => {
-                    cert_valid = true;
-                    cert_subject = Some(cert.subject().to_string());
-                    cert_issuer = Some(cert.issuer().to_string());
-                    cert_expiry = Some(
-                        cert.validity()
-                            .not_after
-                            .to_rfc2822()
-                            .unwrap_or_else(|_| "unknown".to_string()),
-                    );
-                    if let Ok(Some(san_ext)) = cert.subject_alternative_name() {
-                        for san in &san_ext.value.general_names {
-                            let s = match san {
-                                GeneralName::DNSName(n) => n.to_string(),
-                                GeneralName::IPAddress(b) => {
-                                    if b.len() == 4 {
-                                        format!("{}.{}.{}.{}", b[0], b[1], b[2], b[3])
-                                    } else {
-                                        format!("{b:?}")
-                                    }
+            if let Ok((_, cert)) = X509Certificate::from_der(leaf.as_ref()) {
+                cert_valid = true;
+                cert_subject = Some(cert.subject().to_string());
+                cert_issuer = Some(cert.issuer().to_string());
+                cert_expiry = Some(
+                    cert.validity()
+                        .not_after
+                        .to_rfc2822()
+                        .unwrap_or_else(|_| "unknown".to_string()),
+                );
+                if let Ok(Some(san_ext)) = cert.subject_alternative_name() {
+                    for san in &san_ext.value.general_names {
+                        let s = match san {
+                            GeneralName::DNSName(n) => n.to_string(),
+                            GeneralName::IPAddress(b) => {
+                                if b.len() == 4 {
+                                    format!("{}.{}.{}.{}", b[0], b[1], b[2], b[3])
+                                } else {
+                                    format!("{b:?}")
                                 }
-                                other => format!("{other:?}"),
-                            };
-                            cert_sans.push(s);
-                        }
+                            }
+                            other => format!("{other:?}"),
+                        };
+                        cert_sans.push(s);
                     }
                 }
-                Err(_) => {}
             }
         }
     }

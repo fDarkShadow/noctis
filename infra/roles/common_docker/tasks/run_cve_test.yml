@@ -39,23 +39,83 @@
         port: "{{ target_port }}"
         timeout: 45
 
-    - name: "{{ cve_id }} — Run noctis scan on {{ inventory_hostname }}"
-      ansible.builtin.command:
-        cmd: >-
-          {{ noctis_bin }} scan
-          --host {{ target_host }}
-          --service {{ target_service }}:{{ target_port }}
-          --tests {{ feed_path }}
-      register: scan_result
-      failed_when: false
-      changed_when: false
-      timeout: "{{ scan_timeout }}"
+    # ── Choose server and build request body ──────────────────────────────────
 
-    - name: "{{ cve_id }} — Parse findings count"
+    - name: "{{ cve_id }} — Select API server"
       ansible.builtin.set_fact:
-        findings_count: >-
-          {{ (scan_result.stdout | from_json).findings | length
-             if scan_result.rc == 0 else 0 }}
+        _api_url: >-
+          http://127.0.0.1:{{
+            noctis_oob_server_port if noctis_use_oob else noctis_plain_port
+          }}
+
+    - name: "{{ cve_id }} — Build scan request body"
+      ansible.builtin.set_fact:
+        _scan_body: >-
+          {{
+            {
+              "host": target_host,
+              "services": [
+                {
+                  "port": target_port | int,
+                  "service": target_service,
+                  "protocol": "tcp"
+                }
+              ],
+              "tests": [feed_path],
+              "concurrency": 5
+            }
+            | combine(
+                {
+                  "oob": {
+                    "enabled": true,
+                    "host": noctis_bridge_gateway,
+                    "port": noctis_oob_callback_port | int
+                  }
+                } if noctis_use_oob else {}
+            )
+          }}
+
+    # ── Submit scan ───────────────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — POST /scans to {{ _api_url }}"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/scans"
+        method: POST
+        body_format: json
+        body: "{{ _scan_body }}"
+        status_code: [201, 202]
+      register: scan_submit
+
+    - name: "{{ cve_id }} — Set scan ID"
+      ansible.builtin.set_fact:
+        _scan_id: "{{ scan_submit.json.id }}"
+
+    # ── Poll until completed ──────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — Poll GET /scans/{{ _scan_id }}"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/scans/{{ _scan_id }}"
+        method: GET
+        status_code: 200
+      register: scan_status
+      until: scan_status.json.status in ['completed', 'failed']
+      retries: "{{ (scan_timeout | int // 2) | int }}"
+      delay: 2
+
+    # ── Fetch findings ────────────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — GET /scans/{{ _scan_id }}/findings"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/scans/{{ _scan_id }}/findings"
+        method: GET
+        status_code: 200
+      register: scan_findings
+
+    - name: "{{ cve_id }} — Count findings"
+      ansible.builtin.set_fact:
+        findings_count: "{{ scan_findings.json | length }}"
+
+    # ── Assert ────────────────────────────────────────────────────────────────
 
     - name: "{{ cve_id }} — Assert TRUE POSITIVE"
       ansible.builtin.assert:
@@ -63,7 +123,7 @@
         fail_msg: >-
           FALSE NEGATIVE on {{ inventory_hostname }} ({{ cve_id }}):
           expected findings on vulnerable target, got 0.
-          stdout: {{ scan_result.stdout[:500] }}
+          Scan status: {{ scan_status.json.status }}
         success_msg: "TRUE POSITIVE ✓ — {{ findings_count }} finding(s)"
       when: expected_result == 'vulnerable'
 
@@ -73,7 +133,6 @@
         fail_msg: >-
           FALSE POSITIVE on {{ inventory_hostname }} ({{ cve_id }}):
           expected 0 findings on patched target, got {{ findings_count }}.
-          stdout: {{ scan_result.stdout[:500] }}
         success_msg: "TRUE NEGATIVE ✓ — 0 findings on patched target"
       when: expected_result == 'clean'
 
@@ -81,7 +140,8 @@
       ansible.builtin.debug:
         msg: |
           ── {{ cve_id }} — {{ inventory_hostname }} ──────────────
-          Target   : {{ target_host }}:{{ target_port }}
+          Target   : {{ target_host }}:{{ target_port }} ({{ target_service }})
+          Server   : {{ _api_url }}{{ ' [OOB]' if noctis_use_oob else '' }}
           Expected : {{ expected_result }}
           Findings : {{ findings_count }}
           Result   : {{ 'PASS' if

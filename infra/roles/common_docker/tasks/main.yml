@@ -1,4 +1,18 @@
 ---
+- name: Load server config from file (separate-invocation mode)
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/../../target/noctis-test-config.yml"
+  when: "'noctis_config' not in hostvars"
+  failed_when: false
+
+- name: Inherit server config from noctis_config host (single-invocation mode)
+  ansible.builtin.set_fact:
+    noctis_bridge_gateway: "{{ hostvars['noctis_config']['noctis_bridge_gateway'] }}"
+    noctis_plain_port: "{{ hostvars['noctis_config']['noctis_plain_port'] }}"
+    noctis_oob_server_port: "{{ hostvars['noctis_config']['noctis_oob_server_port'] }}"
+    noctis_oob_callback_port: "{{ hostvars['noctis_config']['noctis_oob_callback_port'] }}"
+  when: "'noctis_config' in hostvars"
+
 - name: Create isolated container network
   ansible.builtin.command:
     cmd: "{{ container_runtime }} network create {{ container_network }}"

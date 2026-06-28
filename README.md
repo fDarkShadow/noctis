@@ -127,42 +127,12 @@ noctis serve --host 0.0.0.0 --port 8080
 
 ## Available feeds
 
-### CVE detections
+CVE feeds live in [`tests/cve/`](tests/cve/) — one YAML file per CVE. Coverage includes
+critical vulnerabilities across Apache, Atlassian, F5, Fortinet, GitLab, Ivanti, Jenkins,
+Microsoft Exchange, OpenSSH, PHP, Pulse Secure, VMware, and more.
 
-| CVE | Product | Severity | Detection |
-|-----|---------|----------|-----------|
-| CVE-2014-6271 | GNU Bash (Shellshock) | Critical | HTTP CGI header injection + RCE proof |
-| CVE-2017-9841 | PHPUnit | Critical | `eval-stdin.php` + MD5 RCE proof |
-| CVE-2019-11510 | Pulse Connect Secure | Critical | `%2F` path traversal → `/etc/passwd` |
-| CVE-2021-21985 | VMware vCenter | Critical | vSAN pre-auth RCE endpoint |
-| CVE-2021-22205 | GitLab CE/EE | Critical | ExifTool pre-auth RCE |
-| CVE-2021-26855 | Microsoft Exchange | Critical | ProxyLogon SSRF → `X-CalculatedBETarget` |
-| CVE-2021-41773 | Apache httpd 2.4.49 | Critical | LFI `/icons/` + RCE via mod_cgi |
-| CVE-2021-43798 | Grafana | High | Plugin path traversal → `/etc/passwd` |
-| CVE-2021-44228 | Log4j2 (Log4Shell) | Critical | `pom.properties` version (QoD 75) + OOB JNDI (QoD 97) |
-| CVE-2022-1388 | F5 BIG-IP | Critical | iControl REST auth bypass |
-| CVE-2022-22965 | Spring Framework | Critical | Spring4Shell ClassLoader RCE |
-| CVE-2022-26134 | Atlassian Confluence | Critical | OGNL injection RCE |
-| CVE-2023-22527 | Atlassian Confluence | Critical | SSTI/OGNL injection RCE |
-| CVE-2023-34960 | Chamilo LMS | Critical | SOAP `wsConvertPpt` command injection |
-| CVE-2023-46805 | Ivanti Connect Secure | High | REST API auth bypass (path traversal) |
-| CVE-2023-48795 | OpenSSH / SSH servers | Medium | Terrapin — ChaCha20-Poly1305 negotiation |
-| CVE-2023-49103 | ownCloud Graph API | High | `phpinfo()` exposure → credentials |
-| CVE-2023-7028 | GitLab CE/EE | High | Account takeover via password reset injection |
-| CVE-2024-21887 | Ivanti Connect Secure | Critical | Command injection RCE |
-| CVE-2024-21893 | Ivanti Connect Secure | High | SAML SSRF |
-| CVE-2024-4577 | PHP-CGI | Critical | Argument injection RCE |
-| CVE-2024-55591 | Fortinet FortiOS/FortiProxy | Critical | Node.js WebSocket auth bypass |
-| CVE-2024-6387 | OpenSSH (regreSSHion) | High | Pre-auth RCE — banner version |
-
-### Misconfiguration checks
-
-| Feed | Detection |
-|------|-----------|
-| `exposed-paths.yaml` | Sensitive paths accessible (`.git`, `.env`, `actuator`, etc.) |
-| `http-security-headers.yaml` | Missing `X-Frame-Options`, `CSP`, `HSTS`, etc. |
-| `ssh-weak-auth.yaml` | Password authentication enabled |
-| `tls-weak-config.yaml` | TLS 1.0/1.1, RC4, export ciphers, self-signed certs |
+Misconfiguration checks live in [`tests/misconfig/`](tests/misconfig/): exposed paths,
+missing HTTP security headers, weak SSH auth, and weak TLS configuration.
 
 ---
 
@@ -266,18 +236,20 @@ The Red Hat YAML VS Code extension picks up the schema automatically via `.vscod
 
 ## Test infrastructure
 
-End-to-end tests use Ansible + rootless Podman. Each CVE has a vulnerable and a patched container; the role starts them, runs `noctis scan`, and asserts the result.
+End-to-end tests use Ansible + rootless Podman. Two `noctis serve` instances start once for the suite — one plain, one with OOB — and tests submit scans via the REST API (`POST /scans`).
 
 ```sh
 cd infra
 
-task build          # build local Docker/Podman images
+task build          # build all mock images in parallel (docker buildx bake)
 task test CVE=CVE-2021-41773    # true-positive + true-negative for one CVE
-task test-all       # all CVEs sequentially
+task test-all       # all CVEs — servers start once, all inventories in one run
 task check-deps     # verify prerequisites
 ```
 
 Each CVE test covers four cases: `vuln` (HTTP), `vuln_https`, `patched` (HTTP), `patched_https`.
+
+Playbooks are auto-discovered by sorted filename: `00-build-noctis` → `01-start-servers` → `10-CVE-*` → `99-stop-servers`.
 
 For full details on adding feeds and writing mocks, see [`CLAUDE.md`](CLAUDE.md).
 
@@ -305,7 +277,7 @@ In short:
 1. Write a feed in `tests/cve/` with a stable UUID v4 `uid`
 2. Add a Podman mock in `infra/docker/` (HTTP:80 + HTTPS:443)
 3. Add an inventory in `infra/inventories/` (4 hosts: vuln, vuln_https, patched, patched_https)
-4. Add a playbook, register in `site.yml` and `Taskfile.yml`
+4. Add `infra/playbooks/10-<CVE>.yml` (auto-discovered) and a bake target in `infra/bake/<family>.hcl` (auto-discovered)
 5. Run `task build && task test CVE=<your-cve>` — expect 4 passing tests
 
 ---

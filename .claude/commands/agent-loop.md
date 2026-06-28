@@ -150,13 +150,10 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
   - Add `container_port: 443` on HTTPS hosts
   - Never add `target_port`
 
-**d) Playbook** — `infra/playbooks/<CVE>.yml` (copy an existing one)
+**d) Playbook** — `infra/playbooks/10-<CVE>.yml` (copy an existing one — the `10-` prefix is mandatory;
+  `task test-all` auto-discovers playbooks by sorted filename)
 
-**e) site.yml** — add `import_playbook: playbooks/<CVE>.yml`
-
-**f) Taskfile.yml** — add the CVE to `vars.INVENTORIES`
-
-**g) Bake target** — add a matrix target in the appropriate `infra/bake/<family>.hcl`
+**e) Bake target** — add a matrix target in the appropriate `infra/bake/<family>.hcl`
   (or create a new file for a new product family). See CLAUDE.md for the template.
   `task build` picks up all `*.hcl` files automatically — no other registration needed.
 

@@ -71,6 +71,7 @@ pub struct Finding {
 }
 
 impl Finding {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         test_uid: Uuid,
         step_id: impl Into<String>,

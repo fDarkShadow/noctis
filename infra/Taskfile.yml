@@ -1,75 +1,5 @@
 version: "3"
 
-vars:
-  INVENTORIES:
-    - CVE-2021-41773
-    - CVE-2017-9841
-    - CVE-2019-11510
-    - CVE-2014-6271
-    - CVE-2022-1388
-    - CVE-2022-26134
-    - CVE-2021-26855
-    - CVE-2023-48795
-    - CVE-2021-44228
-    - CVE-2024-6387
-    - CVE-2023-49103
-    - CVE-2024-4577
-    - CVE-2024-21887
-    - CVE-2024-21893
-    - CVE-2023-46805
-    - CVE-2022-22965
-    - CVE-2021-43798
-    - CVE-2023-22527
-    - CVE-2026-9082
-    - CVE-2021-22205
-    - CVE-2023-7028
-    - CVE-2021-21985
-    - CVE-2023-34960
-    - CVE-2024-55591
-    - CVE-2017-1000353
-    - CVE-2024-27198
-    - CVE-2023-34362
-    - CVE-2024-3400
-    - CVE-2023-46604
-    - CVE-2024-4040
-    - CVE-2022-47966
-    - CVE-2023-22515
-    - CVE-2021-42013
-    - CVE-2023-28432
-    - CVE-2024-23897
-    - CVE-2024-0204
-    - CVE-2023-27524
-    - CVE-2025-29927
-    - CVE-2023-4966
-    - CVE-2023-20198
-    - CVE-2024-45519
-    - CVE-2023-42793
-    - CVE-2024-0012
-    - CVE-2025-24813
-    - CVE-2025-1974
-    - CVE-2024-9463
-    - CVE-2022-22954
-    - CVE-2021-40438
-    - CVE-2024-21762
-    - CVE-2023-41266
-    - CVE-2024-24919
-    - CVE-2024-8963
-    - CVE-2024-4358
-    - CVE-2024-20767
-    - CVE-2024-23692
-    - CVE-2024-36401
-    - CVE-2024-47575
-    - CVE-2025-22457
-    - CVE-2025-32432
-    - CVE-2024-50623
-    - CVE-2023-48788
-    - CVE-2024-53677
-    - CVE-2024-1709
-    - CVE-2021-22986
-    - CVE-2022-46169
-    - CVE-2023-22518
-    - CVE-2023-46747
-
 tasks:
   check-deps:
     desc: "Vérifie les prérequis et leurs versions minimales"
@@ -80,36 +10,65 @@ tasks:
         msg: "podman not found — install podman >= 4.0"
       - sh: "which cargo"
         msg: "cargo not found — install Rust >= 1.75"
+      - sh: "which docker"
+        msg: "docker not found — install Docker (required for buildx bake)"
+      - sh: "docker buildx version"
+        msg: "docker buildx not available — install Docker Buildx plugin"
       - sh: "python3 scripts/check-versions.py"
         msg: "Version requirements not met (see output above)"
 
   build:
     desc: "Build all local mock images in parallel (docker buildx bake)"
+    dir: "{{.TASKFILE_DIR}}/bake"
     cmds:
-      - >-
-        docker buildx bake
-        $(find {{.ROOT_DIR}}/infra/bake -name '*.hcl' | sort | sed 's|^|-f |' | tr '\n' ' ')
-        --load
+      - |
+        HCL_FILES=$(find . -name '*.hcl' | sort | sed 's|^|-f |' | tr '\n' ' ')
+        TARGETS=$(grep -rh '^target "' *.hcl | sed 's/target "\([^"]*\)".*/\1/' | tr '\n' ' ')
+        docker buildx bake $HCL_FILES --allow=fs.read=.. --load $TARGETS
 
   test:
-    desc: "Teste un seul CVE — task test CVE=CVE-2021-41773"
+    desc: "Test one CVE (TP + TN) — task test CVE=CVE-2021-41773"
     deps: [check-deps]
+    dir: "{{.TASKFILE_DIR}}"
     requires:
       vars: [CVE]
     cmds:
-      - ansible-playbook site.yml -i inventories/{{.CVE}}
+      - |
+        set +e
+        ansible-playbook playbooks/00-build-noctis.yml playbooks/01-start-servers.yml
+        startup_rc=$?
+        if [ $startup_rc -eq 0 ]; then
+          ansible-playbook playbooks/10-{{.CVE}}.yml -i inventories/{{.CVE}}
+          test_rc=$?
+        else
+          test_rc=$startup_rc
+        fi
+        ansible-playbook playbooks/99-stop-servers.yml
+        exit $test_rc
 
   test-all:
-    desc: "Lance tous les tests CVE (TP + TN) séquentiellement"
+    desc: "Run all CVE tests — servers start once, CVEs run independently (failures don't stop the suite)"
     deps: [check-deps]
+    dir: "{{.TASKFILE_DIR}}"
     cmds:
-      - for: {var: INVENTORIES}
-        cmd: |
-          echo ""
-          echo "════════════════════════════════════════"
-          echo "Testing {{.ITEM}}"
-          echo "════════════════════════════════════════"
-          ansible-playbook site.yml -i inventories/{{.ITEM}}
+      - |
+        set +e
+        ansible-playbook playbooks/00-build-noctis.yml playbooks/01-start-servers.yml
+        startup_rc=$?
+        overall_rc=0
+        if [ $startup_rc -eq 0 ]; then
+          for playbook in $(find playbooks -name '10-CVE-*.yml' | sort); do
+            cve=$(basename "$playbook" .yml | sed 's/^10-//')
+            if [ -d "inventories/$cve" ]; then
+              ansible-playbook "$playbook" -i "inventories/$cve"
+              [ $? -ne 0 ] && overall_rc=1
+            fi
+          done
+        else
+          overall_rc=$startup_rc
+        fi
+        ansible-playbook playbooks/99-stop-servers.yml
+        exit $overall_rc
 
   clean:
     desc: "Remove all local noctis/* images"
