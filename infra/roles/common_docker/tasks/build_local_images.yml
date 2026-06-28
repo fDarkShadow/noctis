@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build NetScaler mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/netscaler-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/netscaler-mock"
+  changed_when: true
+
+- name: Build NetScaler mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/netscaler-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/netscaler-mock"
 - name: Build Cisco WSMA mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/cisco-wsma-mock:vuln -f Dockerfile.vuln ."
