@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build Confluence restore mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/confluence-restore-mock"
+  changed_when: true
+
+- name: Build Confluence restore mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/confluence-restore-mock"
 - name: Build BIG-IP 46747 mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:vuln -f Dockerfile.vuln ."
