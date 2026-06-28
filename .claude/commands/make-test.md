@@ -284,11 +284,12 @@ gh pr create \
 - Feed: `tests/cve/<CVE>.yaml`
 - Mock: `infra/docker/<name>/` (HTTP:80 + HTTPS:443)
 - Tests: 4 cases (vuln/patched × HTTP/HTTPS)
+- Detection branch: `expected_qod=<N>` / `expected_min_confidence=<X.XX>`
 
 ## Test results
 
 \`\`\`
-<paste task test output here>
+<paste task test output here — include the "Findings detail" lines showing cve_id, severity, confidence%, qod, evidence>
 \`\`\`
 
 ## Checklist
@@ -297,6 +298,10 @@ gh pr create \
 - [ ] Valid UUID v4
 - [ ] 4 passing tests (TP×2 + TN×2)
 - [ ] Schema respected (additionalProperties)
+- [ ] `expected_qod` set in inventory — right detection branch fired (QoD ≥ expected)
+- [ ] `expected_min_confidence` set in inventory — confidence proves steps ran, not just base
+- [ ] Finding `cve_id` matches CVE
+- [ ] Patched mock produces zero findings (no false positive)
 EOF
 )"
 ```

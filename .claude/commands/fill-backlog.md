@@ -257,6 +257,19 @@ Cite the source of this strategy (OpenVAS vuldetect / Nuclei matcher / PoC READM
 ### Docker mock notes
 <Recommended base image, exact vuln vs patched behaviour, endpoints to expose,
 confirmation marker to return, HTTP:80 + HTTPS:443>
+
+### Expected test values
+Fill in based on the detection strategy above so the implementation agent can set
+inventory vars directly without re-deriving them:
+
+- **`expected_qod`**: `<50|70|75|97>` — highest QoD the mock must exercise
+  (50=banner, 70=version/header, 75=response analysis/LFI/bypass, 97=RCE or OOB callback)
+- **`expected_min_confidence`**: `<confidence_base + highest_branch_delta - 0.05>`
+  — e.g. base 0.20 + RCE delta 0.75 → `0.90`
+- **Branches the mock must implement** (one line each):
+  - `<branch 1: endpoint + response that triggers QoD N>`
+  - `<branch 2: endpoint + response that triggers QoD N>` (if multi-step chain)
+- **Patched behaviour**: `<what the patched mock returns so every detection step fails>`
 ```
 
 ### Creation command
