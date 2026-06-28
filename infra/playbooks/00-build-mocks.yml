@@ -1,0 +1,40 @@
+---
+- name: "Build test mock images (docker buildx bake)"
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    bake_dir: "{{ playbook_dir }}/../bake"
+
+  tasks:
+    - name: Find HCL family files
+      ansible.builtin.find:
+        paths: "{{ bake_dir }}"
+        patterns: "*.hcl"
+      register: hcl_files
+
+    - name: Launch bake per family (all families in parallel)
+      ansible.builtin.shell: |
+        targets=$(grep '^target "' "{{ item.path | basename }}" \
+          | sed 's/target "\([^"]*\)".*/\1/' | tr '\n' ' ')
+        docker buildx bake -f "{{ item.path | basename }}" --allow=fs.read=.. --load $targets
+      args:
+        chdir: "{{ bake_dir }}"
+        executable: /bin/sh
+      loop: "{{ hcl_files.files | sort(attribute='path') }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      async: 600
+      poll: 0
+      register: bake_jobs
+
+    - name: Wait for all families to finish
+      ansible.builtin.async_status:
+        jid: "{{ item.ansible_job_id }}"
+      loop: "{{ bake_jobs.results }}"
+      loop_control:
+        label: "{{ item.item.path | basename }}"
+      register: job_result
+      until: job_result.finished
+      retries: 60
+      delay: 10

@@ -1,0 +1,11 @@
+target/
+.git/
+.claude/
+.sofa/
+.vscode/
+openvas/
+infra/
+schemas/
+*.md
+.gitignore
+.dockerignore

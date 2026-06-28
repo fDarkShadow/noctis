@@ -4,15 +4,21 @@
   gather_facts: false
 
   vars:
-    noctis_bin: "{{ playbook_dir }}/../../target/debug/noctis"
+    noctis_image: "noctis:ci"
     container_network: noctis_test_net
     noctis_plain_port: 8080
     noctis_oob_server_port: 8081
     noctis_oob_callback_port: 9090
-    log_dir: "{{ playbook_dir }}/../../target"
-    pids_file: "{{ playbook_dir }}/../../target/noctis-server-pids.txt"
+    feeds_dir: "{{ playbook_dir }}/../../tests"
+    config_file: "{{ playbook_dir }}/../../target/noctis-test-config.yml"
 
   tasks:
+    - name: Ensure target/ directory exists
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../../target"
+        state: directory
+        mode: '0755'
+
     - name: Ensure container network exists
       ansible.builtin.command:
         cmd: "podman network create {{ container_network }}"
@@ -28,12 +34,7 @@
       register: gateway_reg
       changed_when: false
 
-    - name: Set bridge gateway fact (shared with all plays via dummy host)
-      ansible.builtin.set_fact:
-        noctis_bridge_gateway: "{{ gateway_reg.stdout | trim }}"
-        cacheable: true
-
-    - name: Add gateway to dummy host so CVE plays can read it (single-invocation mode)
+    - name: Add config to dummy host (single-invocation mode)
       ansible.builtin.add_host:
         name: noctis_config
         noctis_bridge_gateway: "{{ gateway_reg.stdout | trim }}"
@@ -41,58 +42,44 @@
         noctis_oob_server_port: "{{ noctis_oob_server_port }}"
         noctis_oob_callback_port: "{{ noctis_oob_callback_port }}"
 
-    - name: Write server config to file (separate-invocation mode — test-all loop)
+    - name: Write server config to file (separate-invocation mode)
       ansible.builtin.copy:
         content: |
           noctis_bridge_gateway: "{{ gateway_reg.stdout | trim }}"
           noctis_plain_port: {{ noctis_plain_port }}
           noctis_oob_server_port: {{ noctis_oob_server_port }}
           noctis_oob_callback_port: {{ noctis_oob_callback_port }}
-        dest: "{{ playbook_dir }}/../../target/noctis-test-config.yml"
+        dest: "{{ config_file }}"
         mode: '0644'
 
-    - name: Kill any leftover noctis servers from a previous run (by PID file)
-      ansible.builtin.shell: |
-        if [ -f "{{ pids_file }}" ]; then
-          xargs kill < "{{ pids_file }}" 2>/dev/null || true
-          rm -f "{{ pids_file }}"
-          sleep 1
-        fi
-      changed_when: true
+    - name: Remove any leftover noctis server containers
+      ansible.builtin.command:
+        cmd: "podman rm -f noctis-plain noctis-oob"
       failed_when: false
-
-    - name: "Start server A (plain, port {{ noctis_plain_port }})"
-      ansible.builtin.shell: |
-        {{ noctis_bin }} serve \
-          --host 127.0.0.1 \
-          --port {{ noctis_plain_port }} \
-          > {{ log_dir }}/noctis-plain.log 2>&1 &
-        echo $!
-      args:
-        chdir: "{{ playbook_dir }}/../.."
-      register: plain_pid
       changed_when: true
 
-    - name: "Start server B (OOB, port {{ noctis_oob_server_port }}, callback {{ noctis_oob_callback_port }})"
-      ansible.builtin.shell: |
-        {{ noctis_bin }} serve \
-          --host 127.0.0.1 \
-          --port {{ noctis_oob_server_port }} \
-          --oob \
-          --oob-host {{ gateway_reg.stdout | trim }} \
-          --oob-port {{ noctis_oob_callback_port }} \
-          > {{ log_dir }}/noctis-oob.log 2>&1 &
-        echo $!
-      args:
-        chdir: "{{ playbook_dir }}/../.."
-      register: oob_pid
+    - name: "Start server A — plain (port {{ noctis_plain_port }})"
+      ansible.builtin.command:
+        cmd: >-
+          podman run -d
+          --name noctis-plain
+          --network host
+          -v {{ feeds_dir }}:/feeds:ro,z
+          {{ noctis_image }}
+          serve --host 127.0.0.1 --port {{ noctis_plain_port }}
       changed_when: true
 
-    - name: Write server PIDs to file (for 99-stop-servers.yml)
-      ansible.builtin.copy:
-        content: "{{ plain_pid.stdout | trim }}\n{{ oob_pid.stdout | trim }}\n"
-        dest: "{{ pids_file }}"
-        mode: '0644'
+    - name: "Start server B — OOB (port {{ noctis_oob_server_port }}, callback {{ noctis_oob_callback_port }})"
+      ansible.builtin.command:
+        cmd: >-
+          podman run -d
+          --name noctis-oob
+          --network host
+          -v {{ feeds_dir }}:/feeds:ro,z
+          {{ noctis_image }}
+          serve --host 127.0.0.1 --port {{ noctis_oob_server_port }}
+          --oob --oob-host {{ gateway_reg.stdout | trim }} --oob-port {{ noctis_oob_callback_port }}
+      changed_when: true
 
     - name: Wait for server A to be healthy
       ansible.builtin.uri:
@@ -116,6 +103,7 @@
       ansible.builtin.debug:
         msg: |
           noctis servers ready
-            A (plain) : http://127.0.0.1:{{ noctis_plain_port }}  (pid {{ plain_pid.stdout | trim }})
-            B (OOB)   : http://127.0.0.1:{{ noctis_oob_server_port }}  (pid {{ oob_pid.stdout | trim }})
-            OOB callback host : {{ gateway_reg.stdout | trim }}:{{ noctis_oob_callback_port }}
+            A (plain) : http://127.0.0.1:{{ noctis_plain_port }}
+            B (OOB)   : http://127.0.0.1:{{ noctis_oob_server_port }}
+            OOB callback : {{ gateway_reg.stdout | trim }}:{{ noctis_oob_callback_port }}
+            Feeds        : {{ feeds_dir }} → /feeds (container)

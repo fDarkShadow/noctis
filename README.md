@@ -30,41 +30,42 @@ git clone https://github.com/fDarkShadow/noctis
 cd noctis
 cargo build --release
 
-# Scan a host — HTTP on port 80, HTTPS on 443, all CVE feeds
-./target/release/noctis scan \
-  --host 10.0.0.1 \
-  --service http:80 \
-  --service https:443 \
-  --tests tests/cve/
+# Start the daemon
+./target/release/noctis serve --host 0.0.0.0 --port 8080
 
-# Single feed
-./target/release/noctis scan \
-  --host 10.0.0.1 \
-  --service http:80 \
-  --tests tests/cve/CVE-2021-41773.yaml
+# Submit a scan (REST API)
+curl -s -X POST http://localhost:8080/scans \
+  -H "Content-Type: application/json" \
+  -d '{
+    "host": "10.0.0.1",
+    "services": [
+      {"port": 80,  "service": "http",  "protocol": "tcp"},
+      {"port": 443, "service": "https", "protocol": "tcp"}
+    ],
+    "tests": ["tests/cve/"],
+    "concurrency": 10
+  }' | jq .
+
+# Poll for results
+curl -s http://localhost:8080/scans/<id>/findings | jq .
 ```
 
-Output is JSON on stdout:
+Findings response:
 
 ```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "status": "completed",
-  "target": "10.0.0.1",
-  "findings": [
-    {
-      "test_id": "a3c7f4e2-1b9d-4f6a-8e3c-2d5a0f1e9b4c",
-      "cve": "CVE-2021-41773",
-      "severity": "critical",
-      "confidence": 0.95,
-      "qod": 75,
-      "evidence": "LFI confirmed — /etc/passwd readable via path traversal"
+[
+  {
+    "type": "cve",
+    "cve_id": "CVE-2021-41773",
+    "severity": "critical",
+    "confidence": 0.95,
+    "qod": 75,
+    "evidence": {
+      "response_excerpt": "LFI confirmed — /etc/passwd readable via path traversal"
     }
-  ]
-}
+  }
+]
 ```
-
-Exit code `0` always (even with findings); `1` on execution error.
 
 ---
 
@@ -73,9 +74,10 @@ Exit code `0` always (even with findings); `1` on execution error.
 | Dependency | Version | Purpose |
 |------------|---------|---------|
 | Rust | ≥ 1.75 | Build |
-| libssh2 + pkg-config | system | SSH checks |
+| pkg-config + libssl-dev | system | Build (libssh2 is vendored; OpenSSL headers needed at compile time) |
 | Ansible-core | ≥ 2.15 | E2E tests only |
 | Podman | ≥ 4.0 | E2E tests only |
+| Docker + buildx | any | E2E tests only (mock image builds) |
 | [Task](https://taskfile.dev) | ≥ 3.0 | E2E tests only |
 
 ---
@@ -84,17 +86,15 @@ Exit code `0` always (even with findings); `1` on execution error.
 
 ```sh
 # Verbosity
-noctis -v scan ...    # INFO
-noctis -vv scan ...   # DEBUG
-
-# Concurrency (default: 5)
-noctis scan --concurrency 20 ...
+noctis -v serve ...    # INFO
+noctis -vv serve ...   # DEBUG
 
 # OOB for blind detections (Log4Shell, SSRF)
 noctis serve --oob --oob-host <public-ip> --oob-port 9090
-```
 
-### Daemon mode
+# Docker
+docker run -v ./tests:/feeds -p 8080:8080 noctis:ci serve --host 0.0.0.0 --port 8080
+```
 
 ```sh
 noctis serve --host 0.0.0.0 --port 8080
@@ -249,7 +249,7 @@ task check-deps     # verify prerequisites
 
 Each CVE test covers four cases: `vuln` (HTTP), `vuln_https`, `patched` (HTTP), `patched_https`.
 
-Playbooks are auto-discovered by sorted filename: `00-build-noctis` → `01-start-servers` → `10-CVE-*` → `99-stop-servers`.
+Playbooks are auto-discovered by sorted filename: `00-build-mocks` → `00-build-noctis` → `01-start-servers` → `10-CVE-*` → `99-stop-servers`.
 
 For full details on adding feeds and writing mocks, see [`CLAUDE.md`](CLAUDE.md).
 

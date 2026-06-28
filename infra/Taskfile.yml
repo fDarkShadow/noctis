@@ -18,13 +18,10 @@ tasks:
         msg: "Version requirements not met (see output above)"
 
   build:
-    desc: "Build all local mock images in parallel (docker buildx bake)"
-    dir: "{{.TASKFILE_DIR}}/bake"
+    desc: "Build all local mock images (one bake per family to avoid BuildKit overload)"
+    dir: "{{.TASKFILE_DIR}}"
     cmds:
-      - |
-        HCL_FILES=$(find . -name '*.hcl' | sort | sed 's|^|-f |' | tr '\n' ' ')
-        TARGETS=$(grep -rh '^target "' *.hcl | sed 's/target "\([^"]*\)".*/\1/' | tr '\n' ' ')
-        docker buildx bake $HCL_FILES --allow=fs.read=.. --load $TARGETS
+      - ansible-playbook playbooks/00-build-mocks.yml
 
   test:
     desc: "Test one CVE (TP + TN) — task test CVE=CVE-2021-41773"

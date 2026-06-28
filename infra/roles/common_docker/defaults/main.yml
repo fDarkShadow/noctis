@@ -2,8 +2,7 @@
 container_runtime: podman
 container_network: noctis_test_net
 docker_dir: "{{ playbook_dir }}/../docker"
-noctis_feeds_dir: "{{ playbook_dir }}/../../tests"
-noctis_bin: "{{ playbook_dir }}/../../target/debug/noctis"
+noctis_feeds_dir: "/feeds"
 scan_timeout: 60
 
 # REST API servers (started by 01-start-servers.yml, stopped by 99-stop-servers.yml)

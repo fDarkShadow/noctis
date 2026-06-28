@@ -12,8 +12,8 @@ Working instructions for Claude Code on this project.
 ```
 noctis/
 ├── src/                    # Rust engine
-│   ├── main.rs             # Entrypoint — subcommands serve / scan
-│   ├── cli.rs              # Clap — ScanArgs, ServeArgs
+│   ├── main.rs             # Entrypoint — subcommand: serve
+│   ├── cli.rs              # Clap — ServeArgs
 │   ├── api/                # REST API (axum 0.8) — POST/GET /scans
 │   ├── scan/               # Scan orchestration
 │   │   ├── manager.rs      # ScanManager — submit, execute, matched_services
@@ -55,14 +55,8 @@ noctis/
 
 ```sh
 cargo build                           # debug build
-cargo test                            # unit tests (79 tests)
+cargo test                            # unit tests
 cargo clippy -- -D warnings           # lint
-
-# Scan CLI
-noctis scan \
-  --host 10.0.0.1 \
-  --service http:80 --service https:443 \
-  --tests tests/cve/CVE-2021-41773.yaml
 
 # REST daemon
 noctis serve --host 0.0.0.0 --port 8080
@@ -217,8 +211,7 @@ resp.connected       bool
    - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
    - EOL base images (e.g. httpd:2.4.49 on Debian Buster): patch apt sources to `archive.debian.org` before installing openssl
 4. **Playbook**: `infra/playbooks/10-CVE-XXXX-XXXXX.yml` (copy an existing one — prefix `10-` is mandatory; `task test-all` auto-discovers playbooks by sorted filename)
-5. **Taskfile.yml**: add the CVE to `vars.INVENTORIES`
-6. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
+5. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
 
 ### Python mock template (copy from `infra/docker/bigip-mock/server.py`)
 
@@ -319,8 +312,7 @@ Never hardcode `target_port` in an inventory.
 
 ### Variable paths in the role
 - `playbook_dir` = `infra/playbooks/` (not `infra/`)
-- `noctis_bin` = `{{ playbook_dir }}/../../target/debug/noctis`
-- `noctis_feeds_dir` = `{{ playbook_dir }}/../../tests`
+- `noctis_feeds_dir` = `/feeds` — the container-internal mount point (host `tests/` is mounted at `/feeds` by `01-start-servers.yml`)
 
 ## Feed authoring tooling
 

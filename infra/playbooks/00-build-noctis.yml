@@ -1,10 +1,10 @@
 ---
-- name: "Build noctis binary"
+- name: "Build noctis server image"
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Compile noctis (cargo build)
+    - name: Build noctis:ci image
       ansible.builtin.command:
-        cmd: cargo build
-        chdir: "{{ playbook_dir }}/../../"
+        cmd: podman build -t noctis:ci .
+        chdir: "{{ playbook_dir }}/../.."
       changed_when: true
