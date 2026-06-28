@@ -1,41 +1,37 @@
 # ── Stage 1: dependency plan (cargo-chef) ────────────────────────────────────
-FROM docker.io/library/rust:1-bookworm AS chef
-RUN cargo install cargo-chef --locked
+FROM docker.io/library/rust:1-alpine AS chef
+RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static zlib-dev zlib-static pkgconfig ca-certificates \
+    && cargo install cargo-chef --locked
 WORKDIR /build
 
 FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-# ── Stage 2: build ────────────────────────────────────────────────────────────
+# ── Stage 2: build — fully static (musl + OPENSSL_STATIC) ────────────────────
 FROM chef AS builder
 
-# pkg-config + libssl-dev needed to compile vendored libssh2 against system OpenSSL
-RUN apt update \
-    && apt install -y --no-install-recommends pkg-config libssl-dev \
-    && apt clean
+# Create the runtime user so we can copy /etc/passwd to the scratch image
+RUN adduser -D -u 1000 -s /sbin/nologin noctis
 
-# Warm up the dependency cache before copying application source
 COPY --from=planner /build/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN PKG_CONFIG_ALL_STATIC=1 OPENSSL_STATIC=1 \
+    cargo chef cook --release --recipe-path recipe.json
 
 COPY . .
-RUN cargo build --release --locked
+RUN PKG_CONFIG_ALL_STATIC=1 OPENSSL_STATIC=1 \
+    cargo build --release --locked
 
-# ── Stage 3: runtime ──────────────────────────────────────────────────────────
-FROM gcr.io/distroless/cc-debian12:nonroot
+# ── Stage 3: runtime — scratch, zero runtime deps, no shell ──────────────────
+FROM scratch
 
-# libssh2 is vendored (statically linked into the binary).
-# distroless/cc includes libc6 + libgcc-s1 but not OpenSSL or zlib.
-COPY --from=builder /lib/x86_64-linux-gnu/libssl.so.3    /lib/x86_64-linux-gnu/libssl.so.3
-COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.3 /lib/x86_64-linux-gnu/libcrypto.so.3
-COPY --from=builder /lib/x86_64-linux-gnu/libz.so.1      /lib/x86_64-linux-gnu/libz.so.1
-
+COPY --from=builder /etc/passwd             /etc/passwd
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /build/target/release/noctis /usr/local/bin/noctis
 
-# Feeds are served from a mounted volume at runtime:
-#   docker run -v ./tests:/feeds noctis serve --host 0.0.0.0 --port 8080
+USER noctis
 EXPOSE 8080
 
+# Feeds are mounted at runtime: docker run -v ./tests:/feeds noctis serve ...
 ENTRYPOINT ["/usr/local/bin/noctis"]
 CMD ["serve"]
