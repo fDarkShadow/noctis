@@ -38,6 +38,14 @@ target "panos-mock" {
   tags       = ["noctis/panos-mock:${variant}"]
 }
 
+target "panos-ztp-mock" {
+  name       = "panos-ztp-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/panos-ztp-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/panos-ztp-mock:${variant}"]
+}
+
 target "qlik-sense-mock" {
   name       = "qlik-sense-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
