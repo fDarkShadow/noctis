@@ -308,3 +308,15 @@
     cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
+
+- name: Build GeoServer mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/geoserver-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/geoserver-mock"
+  changed_when: true
+
+- name: Build GeoServer mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/geoserver-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/geoserver-mock"
+  changed_when: true
