@@ -308,3 +308,15 @@
     cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
+
+- name: Build Workspace ONE mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/workspace-one-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/workspace-one-mock"
+  changed_when: true
+
+- name: Build Workspace ONE mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/workspace-one-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/workspace-one-mock"
+  changed_when: true
