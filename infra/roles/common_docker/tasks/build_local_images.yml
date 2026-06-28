@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build Superset mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/superset-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/superset-mock"
+  changed_when: true
+
+- name: Build Superset mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/superset-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/superset-mock"
 - name: Build Next.js mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/nextjs-mock:vuln -f Dockerfile.vuln ."
