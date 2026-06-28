@@ -319,4 +319,366 @@
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/manageengine-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/manageengine-mock"
+- name: Build Confluence setup mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-setup-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/confluence-setup-mock"
+  changed_when: true
+
+- name: Build Confluence setup mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-setup-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/confluence-setup-mock"
+- name: Build Apache CVE-2021-42013 (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-42013:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/apache-cve-2021-42013"
+  changed_when: true
+
+- name: Build Apache CVE-2021-42013 (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-cve-2021-42013:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/apache-cve-2021-42013"
+- name: Build MinIO mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/minio-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/minio-mock"
+  changed_when: true
+
+- name: Build MinIO mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/minio-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/minio-mock"
+- name: Build Jenkins CLI mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/jenkins-cli-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/jenkins-cli-mock"
+  changed_when: true
+
+- name: Build Jenkins CLI mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/jenkins-cli-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/jenkins-cli-mock"
+- name: Build GoAnywhere mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/goanywhere-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/goanywhere-mock"
+  changed_when: true
+
+- name: Build GoAnywhere mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/goanywhere-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/goanywhere-mock"
+- name: Build Superset mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/superset-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/superset-mock"
+  changed_when: true
+
+- name: Build Superset mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/superset-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/superset-mock"
+- name: Build Next.js mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/nextjs-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/nextjs-mock"
+  changed_when: true
+
+- name: Build Next.js mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/nextjs-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/nextjs-mock"
+- name: Build NetScaler mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/netscaler-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/netscaler-mock"
+  changed_when: true
+
+- name: Build NetScaler mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/netscaler-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/netscaler-mock"
+- name: Build Cisco WSMA mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cisco-wsma-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/cisco-wsma-mock"
+  changed_when: true
+
+- name: Build Cisco WSMA mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cisco-wsma-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/cisco-wsma-mock"
+- name: Build Zimbra SMTP mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/zimbra-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/zimbra-mock"
+  changed_when: true
+
+- name: Build Zimbra SMTP mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/zimbra-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/zimbra-mock"
+- name: Build TeamCity token mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/teamcity-token-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/teamcity-token-mock"
+  changed_when: true
+
+- name: Build TeamCity token mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/teamcity-token-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/teamcity-token-mock"
+- name: Build PAN-OS mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/panos-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/panos-mock"
+  changed_when: true
+
+- name: Build PAN-OS mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/panos-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/panos-mock"
+- name: Build Tomcat PUT mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/tomcat-put-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/tomcat-put-mock"
+  changed_when: true
+
+- name: Build Tomcat PUT mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/tomcat-put-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/tomcat-put-mock"
+- name: Build Ingress-NGINX mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ingress-nginx-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ingress-nginx-mock"
+  changed_when: true
+
+- name: Build Ingress-NGINX mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ingress-nginx-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ingress-nginx-mock"
+- name: Build Expedition mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/expedition-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/expedition-mock"
+  changed_when: true
+
+- name: Build Expedition mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/expedition-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/expedition-mock"
+- name: Build Workspace ONE mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/workspace-one-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/workspace-one-mock"
+  changed_when: true
+
+- name: Build Workspace ONE mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/workspace-one-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/workspace-one-mock"
+- name: Build Apache mod_proxy mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-mod-proxy-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/apache-mod-proxy-mock"
+  changed_when: true
+
+- name: Build Apache mod_proxy mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/apache-mod-proxy-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/apache-mod-proxy-mock"
+- name: Build FortiOS SSL VPN mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortios-ssl-vpn-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/fortios-ssl-vpn-mock"
+  changed_when: true
+
+- name: Build FortiOS SSL VPN mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortios-ssl-vpn-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/fortios-ssl-vpn-mock"
+- name: Build Qlik Sense mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/qlik-sense-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/qlik-sense-mock"
+  changed_when: true
+
+- name: Build Qlik Sense mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/qlik-sense-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/qlik-sense-mock"
+- name: Build Check Point mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/checkpoint-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/checkpoint-mock"
+  changed_when: true
+
+- name: Build Check Point mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/checkpoint-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/checkpoint-mock"
+- name: Build Ivanti CSA mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-csa-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ivanti-csa-mock"
+  changed_when: true
+
+- name: Build Ivanti CSA mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-csa-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ivanti-csa-mock"
+- name: Build Telerik Report Server mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/telerik-report-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/telerik-report-mock"
+  changed_when: true
+
+- name: Build Telerik Report Server mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/telerik-report-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/telerik-report-mock"
+- name: Build ColdFusion mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/coldfusion-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/coldfusion-mock"
+  changed_when: true
+
+- name: Build ColdFusion mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/coldfusion-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/coldfusion-mock"
+- name: Build HFS mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/hfs-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/hfs-mock"
+  changed_when: true
+
+- name: Build HFS mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/hfs-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/hfs-mock"
+- name: Build GeoServer mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/geoserver-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/geoserver-mock"
+  changed_when: true
+
+- name: Build GeoServer mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/geoserver-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/geoserver-mock"
+- name: Build FortiManager mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortimanager-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/fortimanager-mock"
+  changed_when: true
+
+- name: Build FortiManager mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortimanager-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/fortimanager-mock"
+- name: Build Ivanti ICS mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-ics-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ivanti-ics-mock"
+  changed_when: true
+
+- name: Build Ivanti ICS mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ivanti-ics-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ivanti-ics-mock"
+- name: Build Craft CMS mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/craftcms-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/craftcms-mock"
+  changed_when: true
+
+- name: Build Craft CMS mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/craftcms-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/craftcms-mock"
+- name: Build Cleo MFT mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cleo-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/cleo-mock"
+  changed_when: true
+
+- name: Build Cleo MFT mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cleo-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/cleo-mock"
+- name: Build FortiClientEMS mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/forticlientems-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/forticlientems-mock"
+  changed_when: true
+
+- name: Build FortiClientEMS mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/forticlientems-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/forticlientems-mock"
+  changed_when: true
+
+- name: Build Struts mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/struts-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/struts-mock"
+  changed_when: true
+
+- name: Build Struts mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/struts-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/struts-mock"
+- name: Build ScreenConnect mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/screenconnect-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/screenconnect-mock"
+  changed_when: true
+
+- name: Build ScreenConnect mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/screenconnect-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/screenconnect-mock"
+- name: Build BIG-IP 22986 mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-22986-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/bigip-22986-mock"
+  changed_when: true
+
+- name: Build BIG-IP 22986 mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-22986-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/bigip-22986-mock"
+- name: Build Cacti mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cacti-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/cacti-mock"
+  changed_when: true
+
+- name: Build Cacti mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cacti-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/cacti-mock"
+- name: Build Confluence restore mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/confluence-restore-mock"
+  changed_when: true
+
+- name: Build Confluence restore mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/confluence-restore-mock"
+- name: Build BIG-IP 46747 mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/bigip-46747-mock"
+  changed_when: true
+
+- name: Build BIG-IP 46747 mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/bigip-46747-mock"
   changed_when: true
