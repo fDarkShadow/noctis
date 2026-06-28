@@ -181,13 +181,16 @@
     - name: "{{ cve_id }} — Findings detail"
       ansible.builtin.debug:
         msg: >-
-          [{{ loop.index }}/{{ scan_findings.json | length }}]
+          [{{ loop_idx + 1 }}/{{ scan_findings.json | length }}]
           {{ item.cve_id | default('?') }}
           · {{ item.severity | default('?') | upper }}
           · confidence={{ (item.confidence * 100) | round | int }}%
           · qod={{ item.qod | default('?') }}
-          · evidence: {{ item.evidence | default('(none)') | truncate(200) }}
+          · evidence: {{ item.evidence | to_json | truncate(200) }}
       loop: "{{ scan_findings.json }}"
+      loop_control:
+        label: "finding {{ loop_idx + 1 }}"
+        index_var: loop_idx
       when: findings_count | int > 0
 
     - name: "{{ cve_id }} — Summary"
