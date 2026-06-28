@@ -75,6 +75,20 @@
             )
           }}
 
+    # ── Verify server is alive before submitting ──────────────────────────────
+
+    - name: "{{ cve_id }} — Health check {{ _api_url }}"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/health"
+        method: GET
+        status_code: 200
+      register: _health
+      until: _health.status == 200
+      retries: 10
+      delay: 2
+      failed_when: _health.status != 200
+      ignore_errors: false
+
     # ── Submit scan ───────────────────────────────────────────────────────────
 
     - name: "{{ cve_id }} — POST /scans to {{ _api_url }}"

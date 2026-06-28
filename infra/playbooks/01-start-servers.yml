@@ -64,6 +64,7 @@
           podman run -d
           --name noctis-plain
           --network host
+          --restart on-failure:5
           -v {{ feeds_dir }}:/feeds:ro,z
           {{ noctis_image }}
           serve --host 127.0.0.1 --port {{ noctis_plain_port }}
@@ -75,6 +76,7 @@
           podman run -d
           --name noctis-oob
           --network host
+          --restart on-failure:5
           -v {{ feeds_dir }}:/feeds:ro,z
           {{ noctis_image }}
           serve --host 127.0.0.1 --port {{ noctis_oob_server_port }}
