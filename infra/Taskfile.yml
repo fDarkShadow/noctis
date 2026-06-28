@@ -84,10 +84,12 @@ tasks:
         msg: "Version requirements not met (see output above)"
 
   build:
-    desc: "Construit les images locales (mocks + OpenSSH custom)"
-    deps: [check-deps]
+    desc: "Build all local mock images in parallel (docker buildx bake)"
     cmds:
-      - ansible-playbook build-images.yml
+      - >-
+        docker buildx bake
+        $(find {{.ROOT_DIR}}/infra/bake -name '*.hcl' | sort | sed 's|^|-f |' | tr '\n' ' ')
+        --load
 
   test:
     desc: "Teste un seul CVE — task test CVE=CVE-2021-41773"
@@ -110,10 +112,6 @@ tasks:
           ansible-playbook site.yml -i inventories/{{.ITEM}}
 
   clean:
-    desc: "Supprime les images locales noctis/*"
+    desc: "Remove all local noctis/* images"
     cmds:
-      - podman rmi --ignore
-        noctis/bigip-mock:vuln noctis/bigip-mock:patched
-        noctis/exchange-mock:vuln noctis/exchange-mock:patched
-        noctis/pulse-secure-mock:vuln noctis/pulse-secure-mock:patched
-        noctis/openssh-9.5:local noctis/openssh-9.6:local
+      - podman images --format '{{"{{"}}{{".Repository"}}{{"}}"}}:{{"{{"}}{{".Tag"}}{{"}}"}}' | grep '^noctis/' | xargs -r podman rmi --ignore || true

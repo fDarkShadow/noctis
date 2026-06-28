@@ -210,7 +210,8 @@ resp.connected       bool
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
    - HTTPS hosts: add `container_port: 443` and `target_service: https`
    - **No `target_port`** — port is allocated dynamically
-3. **Docker images**: `infra/docker/<cve-name>/Dockerfile.vuln` + `Dockerfile.patched`
+3. **OOB**: if the feed uses `wait_oob`, set `noctis_use_oob: true` on the relevant hosts in the inventory — the role will route the scan to server B (port 8081) and inject `oob.host` / `oob.port` into the request automatically. No other change needed.
+4. **Docker images**: `infra/docker/<cve-name>/Dockerfile.vuln` + `Dockerfile.patched`
    - All mocks serve HTTP:80 **and** HTTPS:443 (self-signed cert generated at build time via openssl)
    - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)
    - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
@@ -286,25 +287,21 @@ In `infra/roles/common_docker/tasks/build_local_images.yml`, add two tasks per m
 (copy an existing block, e.g. the bigip-mock block):
 
 ```yaml
-- name: Build MyProduct mock (vuln)
-  community.docker.docker_image:
-    name: "noctis/myproduct-mock"
-    tag: vuln
-    build:
-      path: "{{ playbook_dir }}/../../infra/docker/myproduct-mock"
-      dockerfile: Dockerfile.vuln
-    source: build
-    force_source: true
+Images are built via **Docker Buildx Bake** — one HCL file per product family in `infra/bake/`.
+Add a matrix target to the appropriate file (or create a new one for a new family):
 
-- name: Build MyProduct mock (patched)
-  community.docker.docker_image:
-    name: "noctis/myproduct-mock"
-    tag: patched
-    build:
-      path: "{{ playbook_dir }}/../../infra/docker/myproduct-mock"
-      dockerfile: Dockerfile.patched
-    source: build
-    force_source: true
+```hcl
+# infra/bake/<family>.hcl
+target "myproduct-mock" {
+  name       = "myproduct-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/myproduct-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/myproduct-mock:${variant}"]
+}
+```
+
+`task build` automatically picks up all `*.hcl` files in `infra/bake/` — no other registration needed.
 ```
 
 ### Reference feeds to copy from

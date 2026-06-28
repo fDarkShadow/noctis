@@ -156,7 +156,9 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
 
 **f) Taskfile.yml** — add the CVE to `vars.INVENTORIES`
 
-**g) build_local_images.yml** — add build tasks for the new images
+**g) Bake target** — add a matrix target in the appropriate `infra/bake/<family>.hcl`
+  (or create a new file for a new product family). See CLAUDE.md for the template.
+  `task build` picks up all `*.hcl` files automatically — no other registration needed.
 
 ### 7. Build images
 
