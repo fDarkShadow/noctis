@@ -76,8 +76,7 @@ Findings response:
 | Rust | ≥ 1.75 | Build |
 | pkg-config + libssl-dev | system | Build (libssh2 is vendored; OpenSSL headers needed at compile time) |
 | Ansible-core | ≥ 2.15 | E2E tests only |
-| Podman | ≥ 4.0 | E2E tests only |
-| Docker + buildx | any | E2E tests only (mock image builds) |
+| Podman | ≥ 4.0 | E2E tests only (build + run) |
 | [Task](https://taskfile.dev) | ≥ 3.0 | E2E tests only |
 
 ---

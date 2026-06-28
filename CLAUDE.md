@@ -64,7 +64,7 @@ noctis serve --host 0.0.0.0 --port 8080
 # End-to-end tests (from infra/)
 task test CVE=CVE-2021-41773          # TP + TN for one CVE
 task test-all                          # all CVEs
-task build                             # build local Docker images
+task build                             # build local mock images (podman build)
 ```
 
 ## Key data model
@@ -294,23 +294,18 @@ CMD ["python3", "/app/server.py"]
 
 Dockerfile.patched: identical but `ENV MYPRODUCT_MODE=patched`.
 
-### Adding a bake target for new images
+### Adding a new mock image
 
-Images are built via **Docker Buildx Bake** — one HCL file per product family in `infra/bake/`.
-Add a matrix target to the appropriate file (or create a new file for a new product family):
+Create `infra/docker/<product-name>/Dockerfile.vuln` and `Dockerfile.patched`.
+`task build` auto-discovers every directory under `infra/docker/` that contains a
+`Dockerfile.vuln` and builds both variants with `podman build`:
 
-```hcl
-# infra/bake/<family>.hcl
-target "myproduct-mock" {
-  name       = "myproduct-mock-${variant}"
-  matrix     = { variant = ["vuln", "patched"] }
-  context    = "../docker/myproduct-mock"
-  dockerfile = "Dockerfile.${variant}"
-  tags       = ["noctis/myproduct-mock:${variant}"]
-}
+```
+noctis/<dirname>:vuln     ← from Dockerfile.vuln
+noctis/<dirname>:patched  ← from Dockerfile.patched
 ```
 
-`task build` automatically picks up all `*.hcl` files in `infra/bake/` — no other registration needed.
+No registration needed — the directory name is the image name.
 
 ### Reference feeds to copy from
 

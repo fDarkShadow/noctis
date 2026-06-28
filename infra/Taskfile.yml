@@ -10,15 +10,11 @@ tasks:
         msg: "podman not found — install podman >= 4.0"
       - sh: "which cargo"
         msg: "cargo not found — install Rust >= 1.75"
-      - sh: "which docker"
-        msg: "docker not found — install Docker (required for buildx bake)"
-      - sh: "docker buildx version"
-        msg: "docker buildx not available — install Docker Buildx plugin"
       - sh: "python3 scripts/check-versions.py"
         msg: "Version requirements not met (see output above)"
 
   build:
-    desc: "Build all local mock images (one bake per family to avoid BuildKit overload)"
+    desc: "Build all local mock images (podman build, 66 mocks in parallel)"
     dir: "{{.TASKFILE_DIR}}"
     cmds:
       - ansible-playbook playbooks/00-build-mocks.yml

@@ -202,9 +202,10 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
 **d) Playbook** — `infra/playbooks/10-<CVE>.yml` (copy an existing one — the `10-` prefix is mandatory;
   `task test-all` auto-discovers playbooks by sorted filename)
 
-**e) Bake target** — add a matrix target in the appropriate `infra/bake/<family>.hcl`
-  (or create a new file for a new product family). See CLAUDE.md for the template.
-  `task build` picks up all `*.hcl` files automatically — no other registration needed.
+**e) Mock image** — create `infra/docker/<product-name>/Dockerfile.vuln` + `Dockerfile.patched`.
+  `task build` auto-discovers every directory under `infra/docker/` that contains a
+  `Dockerfile.vuln` and builds `noctis/<dirname>:vuln` and `noctis/<dirname>:patched`
+  with `podman build`. No registration needed — the directory name is the image name.
 
 ### 7. Build images
 
