@@ -308,3 +308,15 @@
     cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
+
+- name: Build FortiOS SSL VPN mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortios-ssl-vpn-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/fortios-ssl-vpn-mock"
+  changed_when: true
+
+- name: Build FortiOS SSL VPN mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/fortios-ssl-vpn-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/fortios-ssl-vpn-mock"
+  changed_when: true
