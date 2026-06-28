@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build CrushFTP mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/crushftp-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/crushftp-mock"
+  changed_when: true
+
+- name: Build CrushFTP mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/crushftp-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/crushftp-mock"
 - name: Build ManageEngine mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/manageengine-mock:vuln -f Dockerfile.vuln ."
