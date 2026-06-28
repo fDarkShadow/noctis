@@ -308,3 +308,15 @@
     cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
+
+- name: Build Cleo MFT mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cleo-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/cleo-mock"
+  changed_when: true
+
+- name: Build Cleo MFT mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cleo-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/cleo-mock"
+  changed_when: true
