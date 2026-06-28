@@ -320,4 +320,54 @@
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/struts-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/struts-mock"
+- name: Build ScreenConnect mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/screenconnect-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/screenconnect-mock"
+  changed_when: true
+
+- name: Build ScreenConnect mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/screenconnect-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/screenconnect-mock"
+- name: Build BIG-IP 22986 mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-22986-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/bigip-22986-mock"
+  changed_when: true
+
+- name: Build BIG-IP 22986 mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-22986-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/bigip-22986-mock"
+- name: Build Cacti mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cacti-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/cacti-mock"
+  changed_when: true
+
+- name: Build Cacti mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/cacti-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/cacti-mock"
+- name: Build Confluence restore mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/confluence-restore-mock"
+  changed_when: true
+
+- name: Build Confluence restore mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/confluence-restore-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/confluence-restore-mock"
+- name: Build BIG-IP 46747 mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/bigip-46747-mock"
+  changed_when: true
+
+- name: Build BIG-IP 46747 mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/bigip-46747-mock"
   changed_when: true
