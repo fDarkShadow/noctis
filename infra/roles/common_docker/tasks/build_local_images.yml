@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build TeamCity token mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/teamcity-token-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/teamcity-token-mock"
+  changed_when: true
+
+- name: Build TeamCity token mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/teamcity-token-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/teamcity-token-mock"
 - name: Build PAN-OS mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/panos-mock:vuln -f Dockerfile.vuln ."
