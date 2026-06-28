@@ -308,3 +308,15 @@
     cmd: "{{ container_runtime }} build -t noctis/moveit-mock:patched -f Dockerfile.patched ."
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
+
+- name: Build BIG-IP 46747 mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/bigip-46747-mock"
+  changed_when: true
+
+- name: Build BIG-IP 46747 mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/bigip-46747-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/bigip-46747-mock"
+  changed_when: true
