@@ -200,11 +200,32 @@ resp.connected       bool
 
 1. **Feed**: `tests/cve/CVE-XXXX-XXXXX.yaml` with a stable UUID v4 uid
 2. **Inventory**: `infra/inventories/CVE-XXXX-XXXXX/hosts.yml`
-   - Four hosts: `<cve>_vuln`, `<cve>_vuln_https`, `<cve>_patched`, `<cve>_patched_https`
+   - Four hosts minimum: `<cve>_vuln`, `<cve>_vuln_https`, `<cve>_patched`, `<cve>_patched_https`
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
    - HTTPS hosts: add `container_port: 443` and `target_service: https`
    - **No `target_port`** — port is allocated dynamically
-3. **OOB**: if the feed uses `wait_oob`, set `noctis_use_oob: true` on the relevant hosts in the inventory — the role will route the scan to server B (port 8081) and inject `oob.host` / `oob.port` into the request automatically. No other change needed.
+   - On every vuln host set `expected_qod` (highest QoD branch the mock exercises) and
+     `expected_min_confidence` (`confidence_base + highest_delta - 0.05`). These are asserted
+     by the role to prove the right detection branch fired.
+3. **OOB**: if the feed uses `wait_oob`, the OOB steps are guarded by `condition: "oob_enabled"`
+   and do **not** fire on the standard 4 hosts (OOB disabled by default). Add two extra hosts
+   to exercise the OOB path:
+   ```yaml
+   <product>_vuln_oob:
+     ...same image as vuln...
+     noctis_use_oob: true
+     expected_result: vulnerable
+     expected_qod: 97
+     expected_min_confidence: 0.90
+
+   <product>_patched_oob:
+     ...same image as patched...
+     noctis_use_oob: true
+     expected_result: clean   # patched mock must NOT call back
+   ```
+   The role routes OOB hosts to server B (port 8081) and injects `oob.host` / `oob.port`
+   automatically. Also correct the standard 4 hosts' `expected_qod` to the non-OOB max QoD
+   (e.g., 75 for response analysis) since OOB steps won't fire there.
 4. **Docker images**: `infra/docker/<cve-name>/Dockerfile.vuln` + `Dockerfile.patched`
    - All mocks serve HTTP:80 **and** HTTPS:443 (self-signed cert generated at build time via openssl)
    - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)

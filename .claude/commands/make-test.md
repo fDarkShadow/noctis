@@ -170,6 +170,35 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
     must implement the RCE endpoint so the QoD 97 branch fires. Set `expected_qod: 97`.
     A QoD 75 finding on a host where you set `expected_qod: 97` means the RCE path failed.
 
+  - **OOB feeds** — feeds with `wait_oob` use `condition: "oob_enabled"` to guard OOB steps,
+    so the standard 4 hosts never trigger OOB. Add 2 extra hosts for the OOB path:
+    ```yaml
+    <product>_vuln_oob:
+      ansible_host: localhost
+      ansible_connection: local
+      target_host: "127.0.0.1"
+      target_service: http
+      container_name: noctis_<cve_snake>_vuln_oob
+      docker_image: "noctis/<mock>:vuln"
+      expected_result: vulnerable
+      noctis_use_oob: true
+      expected_qod: 97
+      expected_min_confidence: 0.90
+
+    <product>_patched_oob:
+      ansible_host: localhost
+      ansible_connection: local
+      target_host: "127.0.0.1"
+      target_service: http
+      container_name: noctis_<cve_snake>_patched_oob
+      docker_image: "noctis/<mock>:patched"
+      expected_result: clean
+      noctis_use_oob: true
+    ```
+    On the standard 4 hosts, correct `expected_qod` to the **non-OOB max QoD** (the highest
+    QoD reachable without OOB). The patched OOB host is essential: it proves the patched mock
+    does NOT call back even when the scanner has OOB active.
+
 **d) Playbook** — `infra/playbooks/10-<CVE>.yml` (copy an existing one — the `10-` prefix is mandatory;
   `task test-all` auto-discovers playbooks by sorted filename)
 
