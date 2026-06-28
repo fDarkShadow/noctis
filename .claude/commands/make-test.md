@@ -149,6 +149,26 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
   - 4 hosts: `_vuln`, `_vuln_https`, `_patched`, `_patched_https`
   - Add `container_port: 443` on HTTPS hosts
   - Never add `target_port`
+  - On every vuln host, set `expected_qod` and `expected_min_confidence` to match
+    the **highest** detection branch the mock actually exercises:
+
+    | Detection branch | `expected_qod` | `expected_min_confidence` |
+    |-----------------|----------------|--------------------------|
+    | Banner / version fingerprint | 50–70 | `confidence_base` + banner delta |
+    | Response analysis (body/header pattern) | 75 | `confidence_base` + resp delta |
+    | Confirmed RCE / exploit output | 97 | `confidence_base` + rce delta |
+    | OOB callback received | 97 | `confidence_base` + oob delta |
+
+    Example for a feed with `confidence_base: 0.20` where the RCE branch adds `0.75`:
+    ```yaml
+    bigip_vuln:
+      expected_qod: 97
+      expected_min_confidence: 0.90
+    ```
+
+    If the feed has multiple branches (safe probe QoD 75 **and** RCE QoD 97), the mock
+    must implement the RCE endpoint so the QoD 97 branch fires. Set `expected_qod: 97`.
+    A QoD 75 finding on a host where you set `expected_qod: 97` means the RCE path failed.
 
 **d) Playbook** — `infra/playbooks/10-<CVE>.yml` (copy an existing one — the `10-` prefix is mandatory;
   `task test-all` auto-discovers playbooks by sorted filename)
@@ -166,20 +186,57 @@ task build
 
 If it fails: diagnose, fix, retry. Do not proceed until images build successfully.
 
-### 8. Run tests
+### 8. Run tests and verify branch coverage
 
 ```bash
 task test CVE=<CVE>
 ```
 
-Expected: 4 passing tests (vuln HTTP, vuln HTTPS, patched HTTP, patched HTTPS).
+Expected: **4 passing tests** — but a green count is not enough. After the run, check:
 
-On failure:
-- Analyse the Ansible output
-- Fix the feed or the mock
-- Rebuild if needed
+**a) TP hosts — right branch fired**
+
+  In the Ansible "Findings detail" output, verify for each vuln host:
+  - `qod` equals the `expected_qod` you set in the inventory
+    (e.g., 97 for RCE, 75 for response analysis, not 50 for a mere banner match)
+  - `confidence` ≥ `expected_min_confidence`
+  - `evidence` contains the text proving the intended code path executed
+    (e.g., "RCE confirmed via bash endpoint" — not just "status 200")
+
+  If `qod` is lower than expected: a shallower branch fired. Either the mock doesn't
+  implement the deeper path, or a `condition:` guard is wrong. Fix and rebuild.
+
+**b) All feed branches are exercised**
+
+  Count the `on_match` blocks in your feed. Each one is a detection branch.
+  If a branch is never reached in any test:
+  - The mock doesn't implement that endpoint/behaviour → fix the mock
+  - The `condition:` guarding that step is wrong → fix the feed
+
+  A feed with two branches (safe probe + RCE) where only the safe probe ever fires is
+  an undertested feed. The RCE mock endpoint must produce the expected output.
+
+**c) TN hosts — no false positives**
+
+  Trace through each step in your feed against the patched mock's responses.
+  Common FP sources:
+  - A step with no `condition:` fires unconditionally, and the pattern accidentally
+    matches a generic error page on the patched host
+  - The patched mock returns the same status code as the vuln mock on a different path
+
+  If a TN fails: add a tighter `condition:` guard or narrow the regex pattern.
+
+**d) OOB feeds**
+
+  If the feed uses `wait_oob`, the relevant vuln hosts must have `noctis_use_oob: true`
+  in the inventory. Verify the "Findings detail" shows `qod: 97` — this proves the OOB
+  callback was actually received, not just that the HTTP request was sent.
+
+On any failure:
+- Analyse the Ansible output (confidence, QoD, evidence)
+- Fix the feed or the mock, rebuild if needed
 - Retry up to 3 times
-- After 3 failures: open the PR anyway with label `needs-help`, document the error in the PR body
+- After 3 failures: open the PR with label `needs-help`, document the error in the PR body
 
 **If the failure is caused by a bug in the Rust engine** (not in the feed or the mock):
 → see [Handling engine bugs](#handling-engine-bugs) below.

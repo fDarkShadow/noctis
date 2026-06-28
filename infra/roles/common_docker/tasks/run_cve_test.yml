@@ -127,6 +127,46 @@
         success_msg: "TRUE POSITIVE ✓ — {{ findings_count }} finding(s)"
       when: expected_result == 'vulnerable'
 
+    - name: "{{ cve_id }} — Assert finding references correct CVE"
+      ansible.builtin.assert:
+        that: >-
+          scan_findings.json | selectattr('cve_id', 'equalto', cve_id) | list | length > 0
+        fail_msg: >-
+          WRONG CVE ID in findings: expected {{ cve_id }},
+          got {{ scan_findings.json | map(attribute='cve_id') | list }}.
+          The feed may be selecting the wrong test or the uid/cve field is misconfigured.
+        success_msg: "CVE ID ✓ — finding correctly references {{ cve_id }}"
+      when: expected_result == 'vulnerable'
+
+    - name: "{{ cve_id }} — Assert minimum confidence (proves detection steps fired)"
+      ansible.builtin.assert:
+        that: >-
+          (scan_findings.json | map(attribute='confidence') | list | max) >= expected_min_confidence
+        fail_msg: >-
+          LOW CONFIDENCE on {{ inventory_hostname }} ({{ cve_id }}):
+          max confidence {{ scan_findings.json | map(attribute='confidence') | list | max | round(2) }}
+          is below expected_min_confidence={{ expected_min_confidence }}.
+          The detection steps may not be exercising the right code path.
+        success_msg: >-
+          Confidence ✓ — {{ (scan_findings.json | map(attribute='confidence') | list | max * 100) | round | int }}%
+          (threshold {{ (expected_min_confidence * 100) | round | int }}%)
+      when: expected_result == 'vulnerable'
+
+    - name: "{{ cve_id }} — Assert minimum QoD (proves the right detection branch fired)"
+      ansible.builtin.assert:
+        that: >-
+          (scan_findings.json | map(attribute='qod') | list | max) >= expected_qod
+        fail_msg: >-
+          WRONG BRANCH on {{ inventory_hostname }} ({{ cve_id }}):
+          max QoD {{ scan_findings.json | map(attribute='qod') | list | max }}
+          is below expected_qod={{ expected_qod }}.
+          A shallower branch fired (fingerprint/banner?) instead of the intended detection path.
+          Check mock implementation and feed step conditions.
+        success_msg: >-
+          QoD ✓ — {{ scan_findings.json | map(attribute='qod') | list | max }}
+          (expected ≥ {{ expected_qod }})
+      when: expected_result == 'vulnerable' and expected_qod | int > 0
+
     - name: "{{ cve_id }} — Assert TRUE NEGATIVE"
       ansible.builtin.assert:
         that: findings_count | int == 0
@@ -135,6 +175,20 @@
           expected 0 findings on patched target, got {{ findings_count }}.
         success_msg: "TRUE NEGATIVE ✓ — 0 findings on patched target"
       when: expected_result == 'clean'
+
+    # ── Show findings detail ──────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — Findings detail"
+      ansible.builtin.debug:
+        msg: >-
+          [{{ loop.index }}/{{ scan_findings.json | length }}]
+          {{ item.cve_id | default('?') }}
+          · {{ item.severity | default('?') | upper }}
+          · confidence={{ (item.confidence * 100) | round | int }}%
+          · qod={{ item.qod | default('?') }}
+          · evidence: {{ item.evidence | default('(none)') | truncate(200) }}
+      loop: "{{ scan_findings.json }}"
+      when: findings_count | int > 0
 
     - name: "{{ cve_id }} — Summary"
       ansible.builtin.debug:

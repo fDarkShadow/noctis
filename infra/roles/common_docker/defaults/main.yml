@@ -16,3 +16,14 @@ noctis_use_oob: false
 # Gateway IP of container_network — injected by 01-start-servers.yml so containers can
 # reach the OOB callback listener on the host
 noctis_bridge_gateway: "127.0.0.1"
+
+# Minimum confidence a TP finding must reach (proves at least one detection step fired).
+# Override per-host in the inventory to match the expected final confidence of the feed.
+expected_min_confidence: 0.50
+
+# Minimum QoD a TP finding must reach. Proves the right detection branch fired:
+#   50–70 = banner/version match
+#   75    = response analysis (LFI, auth bypass body, …)
+#   97    = OOB callback or confirmed RCE
+# Set per vuln host in the inventory. Omit (or set to 0) to skip this check.
+expected_qod: 0
