@@ -27,6 +27,7 @@
 - import_playbook: playbooks/CVE-2017-1000353.yml
 - import_playbook: playbooks/CVE-2024-27198.yml
 - import_playbook: playbooks/CVE-2023-34362.yml
+- import_playbook: playbooks/CVE-2023-46604.yml
 - import_playbook: playbooks/CVE-2024-4040.yml
 - import_playbook: playbooks/CVE-2022-47966.yml
 - import_playbook: playbooks/CVE-2023-22515.yml
