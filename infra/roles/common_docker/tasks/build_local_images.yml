@@ -309,6 +309,16 @@
     chdir: "{{ docker_dir }}/moveit-mock"
   changed_when: true
 
+- name: Build Ingress-NGINX mock (vuln)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ingress-nginx-mock:vuln -f Dockerfile.vuln ."
+    chdir: "{{ docker_dir }}/ingress-nginx-mock"
+  changed_when: true
+
+- name: Build Ingress-NGINX mock (patched)
+  ansible.builtin.command:
+    cmd: "{{ container_runtime }} build -t noctis/ingress-nginx-mock:patched -f Dockerfile.patched ."
+    chdir: "{{ docker_dir }}/ingress-nginx-mock"
 - name: Build Expedition mock (vuln)
   ansible.builtin.command:
     cmd: "{{ container_runtime }} build -t noctis/expedition-mock:vuln -f Dockerfile.vuln ."
