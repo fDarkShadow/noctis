@@ -1,11 +1,11 @@
-name: Misconfig — nouveau feed
-description: Implémenter la détection d'une mauvaise configuration
+name: Misconfig — new feed
+description: Implement detection for a misconfiguration
 labels: ["type:misconfig", "status:available", "priority:medium"]
 body:
   - type: input
     id: name
     attributes:
-      label: Nom du check
+      label: Check name
       placeholder: "SSH root login enabled"
     validations:
       required: true
@@ -13,7 +13,7 @@ body:
   - type: input
     id: product
     attributes:
-      label: Produit / protocole ciblé
+      label: Target product / protocol
       placeholder: "OpenSSH"
     validations:
       required: true
@@ -21,7 +21,7 @@ body:
   - type: dropdown
     id: severity
     attributes:
-      label: Sévérité
+      label: Severity
       options:
         - critical
         - high
@@ -34,7 +34,7 @@ body:
   - type: dropdown
     id: services
     attributes:
-      label: Services ciblés
+      label: Target services
       multiple: true
       options:
         - http
@@ -50,20 +50,20 @@ body:
     id: description
     attributes:
       label: Description
-      description: Quelle mauvaise configuration ? Quel est le risque ?
+      description: What misconfiguration? What is the risk?
     validations:
       required: true
 
   - type: textarea
     id: detection_strategy
     attributes:
-      label: Stratégie de détection
-      description: Comment la détecter (banner, endpoint, header, certificat…) ?
+      label: Detection strategy
+      description: How to detect it (banner, endpoint, header, certificate…)?
     validations:
       required: true
 
   - type: textarea
     id: references
     attributes:
-      label: Références
-      description: CIS Benchmark, NIST, best practices (une URL par ligne)
+      label: References
+      description: CIS Benchmark, NIST, best practices (one URL per line)
