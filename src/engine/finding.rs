@@ -81,7 +81,7 @@ fn build_finding(
         response_excerpt: spec.evidence.as_ref().map(|e| expr::interpolate_lenient(e, &ctx.vars)),
     };
 
-    Ok(Finding::new(
+    let finding = Finding::new(
         def.uid,
         step.id.clone(),
         kind,
@@ -90,7 +90,22 @@ fn build_finding(
         spec.qod,
         ctx.target_label(),
         Some(evidence),
-    ))
+    );
+
+    let label = match &finding.kind {
+        FindingKind::Cve { cve_id, .. } => cve_id.clone(),
+        FindingKind::Misconfig { title, .. } => title.clone(),
+    };
+    tracing::info!(
+        target = %ctx.target_label(),
+        check = %label,
+        qod = finding.qod,
+        confidence = finding.confidence,
+        severity = %finding.severity,
+        "finding"
+    );
+
+    Ok(finding)
 }
 
 #[cfg(test)]

@@ -31,7 +31,7 @@ impl Runner {
         let mut ctx = Context::new(target_host, target_port, target_service, self.oob_server.clone());
         ctx.seed_vars(&def.vars);
 
-        info!(test = %def.uid, target = %ctx.target_label(), "starting test");
+        info!(test = %def.uid, name = %def.name, target = %ctx.target_label(), "starting test");
 
         let steps = &def.steps;
         let mut i = 0;
@@ -40,10 +40,14 @@ impl Runner {
             debug!(step = %step.id, action = %step.action, "executing step");
 
             let stop = if let Some(loop_cfg) = &step.loop_cfg {
-                // Group this loop step with all immediately following non-loop steps.
-                // Each iteration runs the full group, so a match step sees the result
-                // of the probe from the same iteration rather than the last one.
-                let tail = steps[i + 1..].iter().take_while(|s| s.loop_cfg.is_none()).count();
+                // Group this loop step with immediately following non-loop steps so
+                // a match step sees the probe result from the same iteration.
+                // wait_oob is excluded — it's a one-shot wait that must run after
+                // the full injection loop, not once per iteration.
+                let tail = steps[i + 1..]
+                    .iter()
+                    .take_while(|s| s.loop_cfg.is_none() && s.action != "wait_oob")
+                    .count();
                 let group = &steps[i..i + 1 + tail];
                 let stop = run_loop_group(group, loop_cfg, def, &mut ctx).await?;
                 i += 1 + tail;

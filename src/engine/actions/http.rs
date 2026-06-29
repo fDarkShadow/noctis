@@ -44,11 +44,19 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
 
     match checker.run(method, &url, &headers, body.as_deref()).await {
         Ok(resp) => {
+            tracing::debug!(
+                step = %step.id,
+                method,
+                url = %url,
+                status = resp.status,
+                duration_ms = resp.duration_ms,
+                "http"
+            );
             if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&resp, step, def)?); }
             handle_outcome(&step.on_success, step, def, ctx, None)
         }
         Err(e) => {
-            tracing::warn!(step = %step.id, "http error: {e}");
+            tracing::warn!(step = %step.id, url = %url, "http error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }

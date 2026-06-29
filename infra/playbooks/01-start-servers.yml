@@ -26,18 +26,10 @@
       failed_when: net_create.rc != 0 and 'already exists' not in net_create.stderr
       changed_when: net_create.rc == 0
 
-    - name: Detect bridge gateway IP (OOB callback target for containers)
-      ansible.builtin.command:
-        cmd: >-
-          podman network inspect {{ container_network }}
-          --format '{{ "{{" }}range .Subnets{{ "}}" }}{{ "{{" }}.Gateway{{ "}}" }}{{ "{{" }}end{{ "}}" }}'
-      register: gateway_reg
-      changed_when: false
-
     - name: Add config to dummy host (single-invocation mode)
       ansible.builtin.add_host:
         name: noctis_config
-        noctis_bridge_gateway: "{{ gateway_reg.stdout | trim }}"
+        noctis_bridge_gateway: "host.containers.internal"
         noctis_plain_port: "{{ noctis_plain_port }}"
         noctis_oob_server_port: "{{ noctis_oob_server_port }}"
         noctis_oob_callback_port: "{{ noctis_oob_callback_port }}"
@@ -45,7 +37,7 @@
     - name: Write server config to file (separate-invocation mode)
       ansible.builtin.copy:
         content: |
-          noctis_bridge_gateway: "{{ gateway_reg.stdout | trim }}"
+          noctis_bridge_gateway: "host.containers.internal"
           noctis_plain_port: {{ noctis_plain_port }}
           noctis_oob_server_port: {{ noctis_oob_server_port }}
           noctis_oob_callback_port: {{ noctis_oob_callback_port }}
@@ -67,7 +59,7 @@
           --restart on-failure:5
           -v {{ feeds_dir }}:/feeds:ro,z
           {{ noctis_image }}
-          serve --host 127.0.0.1 --port {{ noctis_plain_port }}
+          serve --host 127.0.0.1 --port {{ noctis_plain_port }} -v
       changed_when: true
 
     - name: "Start server B — OOB (port {{ noctis_oob_server_port }}, callback {{ noctis_oob_callback_port }})"
@@ -79,8 +71,8 @@
           --restart on-failure:5
           -v {{ feeds_dir }}:/feeds:ro,z
           {{ noctis_image }}
-          serve --host 127.0.0.1 --port {{ noctis_oob_server_port }}
-          --oob --oob-host {{ gateway_reg.stdout | trim }} --oob-port {{ noctis_oob_callback_port }}
+          serve --host 127.0.0.1 --port {{ noctis_oob_server_port }} -v
+          --oob --oob-host host.containers.internal --oob-port {{ noctis_oob_callback_port }}
       changed_when: true
 
     - name: Wait for server A to be healthy
@@ -107,5 +99,5 @@
           noctis servers ready
             A (plain) : http://127.0.0.1:{{ noctis_plain_port }}
             B (OOB)   : http://127.0.0.1:{{ noctis_oob_server_port }}
-            OOB callback : {{ gateway_reg.stdout | trim }}:{{ noctis_oob_callback_port }}
+            OOB callback : host.containers.internal:{{ noctis_oob_callback_port }}
             Feeds        : {{ feeds_dir }} → /feeds (container)

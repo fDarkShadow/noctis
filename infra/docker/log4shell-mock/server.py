@@ -1,5 +1,8 @@
 """Mock Log4Shell-vulnerable Java app — CVE-2021-44228."""
 import os
+import re
+import threading
+import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("LOG4SHELL_MODE", "vuln") == "vuln"
@@ -15,12 +18,29 @@ POM_TEMPLATE = (
 
 POM_PATH = "/META-INF/maven/org.apache.logging.log4j/log4j-core/pom.properties"
 
+_JNDI_RE = re.compile(r'\$\{jndi:ldap://([^/\}]+)/([^}\s]+)\}', re.IGNORECASE)
+
+
+def _jndi_callback(headers):
+    """Fire an HTTP callback for any JNDI LDAP payload found in request headers."""
+    for key in headers:
+        m = _JNDI_RE.search(headers[key])
+        if m:
+            host_port, token = m.group(1), m.group(2)
+            try:
+                urllib.request.urlopen(f"http://{host_port}/{token}", timeout=5)
+            except Exception:
+                pass
+
 
 class Log4ShellHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass
 
     def do_GET(self):
+        if VULN_MODE:
+            _jndi_callback(self.headers)
+
         path = self.path.split("?")[0]
         if path == POM_PATH:
             version = VULN_VERSION if VULN_MODE else PATCHED_VERSION
@@ -49,7 +69,6 @@ def _make_https_server(handler, port):
 
 
 if __name__ == "__main__":
-    import threading
     mode = "vuln" if VULN_MODE else "patched"
     http_srv = HTTPServer(("0.0.0.0", 80), Log4ShellHandler)
     https_srv = _make_https_server(Log4ShellHandler, 443)

@@ -38,6 +38,13 @@ impl ScanManager {
     /// Submit a scan and return its UUID immediately. Execution is async.
     pub async fn submit(self: Arc<Self>, request: ScanRequest) -> Result<Uuid> {
         let id = Uuid::new_v4();
+        tracing::info!(
+            scan = %id,
+            host = %request.host,
+            services = request.services.len(),
+            tests = request.tests.len(),
+            "scan submitted"
+        );
         let state = Arc::new(RwLock::new(ScanState::new(id, &request)));
 
         self.scans.write().await.insert(id, state.clone());
@@ -145,6 +152,7 @@ impl ScanManager {
         }
 
         // Expand each def to one task per matched (port, service_name).
+        let defs_count = defs.len();
         let tasks: Vec<(TestDef, u16, String)> = defs
             .into_iter()
             .flat_map(|def| {
@@ -155,6 +163,14 @@ impl ScanManager {
             .collect();
 
         let total = tasks.len();
+
+        tracing::info!(
+            scan = %id,
+            host = %request.host,
+            defs = defs_count,
+            tasks = total,
+            "scan starting"
+        );
 
         {
             let mut s = state.write().await;
@@ -259,6 +275,13 @@ impl ScanManager {
     async fn resolve_oob(&self, cfg: &Option<OobConfig>) -> Result<Option<Arc<OobServer>>> {
         match cfg {
             Some(c) if c.enabled => {
+                // Reuse the daemon OOB server if it is already running on the same port.
+                // Starting a second listener on the same port would fail with EADDRINUSE.
+                if let Some(ref daemon) = self.daemon_oob {
+                    if daemon.port == c.port {
+                        return Ok(Some(daemon.clone()));
+                    }
+                }
                 let srv = OobServer::new(c.host.clone(), c.port);
                 srv.clone().start().await?;
                 Ok(Some(srv))

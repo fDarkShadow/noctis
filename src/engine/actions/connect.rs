@@ -23,6 +23,15 @@ pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
 
     match tcp::connect_and_grab(&ctx.target_host, port, send.as_deref(), step.timeout_secs, use_tls).await {
         Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                tls = use_tls,
+                connected = r.connected,
+                duration_ms = r.duration_ms,
+                "tcp"
+            );
             if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
             if r.connected {
                 handle_outcome(&step.on_success, step, def, ctx, None)
@@ -31,7 +40,7 @@ pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
             }
         }
         Err(e) => {
-            tracing::warn!(step = %step.id, "tcp error: {e}");
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "tcp error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }
@@ -42,6 +51,13 @@ pub async fn run_tls(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
 
     match tls::inspect(&ctx.target_host, port, step.timeout_secs).await {
         Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                connected = r.connected,
+                "tls"
+            );
             if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
             if r.connected {
                 handle_outcome(&step.on_success, step, def, ctx, None)
@@ -50,7 +66,7 @@ pub async fn run_tls(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
             }
         }
         Err(e) => {
-            tracing::warn!(step = %step.id, "tls error: {e}");
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "tls error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }
@@ -61,11 +77,18 @@ pub async fn run_ssh(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
 
     match ssh::inspect(&ctx.target_host, port, "probe", step.timeout_secs).await {
         Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                banner = r.banner.as_deref().unwrap_or(""),
+                "ssh"
+            );
             if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
             handle_outcome(&step.on_success, step, def, ctx, None)
         }
         Err(e) => {
-            tracing::warn!(step = %step.id, "ssh error: {e}");
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "ssh error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }

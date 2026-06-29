@@ -26,7 +26,17 @@ pub async fn run_wait_oob(step: &Step, def: &TestDef, ctx: &mut Context) -> Resu
             handle_outcome(&step.on_success, step, def, ctx, Some(data.to_string()))
         }
         None => {
-            tracing::debug!(step = %step.id, "OOB timeout — no callback received");
+            tracing::warn!(
+                step = %step.id,
+                test = %def.name,
+                target = %ctx.target_label(),
+                timeout_secs = step.oob_timeout_secs,
+                prior_findings = ctx.findings.len(),
+                "OOB TIMEOUT — no callback received within {}s (firewall/EDR may have blocked the \
+                 outbound request); {} prior finding(s) preserved",
+                step.oob_timeout_secs,
+                ctx.findings.len(),
+            );
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }

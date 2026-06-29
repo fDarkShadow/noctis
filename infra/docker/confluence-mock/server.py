@@ -1,8 +1,25 @@
 """Mock Atlassian Confluence — CVE-2022-26134 OGNL injection behaviour."""
 import os
+import re
+import threading
+import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import unquote_plus
 
 VULN_MODE = os.environ.get("CONFLUENCE_MODE", "patched") == "vuln"
+
+_CURL_RE = re.compile(r"curl (http://[^\s'\"]+)")
+
+
+def _ognl_callback(raw_path):
+    """Fire an HTTP callback for any curl URL embedded in an OGNL exec() call."""
+    decoded = unquote_plus(raw_path)
+    m = _CURL_RE.search(decoded)
+    if m:
+        try:
+            urllib.request.urlopen(m.group(1), timeout=5)
+        except Exception:
+            pass
 
 
 class ConfluenceHandler(BaseHTTPRequestHandler):
@@ -15,6 +32,7 @@ class ConfluenceHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self._is_ognl():
             if VULN_MODE:
+                _ognl_callback(self.path)
                 # Vulnerable: evaluates OGNL and redirects to login
                 self.send_response(302)
                 self.send_header("Location", "http://127.0.0.1/login.action")
@@ -47,7 +65,6 @@ def _make_https_server(handler, port):
 
 
 if __name__ == "__main__":
-    import threading
     mode = "vuln" if VULN_MODE else "patched"
     http_srv = HTTPServer(("0.0.0.0", 80), ConfluenceHandler)
     https_srv = _make_https_server(ConfluenceHandler, 443)
