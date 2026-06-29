@@ -22,6 +22,8 @@ jobs:
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
       - run: cargo fmt --check
       - run: cargo clippy --locked -- -D warnings
 
@@ -33,6 +35,8 @@ jobs:
       - run: sudo apt-get install -y --no-install-recommends libssh2-1-dev pkg-config
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
       - run: cargo test --locked
 
   audit:
@@ -40,19 +44,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: rustsec/audit-check@v2
+      - name: Cache cargo-audit
+        id: cache-audit
+        uses: actions/cache@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ~/.cargo/bin/cargo-audit
+          key: cargo-audit-${{ runner.os }}-0.22
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.cache-audit.outputs.cache-hit != 'true'
+      - name: Install cargo-audit
+        if: steps.cache-audit.outputs.cache-hit != 'true'
+        run: cargo install cargo-audit --locked
+      - run: cargo audit
 
   feeds:
     name: Validate YAML feeds
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache ys binary
+        id: cache-ys
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/ys
+          key: ys-${{ runner.os }}-0.9.1
+
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+        if: steps.cache-ys.outputs.cache-hit != 'true'
+
       - name: Install yaml-schema (ys)
+        if: steps.cache-ys.outputs.cache-hit != 'true'
         run: cargo install yaml-schema --locked
+
       - name: Validate feeds
         run: |
           for f in tests/cve/*.yaml tests/misconfig/*.yaml; do
@@ -68,11 +92,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get install -y --no-install-recommends libssh2-1-dev pkg-config
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: rust
-      - uses: github/codeql-action/autobuild@v3
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/autobuild@v4
+      - uses: github/codeql-action/analyze@v4
         with:
           category: /language:rust
 
