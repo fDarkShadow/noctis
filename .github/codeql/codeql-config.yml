@@ -1,0 +1,18 @@
+name: "noctis CodeQL config"
+
+query-filters:
+  # The scanner intentionally makes HTTP connections to target services —
+  # constructing http:// URLs is the core feature, not a vulnerability.
+  - exclude:
+      id: rust/non-https-url
+
+  # YAML feed includes use relative paths (e.g. ../common/http_base.yaml).
+  # Feeds are operator-controlled files on the scanner host; an attacker
+  # who can write to the feeds directory already has full local access.
+  - exclude:
+      id: rust/path-injection
+
+  # TLS certificate verification is intentionally disabled for scanning
+  # services with self-signed certificates (NoCertVerifier, tls_insecure).
+  - exclude:
+      id: rust/disabled-certificate-check
