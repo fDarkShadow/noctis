@@ -4,8 +4,10 @@
 
 Noctis detects CVEs and misconfigurations by running structured YAML test sequences against live services — no agent, no shared cache, no false-positive-prone version guessing. Each feed is a self-contained, reproducible detection unit.
 
+[![CI](https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml/badge.svg)](https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-%3E%3D1.75-orange)](https://www.rust-lang.org)
+[![Docker](https://ghcr-badge.egpl.dev/fdarkShadow/noctis/size?tag=edge&label=image)](https://github.com/fDarkShadow/noctis/pkgs/container/noctis)
 
 ---
 
