@@ -1,6 +1,6 @@
 # ── Stage 1: dependency plan (cargo-chef) ────────────────────────────────────
 FROM docker.io/library/rust:1-alpine AS chef
-RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static zlib-dev zlib-static pkgconfig ca-certificates \
+RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static zlib-dev zlib-static libssh2-dev libssh2-static pkgconfig ca-certificates \
     && cargo install cargo-chef --locked
 WORKDIR /build
 
