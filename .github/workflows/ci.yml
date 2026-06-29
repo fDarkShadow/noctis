@@ -93,9 +93,6 @@ jobs:
       - uses: github/codeql-action/init@v4
         with:
           languages: rust
-      - run: |
-          sudo apt-get install -y --no-install-recommends libssh2-1-dev pkg-config
-          cargo build --locked
       - uses: github/codeql-action/analyze@v4
         with:
           category: /language:rust
