@@ -7,6 +7,7 @@ category: tls
 severity: high
 confidence_base: 0.95
 tags: [tls, ssl, crypto, hardening]
+services: [https]
 author: florian
 version: "1.0.0"
 references:

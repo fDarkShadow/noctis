@@ -7,6 +7,7 @@ category: ssh
 severity: medium
 confidence_base: 0.85
 tags: [ssh, auth, hardening]
+services: [ssh]
 author: florian
 version: "1.0.0"
 

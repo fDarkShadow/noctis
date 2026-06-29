@@ -8,6 +8,7 @@ category: exposure
 severity: high
 confidence_base: 0.80
 tags: [http, exposure, recon]
+services: [http, https]
 author: florian
 version: "1.0.0"
 

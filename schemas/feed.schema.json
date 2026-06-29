@@ -232,9 +232,9 @@
       "properties": {
         "confidence_delta": {
           "type": "number",
-          "minimum": 0,
+          "minimum": -1,
           "maximum": 1,
-          "description": "Added to confidence_base. Final confidence = base + delta, clamped to [0, 1]."
+          "description": "Added to confidence_base. Final confidence = base + delta, clamped to [0, 1]. Negative values reduce confidence for low-priority findings."
         },
         "qod": {
           "type": "integer",

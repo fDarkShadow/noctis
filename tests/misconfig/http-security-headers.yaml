@@ -10,6 +10,7 @@ category: http-headers
 severity: medium
 confidence_base: 0.90
 tags: [http, headers, hardening, owasp]
+services: [http, https]
 author: florian
 version: "1.0.0"
 references:
@@ -19,7 +20,6 @@ includes:
   - ../common/http_base.yaml
 
 vars:
-  http_port: 80
   http_path: "/"
 
 steps:

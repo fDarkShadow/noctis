@@ -7,7 +7,6 @@ severity: info
 confidence_base: 1.0
 
 vars:
-  http_port: 80
   http_path: "/"
   http_method: "GET"
 
@@ -16,7 +15,7 @@ steps:
     action: http_request
     method: "{{http_method}}"
     path: "{{http_path}}"
-    port: "{{http_port}}"
+    port: "{{port}}"
     tls_insecure: true
     follow_redirects: true
     timeout_secs: 10
