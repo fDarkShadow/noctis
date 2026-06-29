@@ -29,13 +29,13 @@ pub async fn execute_step(
 
     match step.action.as_str() {
         "http_request" => http::run(step, def, ctx).await,
-        "tcp_connect"  => connect::run_tcp(step, def, ctx).await,
-        "tls_check"    => connect::run_tls(step, def, ctx).await,
-        "ssh_check"    => connect::run_ssh(step, def, ctx).await,
-        "match"        => logic::run_match(step, def, ctx),
-        "script"       => logic::run_script(step, ctx),
-        "wait_oob"     => oob::run_wait_oob(step, def, ctx).await,
-        "set_var"      => logic::run_set_var(step, ctx),
+        "tcp_connect" => connect::run_tcp(step, def, ctx).await,
+        "tls_check" => connect::run_tls(step, def, ctx).await,
+        "ssh_check" => connect::run_ssh(step, def, ctx).await,
+        "match" => logic::run_match(step, def, ctx),
+        "script" => logic::run_script(step, ctx),
+        "wait_oob" => oob::run_wait_oob(step, def, ctx).await,
+        "set_var" => logic::run_set_var(step, ctx),
         unknown => Err(NoctisError::StepError {
             test: def.uid.to_string(),
             step: step.id.clone(),

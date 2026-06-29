@@ -20,7 +20,11 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
 
     // Scheme comes from {{scheme}} injected by the runner (derived from the discovered service
     // name: "http" or "https"). tls_insecure only controls certificate validation.
-    let scheme = ctx.vars.get("scheme").and_then(|v| v.as_str()).unwrap_or("http");
+    let scheme = ctx
+        .vars
+        .get("scheme")
+        .and_then(|v| v.as_str())
+        .unwrap_or("http");
     let port = resolve_port(&step.port, ctx).unwrap_or(if scheme == "https" { 443 } else { 80 });
 
     let url = expr::interpolate(
@@ -31,7 +35,10 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
     let mut headers = IndexMap::new();
     if let Some(h) = &step.headers {
         for (k, v) in h {
-            headers.insert(expr::interpolate(k, &ctx.vars)?, expr::interpolate(v, &ctx.vars)?);
+            headers.insert(
+                expr::interpolate(k, &ctx.vars)?,
+                expr::interpolate(v, &ctx.vars)?,
+            );
         }
     }
 
@@ -40,7 +47,11 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
         None => None,
     };
 
-    let checker = HttpCheck::new(step.follow_redirects.unwrap_or(true), step.tls_insecure, step.timeout_secs)?;
+    let checker = HttpCheck::new(
+        step.follow_redirects.unwrap_or(true),
+        step.tls_insecure,
+        step.timeout_secs,
+    )?;
 
     match checker.run(method, &url, &headers, body.as_deref()).await {
         Ok(resp) => {
@@ -52,7 +63,9 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
                 duration_ms = resp.duration_ms,
                 "http"
             );
-            if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&resp, step, def)?); }
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&resp, step, def)?);
+            }
             handle_outcome(&step.on_success, step, def, ctx, None)
         }
         Err(e) => {

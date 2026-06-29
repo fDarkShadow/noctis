@@ -31,7 +31,10 @@ pub fn interpolate_lenient(template: &str, vars: &HashMap<String, serde_json::Va
     interpolate(template, vars).unwrap_or_else(|_| template.to_string())
 }
 
-fn resolve_path(path: &str, vars: &HashMap<String, serde_json::Value>) -> Option<serde_json::Value> {
+fn resolve_path(
+    path: &str,
+    vars: &HashMap<String, serde_json::Value>,
+) -> Option<serde_json::Value> {
     if let Some(v) = vars.get(path) {
         return Some(v.clone());
     }
@@ -67,24 +70,36 @@ mod tests {
     use serde_json::json;
 
     fn v(pairs: &[(&str, serde_json::Value)]) -> HashMap<String, serde_json::Value> {
-        pairs.iter().map(|(k, v)| (k.to_string(), v.clone())).collect()
+        pairs
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.clone()))
+            .collect()
     }
 
     #[test]
     fn no_placeholder_passthrough() {
-        assert_eq!(interpolate("plain text", &HashMap::new()).unwrap(), "plain text");
+        assert_eq!(
+            interpolate("plain text", &HashMap::new()).unwrap(),
+            "plain text"
+        );
     }
 
     #[test]
     fn single_string_var() {
         let vars = v(&[("host", json!("example.com"))]);
-        assert_eq!(interpolate("http://{{host}}/", &vars).unwrap(), "http://example.com/");
+        assert_eq!(
+            interpolate("http://{{host}}/", &vars).unwrap(),
+            "http://example.com/"
+        );
     }
 
     #[test]
     fn multiple_vars() {
         let vars = v(&[("scheme", json!("https")), ("host", json!("example.com"))]);
-        assert_eq!(interpolate("{{scheme}}://{{host}}", &vars).unwrap(), "https://example.com");
+        assert_eq!(
+            interpolate("{{scheme}}://{{host}}", &vars).unwrap(),
+            "https://example.com"
+        );
     }
 
     #[test]

@@ -132,9 +132,7 @@ mod tests {
     }
 
     fn minimal_yaml(uid: &str) -> String {
-        format!(
-            "uid: {uid}\nname: Test\ntype: misconfig\nseverity: info\nsteps: []\n"
-        )
+        format!("uid: {uid}\nname: Test\ntype: misconfig\nseverity: info\nsteps: []\n")
     }
 
     // ── load ──────────────────────────────────────────────────────────────
@@ -167,7 +165,11 @@ mod tests {
     #[test]
     fn load_missing_uid_field() {
         let dir = tmp_dir();
-        let path = write_yaml(&dir, "no_uid.yaml", "name: Test\ntype: misconfig\nseverity: info\nsteps: []\n");
+        let path = write_yaml(
+            &dir,
+            "no_uid.yaml",
+            "name: Test\ntype: misconfig\nseverity: info\nsteps: []\n",
+        );
         assert!(load(&path).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
     }

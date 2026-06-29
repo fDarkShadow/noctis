@@ -80,8 +80,12 @@ pub struct Step {
     pub timeout_secs: u64,
 }
 
-fn default_timeout() -> u64 { 10 }
-fn default_oob_timeout() -> u64 { 15 }
+fn default_timeout() -> u64 {
+    10
+}
+fn default_oob_timeout() -> u64 {
+    15
+}
 
 // ── Loop ──────────────────────────────────────────────────────────────────
 

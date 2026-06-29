@@ -93,7 +93,10 @@ impl From<&ScanState> for ScanSummary {
             started_at: s.started_at,
             completed_at: s.completed_at,
             elapsed_ms: s.elapsed_ms(),
-            progress: Progress { total: s.total_tests, completed: s.completed_tests },
+            progress: Progress {
+                total: s.total_tests,
+                completed: s.completed_tests,
+            },
             findings_count: s.findings.len(),
             error: s.error.clone(),
             webhook_url: s.webhook_url.clone(),
@@ -104,14 +107,18 @@ impl From<&ScanState> for ScanSummary {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Duration;
     use crate::scan::request::ScanRequest;
+    use chrono::Duration;
 
     fn req(host: &str, port: u16) -> ScanRequest {
         use crate::scan::request::DiscoveredService;
         ScanRequest {
             host: host.to_string(),
-            services: vec![DiscoveredService { port, service: "http".to_string(), protocol: "tcp".to_string() }],
+            services: vec![DiscoveredService {
+                port,
+                service: "http".to_string(),
+                protocol: "tcp".to_string(),
+            }],
             tests: vec!["tests/".to_string()],
             concurrency: 5,
             webhook_url: None,

@@ -22,7 +22,10 @@ pub async fn create_scan(
     match mgr.submit(req).await {
         Ok(id) => (
             StatusCode::ACCEPTED,
-            Json(ScanCreated { id, status: ScanStatus::Pending }),
+            Json(ScanCreated {
+                id,
+                status: ScanStatus::Pending,
+            }),
         )
             .into_response(),
         Err(e) => (
@@ -39,10 +42,7 @@ pub async fn list_scans(State(mgr): State<AppState>) -> impl IntoResponse {
 }
 
 // GET /scans/{id}
-pub async fn get_scan(
-    State(mgr): State<AppState>,
-    Path(id): Path<Uuid>,
-) -> impl IntoResponse {
+pub async fn get_scan(State(mgr): State<AppState>, Path(id): Path<Uuid>) -> impl IntoResponse {
     match mgr.get(id).await {
         Some(s) => Json(s).into_response(),
         None => not_found(id),
@@ -50,10 +50,7 @@ pub async fn get_scan(
 }
 
 // GET /scans/{id}/findings
-pub async fn get_findings(
-    State(mgr): State<AppState>,
-    Path(id): Path<Uuid>,
-) -> impl IntoResponse {
+pub async fn get_findings(State(mgr): State<AppState>, Path(id): Path<Uuid>) -> impl IntoResponse {
     match mgr.findings(id).await {
         Some(f) => Json(f).into_response(),
         None => not_found(id),
@@ -61,10 +58,7 @@ pub async fn get_findings(
 }
 
 // DELETE /scans/{id}
-pub async fn cancel_scan(
-    State(mgr): State<AppState>,
-    Path(id): Path<Uuid>,
-) -> impl IntoResponse {
+pub async fn cancel_scan(State(mgr): State<AppState>, Path(id): Path<Uuid>) -> impl IntoResponse {
     if mgr.cancel(id).await {
         StatusCode::NO_CONTENT.into_response()
     } else {

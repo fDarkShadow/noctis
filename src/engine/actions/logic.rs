@@ -10,16 +10,22 @@ use crate::model::step::Step;
 use crate::model::test_def::TestDef;
 
 pub fn run_match(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
-    let source_key = step.source.as_deref().ok_or_else(|| NoctisError::MissingField {
-        field: "source",
-        action: "match",
-        step: step.id.clone(),
-    })?;
-    let pattern = step.pattern.as_deref().ok_or_else(|| NoctisError::MissingField {
-        field: "pattern",
-        action: "match",
-        step: step.id.clone(),
-    })?;
+    let source_key = step
+        .source
+        .as_deref()
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "source",
+            action: "match",
+            step: step.id.clone(),
+        })?;
+    let pattern = step
+        .pattern
+        .as_deref()
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "pattern",
+            action: "match",
+            step: step.id.clone(),
+        })?;
 
     let source_val = expr::interpolate_lenient(&format!("{{{{{source_key}}}}}"), &ctx.vars);
 
@@ -31,7 +37,12 @@ pub fn run_match(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
     let matched = re.is_match(&source_val);
     let captures: Vec<String> = re
         .captures(&source_val)
-        .map(|c| c.iter().skip(1).filter_map(|m| m.map(|m| m.as_str().to_string())).collect())
+        .map(|c| {
+            c.iter()
+                .skip(1)
+                .filter_map(|m| m.map(|m| m.as_str().to_string()))
+                .collect()
+        })
         .unwrap_or_default();
 
     let result = MatchResult { matched, captures };
@@ -50,23 +61,31 @@ pub fn run_match(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
 }
 
 pub fn run_script(step: &Step, ctx: &mut Context) -> Result<bool> {
-    let code = step.code.as_deref().ok_or_else(|| NoctisError::MissingField {
-        field: "code",
-        action: "script",
-        step: step.id.clone(),
-    })?;
+    let code = step
+        .code
+        .as_deref()
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "code",
+            action: "script",
+            step: step.id.clone(),
+        })?;
 
     let result = expr::eval_script(code, &mut ctx.vars, &step.id)?;
-    if let Some(key) = &step.store_as { ctx.set(key.clone(), result); }
+    if let Some(key) = &step.store_as {
+        ctx.set(key.clone(), result);
+    }
     Ok(false)
 }
 
 pub fn run_set_var(step: &Step, ctx: &mut Context) -> Result<bool> {
-    let name = step.var_name.as_deref().ok_or_else(|| NoctisError::MissingField {
-        field: "var_name",
-        action: "set_var",
-        step: step.id.clone(),
-    })?;
+    let name = step
+        .var_name
+        .as_deref()
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "var_name",
+            action: "set_var",
+            step: step.id.clone(),
+        })?;
 
     let val = match &step.var_value {
         Some(v) => {

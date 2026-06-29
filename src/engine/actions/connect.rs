@@ -8,11 +8,13 @@ use crate::model::test_def::TestDef;
 use super::http::resolve_port;
 
 pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
-    let port = resolve_port(&step.port, ctx).or(ctx.target_port).ok_or_else(|| NoctisError::MissingField {
-        field: "port",
-        action: "tcp_connect",
-        step: step.id.clone(),
-    })?;
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "port",
+            action: "tcp_connect",
+            step: step.id.clone(),
+        })?;
 
     let send = match &step.send {
         Some(s) => Some(crate::expr::interpolate(s, &ctx.vars)?),
@@ -21,7 +23,15 @@ pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
 
     let use_tls = ctx.vars.get("scheme").and_then(|v| v.as_str()) == Some("https");
 
-    match tcp::connect_and_grab(&ctx.target_host, port, send.as_deref(), step.timeout_secs, use_tls).await {
+    match tcp::connect_and_grab(
+        &ctx.target_host,
+        port,
+        send.as_deref(),
+        step.timeout_secs,
+        use_tls,
+    )
+    .await
+    {
         Ok(r) => {
             tracing::debug!(
                 step = %step.id,
@@ -32,7 +42,9 @@ pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
                 duration_ms = r.duration_ms,
                 "tcp"
             );
-            if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
             if r.connected {
                 handle_outcome(&step.on_success, step, def, ctx, None)
             } else {
@@ -47,7 +59,9 @@ pub async fn run_tcp(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
 }
 
 pub async fn run_tls(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
-    let port = resolve_port(&step.port, ctx).or(ctx.target_port).unwrap_or(443);
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .unwrap_or(443);
 
     match tls::inspect(&ctx.target_host, port, step.timeout_secs).await {
         Ok(r) => {
@@ -58,7 +72,9 @@ pub async fn run_tls(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
                 connected = r.connected,
                 "tls"
             );
-            if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
             if r.connected {
                 handle_outcome(&step.on_success, step, def, ctx, None)
             } else {
@@ -73,7 +89,9 @@ pub async fn run_tls(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
 }
 
 pub async fn run_ssh(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
-    let port = resolve_port(&step.port, ctx).or(ctx.target_port).unwrap_or(22);
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .unwrap_or(22);
 
     match ssh::inspect(&ctx.target_host, port, "probe", step.timeout_secs).await {
         Ok(r) => {
@@ -84,7 +102,9 @@ pub async fn run_ssh(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
                 banner = r.banner.as_deref().unwrap_or(""),
                 "ssh"
             );
-            if let Some(key) = &step.store_as { ctx.set(key.clone(), to_json(&r, step, def)?); }
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
             handle_outcome(&step.on_success, step, def, ctx, None)
         }
         Err(e) => {

@@ -46,7 +46,9 @@ pub struct TestDef {
     pub steps: Vec<Step>,
 }
 
-fn default_confidence() -> f32 { 0.75 }
+fn default_confidence() -> f32 {
+    0.75
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]

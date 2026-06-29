@@ -28,11 +28,10 @@ pub async fn inspect(host: &str, port: u16, timeout_secs: u64) -> Result<TlsResu
     let addr = format!("{host}:{port}");
     let start = std::time::Instant::now();
 
-    let stream =
-        tokio::time::timeout(Duration::from_secs(timeout_secs), TcpStream::connect(&addr))
-            .await
-            .map_err(|_| NoctisError::Tls(format!("connect timeout: {addr}")))?
-            .map_err(|e| NoctisError::Tls(format!("connect {addr}: {e}")))?;
+    let stream = tokio::time::timeout(Duration::from_secs(timeout_secs), TcpStream::connect(&addr))
+        .await
+        .map_err(|_| NoctisError::Tls(format!("connect timeout: {addr}")))?
+        .map_err(|e| NoctisError::Tls(format!("connect {addr}: {e}")))?;
 
     let mut root_store = rustls::RootCertStore::empty();
     root_store.extend(TLS_SERVER_ROOTS.iter().cloned());
@@ -54,13 +53,9 @@ pub async fn inspect(host: &str, port: u16, timeout_secs: u64) -> Result<TlsResu
     let duration_ms = start.elapsed().as_millis() as u64;
     let conn = tls_stream.get_ref().1;
 
-    let protocol_version = conn
-        .protocol_version()
-        .map(|v| format!("{v:?}"));
+    let protocol_version = conn.protocol_version().map(|v| format!("{v:?}"));
 
-    let cipher_suite = conn
-        .negotiated_cipher_suite()
-        .map(|cs| format!("{cs:?}"));
+    let cipher_suite = conn.negotiated_cipher_suite().map(|cs| format!("{cs:?}"));
 
     // Extract certificate info from the peer cert chain
     let mut cert_subject = None;

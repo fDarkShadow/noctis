@@ -15,22 +15,23 @@ jobs:
   lint:
     name: Lint (fmt + clippy)
     runs-on: ubuntu-latest
-    container: rust:alpine
     steps:
-      - run: apk add --no-cache musl-dev pkgconfig libssh2-dev git
       - uses: actions/checkout@v4
+      - run: sudo apt-get install -y --no-install-recommends libssh2-1-dev pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      - run: rustup component add rustfmt clippy
       - run: cargo fmt --check
       - run: cargo clippy --locked -- -D warnings
 
   test:
     name: Unit tests
     runs-on: ubuntu-latest
-    container: rust:alpine
     steps:
-      - run: apk add --no-cache musl-dev pkgconfig libssh2-dev git
       - uses: actions/checkout@v4
+      - run: sudo apt-get install -y --no-install-recommends libssh2-1-dev pkg-config
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --locked
 
@@ -46,10 +47,10 @@ jobs:
   feeds:
     name: Validate YAML feeds
     runs-on: ubuntu-latest
-    container: rust:alpine
     steps:
-      - run: apk add --no-cache git
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Install yaml-schema
         run: cargo install yaml-schema --locked
       - name: Validate feeds

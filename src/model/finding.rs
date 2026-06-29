@@ -105,7 +105,10 @@ mod tests {
         Finding::new(
             Uuid::new_v4(),
             "step-1",
-            FindingKind::Cve { cve_id: "CVE-2021-44228".to_string(), cvss: Some(10.0) },
+            FindingKind::Cve {
+                cve_id: "CVE-2021-44228".to_string(),
+                cvss: Some(10.0),
+            },
             Severity::Critical,
             confidence,
             qod,
@@ -142,7 +145,19 @@ mod tests {
     #[test]
     fn test_uid_propagated() {
         let uid = Uuid::new_v4();
-        let f = Finding::new(uid, "s", FindingKind::Cve { cve_id: "CVE-X".to_string(), cvss: None }, Severity::Info, 0.5, 70, "host", None);
+        let f = Finding::new(
+            uid,
+            "s",
+            FindingKind::Cve {
+                cve_id: "CVE-X".to_string(),
+                cvss: None,
+            },
+            Severity::Info,
+            0.5,
+            70,
+            "host",
+            None,
+        );
         assert_eq!(f.test_uid, uid);
     }
 

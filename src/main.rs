@@ -63,7 +63,6 @@ async fn serve(args: cli::ServeArgs) {
         .unwrap_or_else(|e| eprintln!("server error: {e}"));
 }
 
-
 fn init_logging(verbosity: u8) {
     let level = match verbosity {
         0 => Level::WARN,

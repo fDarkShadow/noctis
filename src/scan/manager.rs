@@ -34,7 +34,6 @@ impl ScanManager {
         })
     }
 
-
     /// Submit a scan and return its UUID immediately. Execution is async.
     pub async fn submit(self: Arc<Self>, request: ScanRequest) -> Result<Uuid> {
         let id = Uuid::new_v4();
@@ -127,12 +126,7 @@ impl ScanManager {
 
     // ── Internal execution ────────────────────────────────────────────────
 
-    async fn execute(
-        &self,
-        id: Uuid,
-        request: ScanRequest,
-        state: SharedState,
-    ) -> Result<()> {
+    async fn execute(&self, id: Uuid, request: ScanRequest, state: SharedState) -> Result<()> {
         let paths = loader::resolve_test_paths(&request.tests)?;
 
         let filters = request.filters.clone().unwrap_or_default();
@@ -298,7 +292,11 @@ impl ScanManager {
 /// - `def.services` non-empty: only entries whose service name matches.
 fn matched_services(def: &TestDef, request: &ScanRequest) -> Vec<(u16, String)> {
     if def.services.is_empty() {
-        return request.services.iter().map(|s| (s.port, s.service.clone())).collect();
+        return request
+            .services
+            .iter()
+            .map(|s| (s.port, s.service.clone()))
+            .collect();
     }
     request
         .services

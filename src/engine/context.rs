@@ -46,7 +46,10 @@ impl Context {
         };
 
         let mut vars = HashMap::new();
-        vars.insert("target_host".to_string(), Value::String(target_host.clone()));
+        vars.insert(
+            "target_host".to_string(),
+            Value::String(target_host.clone()),
+        );
         vars.insert("scheme".to_string(), Value::String(scheme.to_string()));
         if let Some(p) = target_port {
             vars.insert("target_port".to_string(), Value::Number(p.into()));
@@ -57,10 +60,7 @@ impl Context {
         vars.insert("oob_enabled".to_string(), Value::Bool(oob_server.is_some()));
         if let Some(ref srv) = oob_server {
             vars.insert("oob_host".to_string(), Value::String(srv.host.clone()));
-            vars.insert(
-                "oob_port".to_string(),
-                Value::Number(srv.port.into()),
-            );
+            vars.insert("oob_port".to_string(), Value::Number(srv.port.into()));
             vars.insert(
                 "oob_url".to_string(),
                 Value::String(format!("http://{}:{}/{}", srv.host, srv.port, oob_token)),

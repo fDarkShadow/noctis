@@ -25,10 +25,7 @@ pub enum NoctisError {
     },
 
     #[error("Expression error in step '{step}': {message}")]
-    ExprError {
-        step: String,
-        message: String,
-    },
+    ExprError { step: String, message: String },
 
     #[error("HTTP check failed: {0}")]
     Http(#[from] reqwest::Error),

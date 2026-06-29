@@ -45,12 +45,11 @@ impl HttpCheck {
         headers: &IndexMap<String, String>,
         body: Option<&str>,
     ) -> Result<HttpResult> {
-        let method = Method::from_bytes(method.as_bytes())
-            .map_err(|_| NoctisError::StepError {
-                test: String::new(),
-                step: String::new(),
-                message: format!("invalid HTTP method: {method}"),
-            })?;
+        let method = Method::from_bytes(method.as_bytes()).map_err(|_| NoctisError::StepError {
+            test: String::new(),
+            step: String::new(),
+            message: format!("invalid HTTP method: {method}"),
+        })?;
 
         let mut req = self.client.request(method, url);
 
@@ -78,10 +77,7 @@ impl HttpCheck {
 
         let mut resp_headers = HashMap::new();
         for (k, v) in resp.headers() {
-            resp_headers.insert(
-                k.to_string(),
-                v.to_str().unwrap_or("<binary>").to_string(),
-            );
+            resp_headers.insert(k.to_string(), v.to_str().unwrap_or("<binary>").to_string());
         }
 
         let body = resp.text().await.map_err(NoctisError::Http)?;

@@ -28,7 +28,12 @@ impl Runner {
         target_port: Option<u16>,
         target_service: &str,
     ) -> Result<Vec<Finding>> {
-        let mut ctx = Context::new(target_host, target_port, target_service, self.oob_server.clone());
+        let mut ctx = Context::new(
+            target_host,
+            target_port,
+            target_service,
+            self.oob_server.clone(),
+        );
         ctx.seed_vars(&def.vars);
 
         info!(test = %def.uid, name = %def.name, target = %ctx.target_label(), "starting test");
@@ -69,9 +74,16 @@ impl Runner {
     }
 }
 
-async fn run_loop_group(steps: &[Step], cfg: &LoopConfig, def: &TestDef, ctx: &mut Context) -> Result<bool> {
+async fn run_loop_group(
+    steps: &[Step],
+    cfg: &LoopConfig,
+    def: &TestDef,
+    ctx: &mut Context,
+) -> Result<bool> {
     let items: Vec<Value> = if let Some(list) = &cfg.over {
-        list.iter().map(|v| serde_json::to_value(v).unwrap_or(Value::Null)).collect()
+        list.iter()
+            .map(|v| serde_json::to_value(v).unwrap_or(Value::Null))
+            .collect()
     } else if let Some(count) = cfg.count {
         (0..count).map(|i| Value::Number(i.into())).collect()
     } else {

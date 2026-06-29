@@ -48,7 +48,9 @@ pub struct ScanRequest {
     pub filters: Option<ScanFilters>,
 }
 
-fn default_concurrency() -> usize { 5 }
+fn default_concurrency() -> usize {
+    5
+}
 
 // ── OOB ───────────────────────────────────────────────────────────────────
 
@@ -64,7 +66,9 @@ pub struct OobConfig {
     pub port: u16,
 }
 
-fn default_oob_port() -> u16 { 9090 }
+fn default_oob_port() -> u16 {
+    9090
+}
 
 // ── Exclusion filters ─────────────────────────────────────────────────────
 
@@ -150,14 +154,20 @@ mod tests {
         let uid = Uuid::new_v4();
         let mut def = make_def();
         def.uid = uid;
-        let f = ScanFilters { exclude_uids: vec![uid], ..Default::default() };
+        let f = ScanFilters {
+            exclude_uids: vec![uid],
+            ..Default::default()
+        };
         assert!(f.is_excluded(&def));
     }
 
     #[test]
     fn exclude_by_uid_no_match() {
         let def = make_def();
-        let f = ScanFilters { exclude_uids: vec![Uuid::new_v4()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_uids: vec![Uuid::new_v4()],
+            ..Default::default()
+        };
         assert!(!f.is_excluded(&def));
     }
 
@@ -165,13 +175,19 @@ mod tests {
     fn exclude_by_cve_match() {
         let mut def = make_def();
         def.cve = Some("CVE-2021-44228".to_string());
-        let f = ScanFilters { exclude_cve: vec!["CVE-2021-44228".to_string()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_cve: vec!["CVE-2021-44228".to_string()],
+            ..Default::default()
+        };
         assert!(f.is_excluded(&def));
     }
 
     #[test]
     fn no_cve_field_not_excluded_by_cve_filter() {
-        let f = ScanFilters { exclude_cve: vec!["CVE-2021-44228".to_string()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_cve: vec!["CVE-2021-44228".to_string()],
+            ..Default::default()
+        };
         assert!(!f.is_excluded(&make_def()));
     }
 
@@ -179,13 +195,19 @@ mod tests {
     fn exclude_by_category_match() {
         let mut def = make_def();
         def.category = Some("authentication".to_string());
-        let f = ScanFilters { exclude_categories: vec!["authentication".to_string()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_categories: vec!["authentication".to_string()],
+            ..Default::default()
+        };
         assert!(f.is_excluded(&def));
     }
 
     #[test]
     fn no_category_not_excluded_by_category_filter() {
-        let f = ScanFilters { exclude_categories: vec!["authentication".to_string()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_categories: vec!["authentication".to_string()],
+            ..Default::default()
+        };
         assert!(!f.is_excluded(&make_def()));
     }
 
@@ -193,7 +215,10 @@ mod tests {
     fn exclude_by_tag_match() {
         let mut def = make_def();
         def.tags = vec!["slow".to_string(), "destructive".to_string()];
-        let f = ScanFilters { exclude_tags: vec!["slow".to_string()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_tags: vec!["slow".to_string()],
+            ..Default::default()
+        };
         assert!(f.is_excluded(&def));
     }
 
@@ -201,7 +226,10 @@ mod tests {
     fn exclude_by_tag_no_overlap() {
         let mut def = make_def();
         def.tags = vec!["fast".to_string()];
-        let f = ScanFilters { exclude_tags: vec!["slow".to_string()], ..Default::default() };
+        let f = ScanFilters {
+            exclude_tags: vec!["slow".to_string()],
+            ..Default::default()
+        };
         assert!(!f.is_excluded(&def));
     }
 }

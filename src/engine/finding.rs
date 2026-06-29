@@ -62,23 +62,41 @@ fn build_finding(
 
     let kind = match &def.kind {
         TestKind::Cve => FindingKind::Cve {
-            cve_id: spec.cve.clone().or_else(|| def.cve.clone()).unwrap_or_else(|| "UNKNOWN".to_string()),
+            cve_id: spec
+                .cve
+                .clone()
+                .or_else(|| def.cve.clone())
+                .unwrap_or_else(|| "UNKNOWN".to_string()),
             cvss: spec.cvss.or(def.cvss),
         },
         TestKind::Misconfig => FindingKind::Misconfig {
-            category: def.category.clone().unwrap_or_else(|| "general".to_string()),
-            title: spec.title.as_ref()
+            category: def
+                .category
+                .clone()
+                .unwrap_or_else(|| "general".to_string()),
+            title: spec
+                .title
+                .as_ref()
                 .map(|t| expr::interpolate_lenient(t, &ctx.vars))
                 .unwrap_or_else(|| def.name.clone()),
-            description: spec.description.as_ref().map(|d| expr::interpolate_lenient(d, &ctx.vars)),
-            remediation: spec.remediation.as_ref().map(|r| expr::interpolate_lenient(r, &ctx.vars)),
+            description: spec
+                .description
+                .as_ref()
+                .map(|d| expr::interpolate_lenient(d, &ctx.vars)),
+            remediation: spec
+                .remediation
+                .as_ref()
+                .map(|r| expr::interpolate_lenient(r, &ctx.vars)),
         },
     };
 
     let evidence = Evidence {
         matched: evidence_raw,
         request: None,
-        response_excerpt: spec.evidence.as_ref().map(|e| expr::interpolate_lenient(e, &ctx.vars)),
+        response_excerpt: spec
+            .evidence
+            .as_ref()
+            .map(|e| expr::interpolate_lenient(e, &ctx.vars)),
     };
 
     let finding = Finding::new(
@@ -217,7 +235,12 @@ mod tests {
         let def = make_def(TestKind::Cve);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: None, set_vars: None, stop: true, condition: None };
+        let out = StepOutcome {
+            finding: None,
+            set_vars: None,
+            stop: true,
+            condition: None,
+        };
         assert!(handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap());
     }
 
@@ -226,7 +249,12 @@ mod tests {
         let def = make_def(TestKind::Cve);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(make_spec()), set_vars: None, stop: false, condition: None };
+        let out = StepOutcome {
+            finding: Some(make_spec()),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert_eq!(c.findings.len(), 1);
     }
@@ -236,7 +264,12 @@ mod tests {
         let def = make_def(TestKind::Cve);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(make_spec()), set_vars: None, stop: true, condition: Some("false".to_string()) };
+        let out = StepOutcome {
+            finding: Some(make_spec()),
+            set_vars: None,
+            stop: true,
+            condition: Some("false".to_string()),
+        };
         let stop = handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert!(!stop);
         assert!(c.findings.is_empty());
@@ -247,7 +280,12 @@ mod tests {
         let def = make_def(TestKind::Cve);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(make_spec()), set_vars: None, stop: false, condition: Some("true".to_string()) };
+        let out = StepOutcome {
+            finding: Some(make_spec()),
+            set_vars: None,
+            stop: false,
+            condition: Some("true".to_string()),
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert_eq!(c.findings.len(), 1);
     }
@@ -258,8 +296,16 @@ mod tests {
         let step = make_step("s");
         let mut c = ctx();
         let mut set_vars = IndexMap::new();
-        set_vars.insert("foo".to_string(), serde_yaml::Value::String("bar".to_string()));
-        let out = StepOutcome { finding: None, set_vars: Some(set_vars), stop: false, condition: None };
+        set_vars.insert(
+            "foo".to_string(),
+            serde_yaml::Value::String("bar".to_string()),
+        );
+        let out = StepOutcome {
+            finding: None,
+            set_vars: Some(set_vars),
+            stop: false,
+            condition: None,
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert_eq!(c.vars.get("foo"), Some(&serde_json::json!("bar")));
     }
@@ -271,7 +317,12 @@ mod tests {
         let def = make_def(TestKind::Cve);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(make_spec()), set_vars: None, stop: false, condition: None };
+        let out = StepOutcome {
+            finding: Some(make_spec()),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert!(matches!(c.findings[0].kind, FindingKind::Cve { .. }));
     }
@@ -281,7 +332,12 @@ mod tests {
         let def = make_def(TestKind::Misconfig);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(make_spec()), set_vars: None, stop: false, condition: None };
+        let out = StepOutcome {
+            finding: Some(make_spec()),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert!(matches!(c.findings[0].kind, FindingKind::Misconfig { .. }));
     }
@@ -294,7 +350,12 @@ mod tests {
         spec.confidence_delta = 0.5; // 0.9 + 0.5 = 1.4 → clamped to 1.0
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(spec), set_vars: None, stop: false, condition: None };
+        let out = StepOutcome {
+            finding: Some(spec),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert_eq!(c.findings[0].confidence, 1.0);
     }
@@ -306,7 +367,12 @@ mod tests {
         spec.severity = Some(Severity::Critical);
         let step = make_step("s");
         let mut c = ctx();
-        let out = StepOutcome { finding: Some(spec), set_vars: None, stop: false, condition: None };
+        let out = StepOutcome {
+            finding: Some(spec),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
         assert_eq!(c.findings[0].severity, Severity::Critical);
     }

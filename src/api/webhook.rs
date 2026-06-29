@@ -4,12 +4,7 @@ use super::models::WebhookEvent;
 
 /// Fire-and-forget webhook POST.
 /// Logs errors but never propagates them — a webhook failure must never affect scan execution.
-pub async fn send<T: Serialize>(
-    client: &reqwest::Client,
-    url: &str,
-    event: &str,
-    data: &T,
-) {
+pub async fn send<T: Serialize>(client: &reqwest::Client, url: &str, event: &str, data: &T) {
     let payload = WebhookEvent {
         event,
         timestamp: chrono::Utc::now(),

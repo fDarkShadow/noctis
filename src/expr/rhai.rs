@@ -14,7 +14,10 @@ pub fn eval_condition(expr: &str, vars: &HashMap<String, serde_json::Value>) -> 
 
     let result: Dynamic = engine
         .eval_expression_with_scope::<Dynamic>(&mut scope, expr)
-        .map_err(|e| NoctisError::ExprError { step: "<condition>".to_string(), message: e.to_string() })?;
+        .map_err(|e| NoctisError::ExprError {
+            step: "<condition>".to_string(),
+            message: e.to_string(),
+        })?;
 
     Ok(result.as_bool().unwrap_or(false))
 }
@@ -33,7 +36,10 @@ pub fn eval_script(
 
     let result: Dynamic = engine
         .eval_with_scope::<Dynamic>(&mut scope, code)
-        .map_err(|e| NoctisError::ExprError { step: step_id.to_string(), message: e.to_string() })?;
+        .map_err(|e| NoctisError::ExprError {
+            step: step_id.to_string(),
+            message: e.to_string(),
+        })?;
 
     for (key, val) in vars.iter_mut() {
         let rhai_name = key.replace('.', "_");
@@ -57,9 +63,13 @@ pub(crate) fn json_to_dynamic(v: &serde_json::Value) -> Dynamic {
         serde_json::Value::Null => Dynamic::UNIT,
         serde_json::Value::Bool(b) => Dynamic::from(*b),
         serde_json::Value::Number(n) => {
-            if let Some(i) = n.as_i64() { Dynamic::from(i) }
-            else if let Some(f) = n.as_f64() { Dynamic::from(f) }
-            else { Dynamic::UNIT }
+            if let Some(i) = n.as_i64() {
+                Dynamic::from(i)
+            } else if let Some(f) = n.as_f64() {
+                Dynamic::from(f)
+            } else {
+                Dynamic::UNIT
+            }
         }
         serde_json::Value::String(s) => Dynamic::from(s.clone()),
         serde_json::Value::Array(arr) => {
@@ -98,7 +108,10 @@ mod tests {
     use serde_json::json;
 
     fn v(pairs: &[(&str, serde_json::Value)]) -> HashMap<String, serde_json::Value> {
-        pairs.iter().map(|(k, v)| (k.to_string(), v.clone())).collect()
+        pairs
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.clone()))
+            .collect()
     }
 
     // ── eval_condition ────────────────────────────────────────────────────
@@ -167,7 +180,10 @@ mod tests {
     #[test]
     fn script_string_result() {
         let mut vars = HashMap::new();
-        assert_eq!(eval_script(r#""hello""#, &mut vars, "s").unwrap(), json!("hello"));
+        assert_eq!(
+            eval_script(r#""hello""#, &mut vars, "s").unwrap(),
+            json!("hello")
+        );
     }
 
     #[test]

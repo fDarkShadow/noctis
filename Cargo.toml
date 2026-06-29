@@ -16,7 +16,7 @@ clap = { version = "4.6.1", features = ["derive"] }
 
 # Serialization
 serde = { version = "1.0.228", features = ["derive"] }
-serde_yaml = "0.9.34"
+serde_yaml = "0.9.34+deprecated"
 serde_json = "1.0.150"
 indexmap = { version = "2.14.0", features = ["serde"] }
 
@@ -24,11 +24,11 @@ indexmap = { version = "2.14.0", features = ["serde"] }
 reqwest = { version = "0.13.4", features = ["json", "rustls", "stream"], default-features = false }
 
 # TLS inspection
-rustls = { version = "0.23.40", features = ["ring"] }
+rustls = { version = "0.23.41", features = ["ring"] }
 rustls-pki-types = "1.14.1"
 x509-parser = "0.18.1"
 tokio-rustls = "0.26.4"
-webpki-roots = "1.0.7"
+webpki-roots = "1.0.8"
 
 # SSH
 ssh2 = "0.9.5"
@@ -44,7 +44,7 @@ tower = "0.5.3"
 regex = "1.12.4"
 
 # Error handling
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 thiserror = "2.0.18"
 
 # Logging
@@ -53,11 +53,11 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 # Utils
 chrono = { version = "0.4.45", features = ["serde"] }
-uuid = { version = "1.23.3", features = ["v4", "serde"] }
+uuid = { version = "1.23.4", features = ["v4", "serde"] }
 glob = "0.3.3"
 tokio-util = { version = "0.7.18", features = ["io"] }
 
-# Validation (type Pydantic)
+# Validation
 validator = { version = "0.20.0", features = ["derive"] }
 
 # Terminal output

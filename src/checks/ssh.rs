@@ -32,15 +32,17 @@ pub async fn inspect(
 
     let result = tokio::task::spawn_blocking(move || -> Result<SshResult> {
         let tcp = TcpStream::connect_timeout(
-            &addr.parse().map_err(|_| NoctisError::Ssh(format!("bad addr: {addr}")))?,
+            &addr
+                .parse()
+                .map_err(|_| NoctisError::Ssh(format!("bad addr: {addr}")))?,
             timeout,
         )
         .map_err(|e| NoctisError::Ssh(format!("connect {addr}: {e}")))?;
 
         let duration_ms = start.elapsed().as_millis() as u64;
 
-        let mut sess = ssh2::Session::new()
-            .map_err(|e| NoctisError::Ssh(format!("session: {e}")))?;
+        let mut sess =
+            ssh2::Session::new().map_err(|e| NoctisError::Ssh(format!("session: {e}")))?;
 
         sess.set_tcp_stream(tcp);
         sess.handshake()
@@ -48,9 +50,7 @@ pub async fn inspect(
 
         let banner = sess.banner().map(|b| b.trim().to_string());
 
-        let host_key_algo = sess
-            .host_key()
-            .map(|(_, kt)| format!("{kt:?}"));
+        let host_key_algo = sess.host_key().map(|(_, kt)| format!("{kt:?}"));
 
         let auth_methods = sess
             .auth_methods(&probe_user)

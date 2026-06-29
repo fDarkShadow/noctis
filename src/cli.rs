@@ -43,4 +43,3 @@ pub struct ServeArgs {
     #[arg(long, default_value_t = 9090)]
     pub oob_port: u16,
 }
-

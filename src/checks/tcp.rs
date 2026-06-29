@@ -93,18 +93,20 @@ async fn connect_and_grab_plain(
     let addr = format!("{host}:{port}");
     let start = std::time::Instant::now();
 
-    let stream_result = timeout(
-        Duration::from_secs(timeout_secs),
-        TcpStream::connect(&addr),
-    )
-    .await;
+    let stream_result = timeout(Duration::from_secs(timeout_secs), TcpStream::connect(&addr)).await;
 
     let duration_ms = start.elapsed().as_millis() as u64;
 
     let mut stream = match stream_result {
         Ok(Ok(s)) => s,
         Ok(Err(e)) => return Err(NoctisError::Tcp(format!("connect {addr}: {e}"))),
-        Err(_) => return Ok(TcpResult { connected: false, banner: None, duration_ms }),
+        Err(_) => {
+            return Ok(TcpResult {
+                connected: false,
+                banner: None,
+                duration_ms,
+            })
+        }
     };
 
     if let Some(payload) = send {
@@ -112,7 +114,11 @@ async fn connect_and_grab_plain(
     }
 
     let banner = read_banner(&mut stream).await;
-    Ok(TcpResult { connected: true, banner, duration_ms })
+    Ok(TcpResult {
+        connected: true,
+        banner,
+        duration_ms,
+    })
 }
 
 async fn connect_and_grab_tls(
@@ -129,12 +135,13 @@ async fn connect_and_grab_tls(
         .map_err(|_| NoctisError::Tcp(format!("connect timeout: {addr}")))?
         .map_err(|e| NoctisError::Tcp(format!("connect {addr}: {e}")))?;
 
-    let config = ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))
-        .with_safe_default_protocol_versions()
-        .map_err(|e| NoctisError::Tcp(format!("TLS config: {e}")))?
-        .dangerous()
-        .with_custom_certificate_verifier(Arc::new(NoCertVerifier))
-        .with_no_client_auth();
+    let config =
+        ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))
+            .with_safe_default_protocol_versions()
+            .map_err(|e| NoctisError::Tcp(format!("TLS config: {e}")))?
+            .dangerous()
+            .with_custom_certificate_verifier(Arc::new(NoCertVerifier))
+            .with_no_client_auth();
 
     let connector = TlsConnector::from(Arc::new(config));
     let server_name = ServerName::try_from(host.to_string())
@@ -152,7 +159,11 @@ async fn connect_and_grab_tls(
     }
 
     let banner = read_banner(&mut stream).await;
-    Ok(TcpResult { connected: true, banner, duration_ms })
+    Ok(TcpResult {
+        connected: true,
+        banner,
+        duration_ms,
+    })
 }
 
 const READ_TIMEOUT_SECS: u64 = 3;
@@ -160,7 +171,11 @@ const READ_TIMEOUT_SECS: u64 = 3;
 async fn read_banner<R: AsyncReadExt + Unpin>(stream: &mut R) -> Option<String> {
     let mut acc = Vec::new();
     // Ignore EOF-vs-timeout: acc retains whatever arrived before either fires.
-    let _ = timeout(Duration::from_secs(READ_TIMEOUT_SECS), stream.read_to_end(&mut acc)).await;
+    let _ = timeout(
+        Duration::from_secs(READ_TIMEOUT_SECS),
+        stream.read_to_end(&mut acc),
+    )
+    .await;
     if acc.is_empty() {
         None
     } else {

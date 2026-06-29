@@ -22,7 +22,9 @@ pub async fn run_wait_oob(step: &Step, def: &TestDef, ctx: &mut Context) -> Resu
 
     match received {
         Some(data) => {
-            if let Some(key) = &step.store_as { ctx.set(key.clone(), data.clone()); }
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), data.clone());
+            }
             handle_outcome(&step.on_success, step, def, ctx, Some(data.to_string()))
         }
         None => {
