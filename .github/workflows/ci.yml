@@ -134,5 +134,5 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE }}:edge
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.IMAGE }}:cache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:cache,mode=max
