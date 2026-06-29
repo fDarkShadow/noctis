@@ -1,46 +1,46 @@
 name: Feature request
-description: Proposer une nouvelle fonctionnalité ou une amélioration
+description: Suggest a new feature or improvement
 labels: ["type:feature", "status:available"]
 body:
   - type: dropdown
     id: area
     attributes:
-      label: Domaine
+      label: Area
       options:
-        - Nouveau type d'action (step)
-        - Amélioration engine / runner
-        - API REST
-        - Feed / modèle YAML
+        - New step action
+        - Engine / runner improvement
+        - REST API
+        - Feed / YAML model
         - Infrastructure / mocks
         - CLI / UX
-        - Autre
+        - Other
     validations:
       required: true
 
   - type: textarea
     id: problem
     attributes:
-      label: Problème ou besoin
-      description: Quel cas d'usage est bloqué ou difficile aujourd'hui ?
+      label: Problem or need
+      description: What use case is blocked or painful today?
     validations:
       required: true
 
   - type: textarea
     id: solution
     attributes:
-      label: Solution proposée
-      description: Description de la fonctionnalité souhaitée, avec exemples si possible.
+      label: Proposed solution
+      description: Description of the desired feature, with examples if possible.
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives envisagées
-      description: Autres approches écartées et pourquoi.
+      label: Alternatives considered
+      description: Other approaches you ruled out and why.
 
   - type: textarea
     id: context
     attributes:
-      label: Contexte additionnel
-      description: CVE / misconfig concernée, contraintes, liens utiles.
+      label: Additional context
+      description: Related CVE / misconfig, constraints, useful links.

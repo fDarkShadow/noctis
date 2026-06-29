@@ -1,44 +1,44 @@
 name: Bug report
-description: Quelque chose ne fonctionne pas comme attendu
+description: Something is not working as expected
 labels: ["type:bug", "status:available"]
 body:
   - type: dropdown
     id: component
     attributes:
-      label: Composant concerné
+      label: Component
       options:
         - Engine (runner / steps)
-        - API REST (/scans)
-        - Feed YAML (détection incorrecte)
+        - REST API (/scans)
+        - YAML feed (incorrect detection)
         - Infrastructure (infra/ / Docker mocks)
         - CLI
-        - Autre
+        - Other
     validations:
       required: true
 
   - type: textarea
     id: description
     attributes:
-      label: Description du problème
-      description: Ce qui se passe, ce qui était attendu.
+      label: Description
+      description: What happens, and what did you expect instead?
     validations:
       required: true
 
   - type: textarea
     id: reproduction
     attributes:
-      label: Étapes pour reproduire
+      label: Steps to reproduce
       placeholder: |
-        1. Lancer noctis serve ...
-        2. POST /scans avec { ... }
-        3. Observer ...
+        1. Run noctis serve ...
+        2. POST /scans with { ... }
+        3. Observe ...
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Comportement attendu
+      label: Expected behaviour
     validations:
       required: true
 
@@ -46,7 +46,7 @@ body:
     id: logs
     attributes:
       label: Logs / output
-      description: Coller la sortie de noctis (avec `-v` si possible) ou le résultat Ansible.
+      description: Paste noctis output (with `-v` if possible) or Ansible results.
       render: shell
 
   - type: input
