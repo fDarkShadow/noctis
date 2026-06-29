@@ -51,12 +51,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Install yaml-schema
+      - name: Install yaml-schema (ys)
         run: cargo install yaml-schema --locked
       - name: Validate feeds
         run: |
           for f in tests/cve/*.yaml tests/misconfig/*.yaml; do
-            yaml-schema --schema schemas/feed.schema.json "$f"
+            ys -f schemas/feed.schema.json "$f"
           done
 
   codeql:
