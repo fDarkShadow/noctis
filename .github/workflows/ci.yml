@@ -101,9 +101,15 @@ jobs:
           category: /language:rust
           output: sarif-results
           upload: always
-      - name: Fail on CodeQL findings
+      - name: Annotate and fail on CodeQL findings
         run: |
-          count=$(jq '[.runs[].results // [] | .[]] | length' sarif-results/rust.sarif)
+          sarif=sarif-results/rust.sarif
+          # Emit one ::error annotation per finding — shows inline in PR diff
+          jq -r '
+            .runs[].results[] |
+            "::error file=\(.locations[0].physicalLocation.artifactLocation.uri // "unknown"),line=\(.locations[0].physicalLocation.region.startLine // 1),title=\(.ruleId // "CodeQL")::\(.message.text | gsub("\n";" "))"
+          ' "$sarif" 2>/dev/null || true
+          count=$(jq '[.runs[].results[]] | length' "$sarif")
           echo "CodeQL: $count finding(s)"
           [ "$count" -eq 0 ] || exit 1
 
