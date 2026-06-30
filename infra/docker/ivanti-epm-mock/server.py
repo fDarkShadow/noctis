@@ -1,31 +1,26 @@
 #!/usr/bin/env python3
-import os, re, ssl, threading
+import os, ssl, threading, json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.request import urlopen
 
 VULN_MODE = os.environ.get("IVANTI_EPM_MODE", "patched") == "vuln"
 
-SOAP_RESPONSE = (
-    '<?xml version="1.0" encoding="utf-8"?>'
-    '<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
-    ' xmlns:xsd="http://www.w3.org/2001/XMLSchema"'
-    ' xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">'
-    "<soap12:Body>"
-    '<UpdateStatusEventsResponse xmlns="http://tempuri.org/">'
-    "<UpdateStatusEventsResult>true</UpdateStatusEventsResult>"
-    "</UpdateStatusEventsResponse>"
-    "</soap12:Body>"
-    "</soap12:Envelope>"
-)
+AUTH_SUCCESS = json.dumps({
+    "sessionid": "a1b2c3d4e5f6789012345678901234567890",
+    "username": "administrator"
+})
 
-OOB_URL_RE = re.compile(r"curl\s+(http://[^\s'<\"]+)")
+AUTH_DENIED = json.dumps({
+    "sessionid": None,
+    "error": "Authentication required"
+})
 
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args): pass
 
-    def _send(self, code, body, ct="text/html"):
-        if isinstance(body, str): body = body.encode()
+    def _send(self, code, body, ct="application/json"):
+        if isinstance(body, str):
+            body = body.encode()
         self.send_response(code)
         self.send_header("Content-Type", ct)
         self.send_header("Content-Length", str(len(body)))
@@ -34,31 +29,24 @@ class Handler(BaseHTTPRequestHandler):
 
     def _read_body(self):
         length = int(self.headers.get("Content-Length", 0))
-        return self.rfile.read(length).decode("utf-8", errors="replace")
-
-    def do_GET(self):
-        self._send(
-            200,
-            "<html><head><title>Ivanti Endpoint Manager</title></head>"
-            "<body><h1>Ivanti EPM</h1></body></html>",
-        )
+        return self.rfile.read(length).decode("utf-8", errors="replace") if length > 0 else ""
 
     def do_POST(self):
-        raw = self._read_body()
-        if "/WSStatusEvents/EventHandler.asmx" in self.path:
-            if not VULN_MODE:
-                self._send(500, b"Internal Server Error", ct="text/plain")
-                return
-            # Trigger OOB callback if a curl URL is present in the payload
-            m = OOB_URL_RE.search(raw)
-            if m:
-                try:
-                    urlopen(m.group(1), timeout=3)
-                except Exception:
-                    pass
-            self._send(200, SOAP_RESPONSE, ct="application/soap+xml; charset=utf-8")
+        body = self._read_body()
+        if self.path.startswith("/RemoteControlAuth/api/Auth"):
+            try:
+                data = json.loads(body)
+                if data.get("logintype") == "64" and VULN_MODE:
+                    self._send(200, AUTH_SUCCESS)
+                else:
+                    self._send(200, AUTH_DENIED)
+            except (json.JSONDecodeError, AttributeError):
+                self._send(400, json.dumps({"error": "Invalid request"}))
         else:
-            self._send(404, b"Not Found", ct="text/plain")
+            self._send(404, json.dumps({"error": "Not found"}))
+
+    def do_GET(self):
+        self._send(404, json.dumps({"error": "Not found"}))
 
 
 def _make_https_server(port):
