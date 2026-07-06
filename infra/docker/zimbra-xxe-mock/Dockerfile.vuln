@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /certs \
+    && openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key \
+       -out /certs/server.crt -days 3650 -nodes \
+       -subj "/CN=noctis-mock"
+COPY server.py /app/server.py
+ENV ZIMBRA_XXE_MODE=vuln
+EXPOSE 80 443
+CMD ["python3", "/app/server.py"]
