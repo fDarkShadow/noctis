@@ -1,0 +1,232 @@
+---
+- name: "{{ cve_id }} — Setup + test + teardown"
+  block:
+    - name: "{{ cve_id }} — Pull image {{ docker_image }}"
+      ansible.builtin.command:
+        cmd: "{{ container_runtime }} pull {{ docker_image }}"
+      when: not docker_image.startswith('noctis/')
+      changed_when: true
+      ignore_errors: true
+
+    - name: "{{ cve_id }} — Find a free host port for {{ container_name }}"
+      ansible.builtin.command:
+        cmd: >-
+          python3 -c
+          "import socket; s=socket.socket(); s.bind(('',0));
+          print(s.getsockname()[1]); s.close()"
+      register: free_port_reg
+      changed_when: false
+      throttle: 1
+
+    - name: "{{ cve_id }} — Set dynamic target_port"
+      ansible.builtin.set_fact:
+        target_port: "{{ free_port_reg.stdout | int }}"
+
+    - name: "{{ cve_id }} — Start container {{ container_name }}"
+      ansible.builtin.command:
+        cmd: >-
+          {{ container_runtime }} run -d
+          --name {{ container_name }}
+          --network {{ container_network }}
+          -p {{ target_port }}:{{ container_port | default(80) }}
+          {{ docker_image }}
+      changed_when: true
+      throttle: 1
+
+    - name: "{{ cve_id }} — Wait for service on {{ target_host }}:{{ target_port }}"
+      ansible.builtin.wait_for:
+        host: "{{ target_host }}"
+        port: "{{ target_port }}"
+        timeout: 45
+
+    # ── Choose server and build request body ──────────────────────────────────
+
+    - name: "{{ cve_id }} — Select API server"
+      ansible.builtin.set_fact:
+        _api_url: >-
+          http://127.0.0.1:{{
+            noctis_oob_server_port if noctis_use_oob else noctis_plain_port
+          }}
+
+    - name: "{{ cve_id }} — Build scan request body"
+      ansible.builtin.set_fact:
+        _scan_body: >-
+          {{
+            {
+              "host": target_host,
+              "services": [
+                {
+                  "port": target_port | int,
+                  "service": target_service,
+                  "protocol": "tcp"
+                }
+              ],
+              "tests": [feed_path],
+              "concurrency": 5
+            }
+            | combine(
+                {
+                  "oob": {
+                    "enabled": true,
+                    "host": noctis_bridge_gateway,
+                    "port": noctis_oob_callback_port | int
+                  }
+                } if noctis_use_oob else {}
+            )
+          }}
+
+    # ── Verify server is alive before submitting ──────────────────────────────
+
+    - name: "{{ cve_id }} — Health check {{ _api_url }}"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/health"
+        method: GET
+        status_code: 200
+      register: _health
+      until: _health.status == 200
+      retries: 10
+      delay: 2
+      failed_when: _health.status != 200
+      ignore_errors: false
+
+    # ── Submit scan ───────────────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — POST /scans to {{ _api_url }}"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/scans"
+        method: POST
+        body_format: json
+        body: "{{ _scan_body }}"
+        status_code: [201, 202]
+      register: scan_submit
+
+    - name: "{{ cve_id }} — Set scan ID"
+      ansible.builtin.set_fact:
+        _scan_id: "{{ scan_submit.json.id }}"
+
+    # ── Poll until completed ──────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — Poll GET /scans/{{ _scan_id }}"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/scans/{{ _scan_id }}"
+        method: GET
+        status_code: 200
+      register: scan_status
+      until: scan_status.json.status in ['completed', 'failed']
+      retries: "{{ (scan_timeout | int // 2) | int }}"
+      delay: 2
+
+    # ── Fetch findings ────────────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — GET /scans/{{ _scan_id }}/findings"
+      ansible.builtin.uri:
+        url: "{{ _api_url }}/scans/{{ _scan_id }}/findings"
+        method: GET
+        status_code: 200
+      register: scan_findings
+
+    - name: "{{ cve_id }} — Count findings"
+      ansible.builtin.set_fact:
+        findings_count: "{{ scan_findings.json | length }}"
+
+    # ── Assert ────────────────────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — Assert TRUE POSITIVE"
+      ansible.builtin.assert:
+        that: findings_count | int > 0
+        fail_msg: >-
+          FALSE NEGATIVE on {{ inventory_hostname }} ({{ cve_id }}):
+          expected findings on vulnerable target, got 0.
+          Scan status: {{ scan_status.json.status }}
+        success_msg: "TRUE POSITIVE ✓ — {{ findings_count }} finding(s)"
+      when: expected_result == 'vulnerable'
+
+    - name: "{{ cve_id }} — Assert finding references expected CVE(s)"
+      vars:
+        found_cves: "{{ scan_findings.json | map(attribute='cve_ids') | sum(start=[]) | unique | list }}"
+      ansible.builtin.assert:
+        that: >-
+          found_cves | intersect(expected_cves) | length > 0
+        fail_msg: >-
+          WRONG CVE(s) in findings: expected one of {{ expected_cves }},
+          got {{ found_cves }}.
+          The feed may be selecting the wrong test or the uid/cves field is misconfigured.
+        success_msg: "CVE(s) ✓ — finding(s) reference {{ found_cves | intersect(expected_cves) }}"
+      when: expected_result == 'vulnerable' and expected_cves | length > 0
+
+    - name: "{{ cve_id }} — Assert minimum confidence (proves detection steps fired)"
+      ansible.builtin.assert:
+        that: >-
+          (scan_findings.json | map(attribute='confidence') | list | max) >= expected_min_confidence
+        fail_msg: >-
+          LOW CONFIDENCE on {{ inventory_hostname }} ({{ cve_id }}):
+          max confidence {{ scan_findings.json | map(attribute='confidence') | list | max | round(2) }}
+          is below expected_min_confidence={{ expected_min_confidence }}.
+          The detection steps may not be exercising the right code path.
+        success_msg: >-
+          Confidence ✓ — {{ (scan_findings.json | map(attribute='confidence') | list | max * 100) | round | int }}%
+          (threshold {{ (expected_min_confidence * 100) | round | int }}%)
+      when: expected_result == 'vulnerable'
+
+    - name: "{{ cve_id }} — Assert minimum QoD (proves the right detection branch fired)"
+      ansible.builtin.assert:
+        that: >-
+          (scan_findings.json | map(attribute='qod') | list | max) >= expected_qod
+        fail_msg: >-
+          WRONG BRANCH on {{ inventory_hostname }} ({{ cve_id }}):
+          max QoD {{ scan_findings.json | map(attribute='qod') | list | max }}
+          is below expected_qod={{ expected_qod }}.
+          A shallower branch fired (fingerprint/banner?) instead of the intended detection path.
+          Check mock implementation and feed step conditions.
+        success_msg: >-
+          QoD ✓ — {{ scan_findings.json | map(attribute='qod') | list | max }}
+          (expected ≥ {{ expected_qod }})
+      when: expected_result == 'vulnerable' and expected_qod | int > 0
+
+    - name: "{{ cve_id }} — Assert TRUE NEGATIVE"
+      ansible.builtin.assert:
+        that: findings_count | int == 0
+        fail_msg: >-
+          FALSE POSITIVE on {{ inventory_hostname }} ({{ cve_id }}):
+          expected 0 findings on patched target, got {{ findings_count }}.
+        success_msg: "TRUE NEGATIVE ✓ — 0 findings on patched target"
+      when: expected_result == 'clean'
+
+    # ── Show findings detail ──────────────────────────────────────────────────
+
+    - name: "{{ cve_id }} — Findings detail"
+      ansible.builtin.debug:
+        msg: >-
+          [{{ loop_idx + 1 }}/{{ scan_findings.json | length }}]
+          {{ item.cve_ids | default([]) | join(', ') | default('no CVE', true) }}
+          · {{ item.severity | default('?') | upper }}
+          · confidence={{ (item.confidence * 100) | round | int }}%
+          · qod={{ item.qod | default('?') }}
+          · evidence: {{ item.evidence | to_json | truncate(200) }}
+      loop: "{{ scan_findings.json }}"
+      loop_control:
+        label: "finding {{ loop_idx + 1 }}"
+        index_var: loop_idx
+      when: findings_count | int > 0
+
+    - name: "{{ cve_id }} — Summary"
+      ansible.builtin.debug:
+        msg: |
+          ── {{ cve_id }} — {{ inventory_hostname }} ──────────────
+          Target   : {{ target_host }}:{{ target_port }} ({{ target_service }})
+          Server   : {{ _api_url }}{{ ' [OOB]' if noctis_use_oob else '' }}
+          Expected : {{ expected_result }}
+          Findings : {{ findings_count }}
+          Result   : {{ 'PASS' if
+                         (expected_result == 'vulnerable' and findings_count | int > 0) or
+                         (expected_result == 'clean' and findings_count | int == 0)
+                       else 'FAIL' }}
+
+  always:
+    - name: "{{ cve_id }} — Teardown container {{ container_name }}"
+      ansible.builtin.command:
+        cmd: "{{ container_runtime }} rm -f {{ container_name }}"
+      failed_when: false
+      changed_when: true
+      async: 30
+      poll: 0

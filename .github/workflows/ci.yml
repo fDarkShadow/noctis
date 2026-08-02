@@ -78,9 +78,15 @@ jobs:
 
       - name: Validate feeds
         run: |
-          for f in tests/cve/*.yaml tests/misconfig/*.yaml; do
+          for f in tests/vulnerabilities/*/*.yaml; do
             ys -f schemas/feed.schema.json "$f"
           done
+
+      - name: Feed integrity (sha lockfile + uid uniqueness)
+        run: python3 scripts/check_feeds.py
+
+      - name: Mock manifest up to date
+        run: python3 scripts/gen_mocks_manifest.py --check
 
   codeql:
     name: CodeQL SAST

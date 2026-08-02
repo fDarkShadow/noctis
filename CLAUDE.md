@@ -4,7 +4,7 @@ Working instructions for Claude Code on this project.
 
 > **Autonomous agents** — read this file in full before writing a single line of code.
 > It documents every convention, pitfall, and pattern you need. Existing feeds and mocks
-> in `tests/cve/` and `infra/docker/` are your primary reference — copy and adapt them
+> in `tests/vulnerabilities/` and `infra/docker/` are your primary reference — copy and adapt them
 > rather than inventing new patterns.
 
 ## Architecture
@@ -28,7 +28,7 @@ noctis/
 │   ├── model/              # Structs deserialized from YAML
 │   │   ├── test_def.rs     # TestDef — metadata + steps + services
 │   │   ├── step.rs         # Step — all fields of a step
-│   │   ├── finding.rs      # Finding, FindingKind, Evidence
+│   │   ├── finding.rs      # Finding, Vulnerability, Evidence
 │   │   └── severity.rs     # Severity enum
 │   ├── checks/             # Low-level network primitives
 │   │   ├── http.rs         # reqwest wrapper
@@ -39,16 +39,19 @@ noctis/
 │   ├── expr/               # {{var}} templates and Rhai scripts
 │   └── oob/                # OOB HTTP server for blind callbacks
 ├── tests/                  # YAML feeds
-│   ├── cve/                # One file per CVE
-│   ├── misconfig/          # Misconfiguration checks
+│   ├── vulnerabilities/    # <product>/<id>.yaml — one file per vulnerability, 0..N CVEs each
+│   │   └── .feed-shas.json # sha256 lockfile — see scripts/check_feeds.py
 │   └── common/             # Reusable includes
+├── scripts/
+│   ├── gen_mocks_manifest.py # generates infra/docker/MOCKS.md (mock → consumer feeds)
+│   └── check_feeds.py        # sha lockfile + uid-uniqueness check — task feeds-check
 └── infra/                  # Reproducible test infrastructure
-    ├── Taskfile.yml         # task test CVE=CVE-XXXX / task test-all
-    ├── playbooks/           # 00-build / 01-start-servers / 10-CVE-* / 99-stop-servers
+    ├── Taskfile.yml         # task test ID=CVE-XXXX / task test-all / task mocks-manifest
+    ├── playbooks/           # 00-build / 01-start-servers / 10-<product>-<id> / 99-stop-servers
     ├── bake/                # docker-bake HCL files, one per product family
     ├── roles/common_docker/ # Generic role: find port → REST POST /scans → assert → teardown
-    ├── inventories/         # One directory per CVE (hosts.yml)
-    └── docker/              # Vuln/patched Dockerfiles per CVE
+    ├── inventories/         # <product>/<id>/hosts.yml — one directory per vulnerability
+    └── docker/              # Vuln/patched Dockerfiles per product; MOCKS.md (generated)
 ```
 
 ## Essential commands
@@ -62,9 +65,12 @@ cargo clippy -- -D warnings           # lint
 noctis serve --host 0.0.0.0 --port 8080
 
 # End-to-end tests (from infra/)
-task test CVE=CVE-2021-41773          # TP + TN for one CVE
-task test-all                          # all CVEs
+task test ID=CVE-2021-41773           # TP + TN for one vulnerability
+task test-all                          # all vulnerabilities
 task build                             # build local mock images (podman build)
+task mocks-manifest                    # regenerate infra/docker/MOCKS.md
+task feeds-check                       # sha lockfile + uid-uniqueness check
+task feeds-check -- --write            # regenerate the lockfile after an intentional feed edit
 ```
 
 ## Key data model
@@ -89,10 +95,19 @@ pub struct DiscoveredService {
 ### TestDef (YAML)
 ```yaml
 uid: <uuid-v4-stable>          # immutable identifier
-type: cve | misconfig
+cves: []                       # zero, one, or many CVE IDs — see examples below
 services: [http, https]        # ports targeted by nmap service name
 confidence_base: 0.30          # confidence before steps run
 ```
+
+`cves` cardinality — a feed is a **vulnerability test**, not a "CVE test":
+```yaml
+cves: []                                       # misconfiguration / heuristic check, no CVE
+cves: [CVE-2021-44228]                         # the common case — exactly one CVE
+cves: [CVE-2023-46805, CVE-2024-21887]         # a chain tracked by multiple CVE IDs
+```
+`category` (optional, free string) still classifies a feed regardless of `cves` —
+e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside a CVE.
 
 ### Service → port matching
 - Feed `services: []` → runs on **all** discovered ports
@@ -124,9 +139,8 @@ YAML feeds must not redefine `port:` or `scheme:` in their `vars:` section — t
 ```yaml
 uid: <uuid-v4>          # stable, unique, never change
 name: "..."
-type: cve
-cve: CVE-XXXX-XXXXX
-cvss: 9.8
+cves: [CVE-XXXX-XXXXX]  # [] if no CVE applies, or several for a chain
+cvss: 9.8               # omit if cves is empty
 severity: critical
 confidence_base: 0.30   # low — steps raise it
 tags: [...]
@@ -196,11 +210,26 @@ resp.connected       bool
 
 ## Test infrastructure (infra/)
 
-### Adding a new CVE
+### Adding a new vulnerability
 
-1. **Feed**: `tests/cve/CVE-XXXX-XXXXX.yaml` with a stable UUID v4 uid
-2. **Inventory**: `infra/inventories/CVE-XXXX-XXXXX/hosts.yml`
-   - Four hosts minimum: `<cve>_vuln`, `<cve>_vuln_https`, `<cve>_patched`, `<cve>_patched_https`
+`<id>` below = the CVE ID when the vulnerability maps to exactly one CVE (the common case),
+or a descriptive kebab-case slug when it maps to zero CVEs (misconfiguration/heuristic check)
+or to a chain tracked by several CVE IDs (e.g. `ivanti-connect-secure-auth-bypass-rce`).
+
+`<product>` = the mock's product slug — normally the `infra/docker/<product>-mock/`
+directory name with the `-mock` suffix (and any trailing CVE-number suffix) stripped, e.g.
+`bigip-22986-mock` → `bigip`. Feeds with no dedicated mock (misconfiguration checks) use
+`<product>` = `general`. **Before picking a `<product>`, check `infra/docker/MOCKS.md`** —
+if a mock for this product already exists, decide deliberately whether to reuse it
+(extend, never overwrite existing endpoints — see the shared-mock warning below) or give
+your CVE its own dedicated mock directory instead.
+
+1. **Feed**: `tests/vulnerabilities/<product>/<id>.yaml` with a stable UUID v4 uid and
+   `cves: []` set to the matching 0, 1, or N CVE IDs. After adding or editing it, run
+   `task feeds-check -- --write` and commit the updated `.feed-shas.json` lockfile —
+   CI fails otherwise.
+2. **Inventory**: `infra/inventories/<product>/<id>/hosts.yml`
+   - Four hosts minimum: `<id>_vuln`, `<id>_vuln_https`, `<id>_patched`, `<id>_patched_https`
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
    - HTTPS hosts: add `container_port: 443` and `target_service: https`
    - **No `target_port`** — port is allocated dynamically
@@ -226,13 +255,21 @@ resp.connected       bool
    The role routes OOB hosts to server B (port 8081) and injects `oob.host` / `oob.port`
    automatically. Also correct the standard 4 hosts' `expected_qod` to the non-OOB max QoD
    (e.g., 75 for response analysis) since OOB steps won't fire there.
-4. **Docker images**: `infra/docker/<cve-name>/Dockerfile.vuln` + `Dockerfile.patched`
+4. **Docker images**: `infra/docker/<product-name>/Dockerfile.vuln` + `Dockerfile.patched`
    - All mocks serve HTTP:80 **and** HTTPS:443 (self-signed cert generated at build time via openssl)
    - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)
    - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
    - EOL base images (e.g. httpd:2.4.49 on Debian Buster): patch apt sources to `archive.debian.org` before installing openssl
-4. **Playbook**: `infra/playbooks/10-CVE-XXXX-XXXXX.yml` (copy an existing one — prefix `10-` is mandatory; `task test-all` auto-discovers playbooks by sorted filename)
-5. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
+   - **If reusing an existing mock directory** (per `infra/docker/MOCKS.md`): only *add*
+     new `elif`-branches for your endpoint. Never change an existing endpoint's status
+     code, body format, or the exact fields another feed's `match`/`pattern:` depends on
+     — this has broken two already-merged CVEs before. Run `task mocks-manifest` after,
+     then `task test ID=<other-id>` for every other consumer listed for that mock.
+5. **Playbook**: `infra/playbooks/10-<product>-<id>.yml` (copy an existing one — prefix
+   `10-` is mandatory; `task test-all` discovers playbooks from `infra/inventories/*/*/`
+   directories, not by filename glob). Set `expected_cves: []` (matching the feed's
+   `cves:`) alongside the display `cve_id`/`feed_path` vars.
+6. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
 
 ### Python mock template (copy from `infra/docker/bigip-mock/server.py`)
 
@@ -311,13 +348,16 @@ No registration needed — the directory name is the image name.
 
 | Pattern | Best example |
 |---------|-------------|
-| HTTP path traversal (tcp_connect) | `tests/cve/CVE-2019-11510.yaml` |
-| HTTP header injection | `tests/cve/CVE-2014-6271.yaml` |
-| HTTP auth bypass (http_request) | `tests/cve/CVE-2022-1388.yaml` |
-| SSH banner version check | `tests/cve/CVE-2024-6387.yaml` |
-| Version via endpoint + OOB | `tests/cve/CVE-2021-44228.yaml` |
-| OGNL/template injection | `tests/cve/CVE-2022-26134.yaml` |
-| Multi-step with condition | `tests/cve/CVE-2023-46805.yaml` |
+| HTTP path traversal (tcp_connect) | `tests/vulnerabilities/pulse-secure/CVE-2019-11510.yaml` |
+| HTTP header injection | `tests/vulnerabilities/shellshock/CVE-2014-6271.yaml` |
+| HTTP auth bypass (http_request) | `tests/vulnerabilities/bigip/CVE-2022-1388.yaml` |
+| SSH banner version check | `tests/vulnerabilities/regresshion/CVE-2024-6387.yaml` |
+| Version via endpoint + OOB | `tests/vulnerabilities/log4shell/CVE-2021-44228.yaml` |
+| OGNL/template injection | `tests/vulnerabilities/confluence/CVE-2022-26134.yaml` |
+| Multi-step, first half of a 2-CVE chain (`cves: [CVE-2023-46805]`) | `tests/vulnerabilities/ivanti/CVE-2023-46805.yaml` |
+| 0-CVE check, loop over a static list (`cves: []`, `category:`) | `tests/vulnerabilities/general/exposed-paths.yaml` |
+| 0-CVE check, ssh_check + match | `tests/vulnerabilities/general/ssh-weak-auth.yaml` |
+| 0-CVE check, tls_check | `tests/vulnerabilities/general/tls-weak-config.yaml` |
 
 ### Dynamic port allocation
 The `common_docker` role finds a free port via Python before each test:
@@ -332,11 +372,11 @@ Never hardcode `target_port` in an inventory.
 
 ## Feed authoring tooling
 
-`schemas/feed.schema.json` — JSON Schema draft-07 for YAML feeds. Provides validation and autocomplete via the Red Hat YAML extension (already wired in `.vscode/settings.json` for `tests/cve/*.yaml` and `tests/misconfig/*.yaml`).
+`schemas/feed.schema.json` — JSON Schema draft-07 for YAML feeds. Provides validation and autocomplete via the Red Hat YAML extension for `tests/vulnerabilities/*.yaml`.
 
 CLI validation:
 ```sh
-npx ajv-cli validate -s schemas/feed.schema.json -d "tests/cve/*.yaml" --spec=draft7 --allow-union-types
+npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.yaml" --spec=draft7 --allow-union-types
 ```
 
 ## Known pitfalls
@@ -357,3 +397,7 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/cve/*.yaml" --spec=dr
 - **Debian Bullseye EOL** (httpd:2.4.51, python images using bullseye) — `bullseye-security` does not exist at `archive.debian.org`. Drop the security repo entirely: replace `/etc/apt/sources.list` with `echo "deb http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list`.
 - **`action: set_var` uses `var_name:` / `var_value:` fields, NOT a `vars:` map** — using `vars:` silently drops the step (unknown field ignored by serde), `var_name` is None, `run_set_var` returns `MissingField`, the scan runner swallows the error as `vec![]` findings. Always write `var_name: foo` / `var_value: false` on separate lines.
 - **`&&` in Rhai conditions works and short-circuits** — `cond_a == true && resp.status == 200` is safe even if `resp` is undefined: if `cond_a` is false, `resp.status` is never evaluated.
+- **`cves: []` empty is valid and normal** — don't invent a placeholder CVE ID for a misconfiguration/heuristic check. `category:` is the classifier for 0-CVE feeds, not `cves`.
+- **`ScanFilters.exclude_cve` matches on overlap, not equality** — a test is excluded if *any* entry in its `cves:` list appears in the exclusion list, so excluding one CVE of a multi-CVE chain feed excludes the whole feed.
+- **Shared mocks silently break other CVEs** — `infra/docker/<product>-mock/` is sometimes reused by more than one CVE (check `infra/docker/MOCKS.md`). Overwriting an existing endpoint/response format instead of adding a new branch breaks the *other* CVE's test without any error appearing in your own — it only surfaces if that CVE happens to be re-run (e.g. in `task test-all`). Always add, never replace; re-test every other consumer listed in `MOCKS.md`.
+- **`task feeds-check` fails on a feed you edited** — that's by design: any content change to a file already in `tests/vulnerabilities/.feed-shas.json` must be accompanied by `task feeds-check -- --write` in the same commit, so an unreviewed/accidental edit to an existing feed shows up in the diff instead of silently merging.

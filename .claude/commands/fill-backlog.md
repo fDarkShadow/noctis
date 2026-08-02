@@ -11,8 +11,9 @@ implement them without additional research.
 
 ### Already-implemented feeds
 ```bash
-ls tests/cve/        # e.g. CVE-2021-44228.yaml
-ls tests/misconfig/  # e.g. tls-weak-config.yaml
+ls tests/vulnerabilities/*/         # <product>/<id>.yaml, e.g. log4shell/CVE-2021-44228.yaml
+grep -h '^cves:' tests/vulnerabilities/*/*.yaml   # every CVE ID already covered (0..N per feed)
+cat infra/docker/MOCKS.md           # existing mocks — reuse deliberately, never accidentally
 ```
 
 ### Already-created issues (avoid duplicates)
@@ -210,8 +211,10 @@ For the **8 to 12 best candidates**, collect:
 ### Body format
 
 ```markdown
-### CVE ID
+### CVE ID(s)
 CVE-XXXX-XXXXX
+<or several, e.g. "CVE-2023-46805, CVE-2024-21887" for a chain>
+<or "None" for a misconfiguration/heuristic check with no CVE>
 
 ### Product / component
 <product name, exact component, vendor>
@@ -273,22 +276,19 @@ inventory vars directly without re-deriving them:
 ```
 
 ### Creation command
+
+`<ID>` in the title = the CVE ID when there's exactly one, the first CVE ID for a
+multi-CVE chain, or a descriptive kebab-case slug for a 0-CVE misconfiguration/heuristic
+check (e.g. `exposed-admin-paths`).
+
 ```bash
 gh issue create \
-  --title "<CVE-ID> — <Product> <short type> (KEV / EPSS X.XX)" \
-  --label "type:cve,status:available,priority:<high|medium|low>" \
+  --title "<ID> — <Product> <short type> (KEV / EPSS X.XX)" \
+  --label "type:vulnerability,status:available,priority:<high|medium|low>" \
   --body "$(cat <<'BODY'
 <body>
 BODY
 )"
-```
-
-For misconfigs:
-```bash
-gh issue create \
-  --title "<check-name> — <Product> <short description>" \
-  --label "type:misconfig,status:available,priority:<high|medium|low>" \
-  --body "..."
 ```
 
 ---

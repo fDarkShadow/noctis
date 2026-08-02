@@ -3,9 +3,9 @@ use serde_json::Value;
 
 use crate::error::{NoctisError, Result};
 use crate::expr;
-use crate::model::finding::{Evidence, Finding, FindingKind};
+use crate::model::finding::{Evidence, Finding, Vulnerability};
 use crate::model::step::{FindingSpec, Step, StepOutcome};
-use crate::model::test_def::{TestDef, TestKind};
+use crate::model::test_def::TestDef;
 
 use super::context::Context;
 
@@ -60,34 +60,23 @@ fn build_finding(
     let confidence = (def.confidence_base + spec.confidence_delta).clamp(0.0, 1.0);
     let severity = spec.severity.unwrap_or(def.severity);
 
-    let kind = match &def.kind {
-        TestKind::Cve => FindingKind::Cve {
-            cve_id: spec
-                .cve
-                .clone()
-                .or_else(|| def.cve.clone())
-                .unwrap_or_else(|| "UNKNOWN".to_string()),
-            cvss: spec.cvss.or(def.cvss),
-        },
-        TestKind::Misconfig => FindingKind::Misconfig {
-            category: def
-                .category
-                .clone()
-                .unwrap_or_else(|| "general".to_string()),
-            title: spec
-                .title
-                .as_ref()
-                .map(|t| expr::interpolate_lenient(t, &ctx.vars))
-                .unwrap_or_else(|| def.name.clone()),
-            description: spec
-                .description
-                .as_ref()
-                .map(|d| expr::interpolate_lenient(d, &ctx.vars)),
-            remediation: spec
-                .remediation
-                .as_ref()
-                .map(|r| expr::interpolate_lenient(r, &ctx.vars)),
-        },
+    let vuln = Vulnerability {
+        cve_ids: spec.cves.clone().unwrap_or_else(|| def.cves.clone()),
+        cvss: spec.cvss.or(def.cvss),
+        category: def.category.clone(),
+        title: spec
+            .title
+            .as_ref()
+            .map(|t| expr::interpolate_lenient(t, &ctx.vars))
+            .unwrap_or_else(|| def.name.clone()),
+        description: spec
+            .description
+            .as_ref()
+            .map(|d| expr::interpolate_lenient(d, &ctx.vars)),
+        remediation: spec
+            .remediation
+            .as_ref()
+            .map(|r| expr::interpolate_lenient(r, &ctx.vars)),
     };
 
     let evidence = Evidence {
@@ -102,7 +91,7 @@ fn build_finding(
     let finding = Finding::new(
         def.uid,
         step.id.clone(),
-        kind,
+        vuln,
         severity,
         confidence,
         spec.qod,
@@ -110,13 +99,9 @@ fn build_finding(
         Some(evidence),
     );
 
-    let label = match &finding.kind {
-        FindingKind::Cve { cve_id, .. } => cve_id.clone(),
-        FindingKind::Misconfig { title, .. } => title.clone(),
-    };
     tracing::info!(
         target = %ctx.target_label(),
-        check = %label,
+        check = %finding.title,
         qod = finding.qod,
         confidence = finding.confidence,
         severity = %finding.severity,
@@ -130,26 +115,24 @@ fn build_finding(
 mod tests {
     use super::*;
     use crate::engine::context::Context;
-    use crate::model::finding::FindingKind;
     use crate::model::severity::Severity;
     use crate::model::step::{FindingSpec, StepOutcome};
-    use crate::model::test_def::{TestDef, TestKind};
+    use crate::model::test_def::TestDef;
     use indexmap::IndexMap;
     use uuid::Uuid;
 
-    fn make_def(kind: TestKind) -> TestDef {
+    fn make_def() -> TestDef {
         TestDef {
             uid: Uuid::new_v4(),
             name: "Test".to_string(),
             description: None,
-            kind,
             severity: Severity::High,
             confidence_base: 0.8,
             tags: vec![],
             author: None,
             version: None,
             references: vec![],
-            cve: Some("CVE-2021-44228".to_string()),
+            cves: vec!["CVE-2021-44228".to_string()],
             cvss: Some(10.0),
             category: Some("injection".to_string()),
             services: vec![],
@@ -192,7 +175,7 @@ mod tests {
 
     fn make_spec() -> FindingSpec {
         FindingSpec {
-            cve: None,
+            cves: None,
             cvss: None,
             title: Some("Vuln found".to_string()),
             description: None,
@@ -212,7 +195,7 @@ mod tests {
 
     #[test]
     fn to_json_serializes_value() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let val = serde_json::json!({"status": 200});
         let result = to_json(&val, &step, &def).unwrap();
@@ -223,7 +206,7 @@ mod tests {
 
     #[test]
     fn none_outcome_returns_false_no_stop() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         assert!(!handle_outcome(&None, &step, &def, &mut c, None).unwrap());
@@ -232,7 +215,7 @@ mod tests {
 
     #[test]
     fn outcome_stop_true_returns_true() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         let out = StepOutcome {
@@ -246,7 +229,7 @@ mod tests {
 
     #[test]
     fn outcome_emits_finding() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         let out = StepOutcome {
@@ -261,7 +244,7 @@ mod tests {
 
     #[test]
     fn outcome_condition_false_skips() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         let out = StepOutcome {
@@ -277,7 +260,7 @@ mod tests {
 
     #[test]
     fn outcome_condition_true_runs() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         let out = StepOutcome {
@@ -292,7 +275,7 @@ mod tests {
 
     #[test]
     fn outcome_set_vars() {
-        let def = make_def(TestKind::Cve);
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         let mut set_vars = IndexMap::new();
@@ -313,8 +296,8 @@ mod tests {
     // ── build_finding (via handle_outcome) ────────────────────────────────
 
     #[test]
-    fn cve_finding_kind() {
-        let def = make_def(TestKind::Cve);
+    fn finding_inherits_feed_cves() {
+        let def = make_def();
         let step = make_step("s");
         let mut c = ctx();
         let out = StepOutcome {
@@ -324,12 +307,33 @@ mod tests {
             condition: None,
         };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
-        assert!(matches!(c.findings[0].kind, FindingKind::Cve { .. }));
+        assert_eq!(c.findings[0].cve_ids, vec!["CVE-2021-44228".to_string()]);
     }
 
     #[test]
-    fn misconfig_finding_kind() {
-        let def = make_def(TestKind::Misconfig);
+    fn finding_step_cves_override_feed_cves() {
+        let def = make_def();
+        let step = make_step("s");
+        let mut c = ctx();
+        let mut spec = make_spec();
+        spec.cves = Some(vec!["CVE-2023-46805".to_string(), "CVE-2024-21887".to_string()]);
+        let out = StepOutcome {
+            finding: Some(spec),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
+        handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
+        assert_eq!(
+            c.findings[0].cve_ids,
+            vec!["CVE-2023-46805".to_string(), "CVE-2024-21887".to_string()]
+        );
+    }
+
+    #[test]
+    fn finding_with_no_cves_is_valid() {
+        let mut def = make_def();
+        def.cves = vec![];
         let step = make_step("s");
         let mut c = ctx();
         let out = StepOutcome {
@@ -339,12 +343,27 @@ mod tests {
             condition: None,
         };
         handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
-        assert!(matches!(c.findings[0].kind, FindingKind::Misconfig { .. }));
+        assert!(c.findings[0].cve_ids.is_empty());
+    }
+
+    #[test]
+    fn finding_inherits_feed_category() {
+        let def = make_def();
+        let step = make_step("s");
+        let mut c = ctx();
+        let out = StepOutcome {
+            finding: Some(make_spec()),
+            set_vars: None,
+            stop: false,
+            condition: None,
+        };
+        handle_outcome(&Some(out), &step, &def, &mut c, None).unwrap();
+        assert_eq!(c.findings[0].category, Some("injection".to_string()));
     }
 
     #[test]
     fn confidence_clamped_by_delta() {
-        let mut def = make_def(TestKind::Cve);
+        let mut def = make_def();
         def.confidence_base = 0.9;
         let mut spec = make_spec();
         spec.confidence_delta = 0.5; // 0.9 + 0.5 = 1.4 → clamped to 1.0
@@ -362,7 +381,7 @@ mod tests {
 
     #[test]
     fn severity_override_from_spec() {
-        let def = make_def(TestKind::Cve); // severity: High
+        let def = make_def(); // severity: High
         let mut spec = make_spec();
         spec.severity = Some(Severity::Critical);
         let step = make_step("s");

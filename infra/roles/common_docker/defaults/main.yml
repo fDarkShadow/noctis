@@ -27,3 +27,7 @@ expected_min_confidence: 0.50
 #   97    = OOB callback or confirmed RCE
 # Set per vuln host in the inventory. Omit (or set to 0) to skip this check.
 expected_qod: 0
+
+# CVE IDs the vulnerable target's findings are expected to reference (0, 1, or many).
+# Empty = skip the CVE-membership assertion (e.g. a misconfiguration check with no CVE).
+expected_cves: []

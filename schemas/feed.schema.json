@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://noctis/schemas/feed.schema.json",
   "title": "Noctis test feed",
-  "description": "Schema for YAML vulnerability / misconfiguration feeds consumed by noctis.",
+  "description": "Schema for YAML vulnerability feeds consumed by noctis (each may reference zero, one, or many CVEs).",
   "type": "object",
-  "required": ["uid", "name", "type", "severity", "services", "steps"],
+  "required": ["uid", "name", "severity", "services", "steps"],
   "additionalProperties": false,
   "properties": {
     "uid": {
@@ -14,15 +14,11 @@
     },
     "name": { "type": "string" },
     "description": { "type": "string" },
-    "type": {
-      "type": "string",
-      "enum": ["cve", "misconfig"],
-      "description": "Feed category."
-    },
-    "cve": {
-      "type": "string",
-      "pattern": "^CVE-\\d{4}-\\d+$",
-      "description": "Required when type is cve."
+    "cves": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CVE-\\d{4}-\\d+$" },
+      "default": [],
+      "description": "Zero, one, or many CVE identifiers this vulnerability corresponds to."
     },
     "cvss": {
       "type": "number",
@@ -53,7 +49,7 @@
     "version": { "type": "string" },
     "category": {
       "type": "string",
-      "description": "Misconfig category (required when type is misconfig)."
+      "description": "Optional free-form classification (e.g. exposure, ssh, injection, auth-bypass)."
     },
     "references": {
       "type": "array",
@@ -251,7 +247,11 @@
           "enum": ["info", "low", "medium", "high", "critical"],
           "description": "Overrides the feed-level severity for this specific finding."
         },
-        "cve": { "type": "string", "pattern": "^CVE-\\d{4}-\\d+$" },
+        "cves": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^CVE-\\d{4}-\\d+$" },
+          "description": "Overrides the feed-level cves list for this specific finding."
+        },
         "cvss": { "type": "number", "minimum": 0, "maximum": 10 },
         "title": { "type": "string" },
         "description": { "type": "string" },

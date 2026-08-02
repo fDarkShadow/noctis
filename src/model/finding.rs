@@ -25,24 +25,6 @@ pub mod qod {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum FindingKind {
-    Cve {
-        cve_id: String,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        cvss: Option<f32>,
-    },
-    Misconfig {
-        category: String,
-        title: String,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        description: Option<String>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        remediation: Option<String>,
-    },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Evidence {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub matched: Option<String>,
@@ -52,13 +34,35 @@ pub struct Evidence {
     pub response_excerpt: Option<String>,
 }
 
+/// What a finding is about — grouped separately from severity/confidence/evidence
+/// so `Finding::new` doesn't take a dozen positional arguments.
+#[derive(Debug, Clone)]
+pub struct Vulnerability {
+    /// CVE identifiers this finding corresponds to — zero, one, or many.
+    pub cve_ids: Vec<String>,
+    pub cvss: Option<f32>,
+    pub category: Option<String>,
+    pub title: String,
+    pub description: Option<String>,
+    pub remediation: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Finding {
     pub id: Uuid,
     pub test_uid: Uuid,
     pub step_id: String,
-    #[serde(flatten)]
-    pub kind: FindingKind,
+    #[serde(default)]
+    pub cve_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cvss: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+    pub title: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remediation: Option<String>,
     pub severity: Severity,
     /// Confidence score for this finding instance (0.0–1.0)
     pub confidence: f32,
@@ -75,7 +79,7 @@ impl Finding {
     pub fn new(
         test_uid: Uuid,
         step_id: impl Into<String>,
-        kind: FindingKind,
+        vuln: Vulnerability,
         severity: Severity,
         confidence: f32,
         qod: u8,
@@ -86,7 +90,12 @@ impl Finding {
             id: Uuid::new_v4(),
             test_uid,
             step_id: step_id.into(),
-            kind,
+            cve_ids: vuln.cve_ids,
+            cvss: vuln.cvss,
+            category: vuln.category,
+            title: vuln.title,
+            description: vuln.description,
+            remediation: vuln.remediation,
             severity,
             confidence: confidence.clamp(0.0, 1.0),
             qod: qod.clamp(0, 100),
@@ -105,9 +114,13 @@ mod tests {
         Finding::new(
             Uuid::new_v4(),
             "step-1",
-            FindingKind::Cve {
-                cve_id: "CVE-2021-44228".to_string(),
+            Vulnerability {
+                cve_ids: vec!["CVE-2021-44228".to_string()],
                 cvss: Some(10.0),
+                category: None,
+                title: "Log4Shell".to_string(),
+                description: None,
+                remediation: None,
             },
             Severity::Critical,
             confidence,
@@ -148,9 +161,13 @@ mod tests {
         let f = Finding::new(
             uid,
             "s",
-            FindingKind::Cve {
-                cve_id: "CVE-X".to_string(),
+            Vulnerability {
+                cve_ids: vec!["CVE-X".to_string()],
                 cvss: None,
+                category: None,
+                title: "Test".to_string(),
+                description: None,
+                remediation: None,
             },
             Severity::Info,
             0.5,

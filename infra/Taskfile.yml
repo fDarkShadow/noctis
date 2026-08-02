@@ -20,18 +20,25 @@ tasks:
       - ansible-playbook playbooks/00-build-mocks.yml
 
   test:
-    desc: "Test one CVE (TP + TN) — task test CVE=CVE-2021-41773"
+    desc: "Test one vulnerability (TP + TN) — task test ID=CVE-2021-41773"
     deps: [check-deps]
     dir: "{{.TASKFILE_DIR}}"
     requires:
-      vars: [CVE]
+      vars: [ID]
     cmds:
       - |
         set +e
+        inv_dir=$(find inventories -mindepth 2 -maxdepth 2 -type d -name "{{.ID}}" | head -1)
+        if [ -z "$inv_dir" ]; then
+          echo "No inventory found for ID={{.ID}} (looked for inventories/*/{{.ID}})" >&2
+          exit 1
+        fi
+        vendor=$(basename "$(dirname "$inv_dir")")
+        playbook="playbooks/10-${vendor}-{{.ID}}.yml"
         ansible-playbook playbooks/00-build-noctis.yml playbooks/01-start-servers.yml
         startup_rc=$?
         if [ $startup_rc -eq 0 ]; then
-          ansible-playbook playbooks/10-{{.CVE}}.yml -i inventories/{{.CVE}}
+          ansible-playbook "$playbook" -i "$inv_dir"
           test_rc=$?
         else
           test_rc=$startup_rc
@@ -40,7 +47,7 @@ tasks:
         exit $test_rc
 
   test-all:
-    desc: "Run all CVE tests — servers start once, CVEs run independently (failures don't stop the suite)"
+    desc: "Run all vulnerability tests — servers start once, each runs independently (failures don't stop the suite)"
     deps: [check-deps]
     dir: "{{.TASKFILE_DIR}}"
     cmds:
@@ -50,10 +57,12 @@ tasks:
         startup_rc=$?
         overall_rc=0
         if [ $startup_rc -eq 0 ]; then
-          for playbook in $(find playbooks -name '10-CVE-*.yml' | sort); do
-            cve=$(basename "$playbook" .yml | sed 's/^10-//')
-            if [ -d "inventories/$cve" ]; then
-              ansible-playbook "$playbook" -i "inventories/$cve"
+          for inv_dir in $(find inventories -mindepth 2 -maxdepth 2 -type d | sort); do
+            vendor=$(basename "$(dirname "$inv_dir")")
+            id=$(basename "$inv_dir")
+            playbook="playbooks/10-${vendor}-${id}.yml"
+            if [ -f "$playbook" ]; then
+              ansible-playbook "$playbook" -i "$inv_dir"
               [ $? -ne 0 ] && overall_rc=1
             fi
           done
@@ -62,6 +71,18 @@ tasks:
         fi
         ansible-playbook playbooks/99-stop-servers.yml
         exit $overall_rc
+
+  mocks-manifest:
+    desc: "Regenerate infra/docker/MOCKS.md from the current inventories"
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - python3 ../scripts/gen_mocks_manifest.py
+
+  feeds-check:
+    desc: "Verify feed SHA lockfile + uid uniqueness — pass -- --write to regenerate the lockfile"
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - python3 ../scripts/check_feeds.py {{.CLI_ARGS}}
 
   clean:
     desc: "Remove all local noctis/* images"

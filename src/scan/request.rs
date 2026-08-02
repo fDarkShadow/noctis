@@ -80,7 +80,7 @@ pub struct ScanFilters {
     #[serde(default)]
     pub exclude_uids: Vec<Uuid>,
 
-    /// Exclude CVE tests whose `cve` field matches.
+    /// Exclude tests whose `cves` list contains any of these CVE IDs.
     #[serde(default)]
     pub exclude_cve: Vec<String>,
 
@@ -98,10 +98,8 @@ impl ScanFilters {
         if self.exclude_uids.contains(&def.uid) {
             return true;
         }
-        if let Some(cve) = &def.cve {
-            if self.exclude_cve.contains(cve) {
-                return true;
-            }
+        if self.exclude_cve.iter().any(|c| def.cves.contains(c)) {
+            return true;
         }
         if let Some(cat) = &def.category {
             if self.exclude_categories.contains(cat) {
@@ -119,7 +117,7 @@ impl ScanFilters {
 mod tests {
     use super::*;
     use crate::model::severity::Severity;
-    use crate::model::test_def::{TestDef, TestKind};
+    use crate::model::test_def::TestDef;
     use indexmap::IndexMap;
 
     fn make_def() -> TestDef {
@@ -127,14 +125,13 @@ mod tests {
             uid: Uuid::new_v4(),
             name: "Test".to_string(),
             description: None,
-            kind: TestKind::Misconfig,
             severity: Severity::Info,
             confidence_base: 0.7,
             tags: vec![],
             author: None,
             version: None,
             references: vec![],
-            cve: None,
+            cves: vec![],
             cvss: None,
             category: None,
             services: vec![],
@@ -174,7 +171,7 @@ mod tests {
     #[test]
     fn exclude_by_cve_match() {
         let mut def = make_def();
-        def.cve = Some("CVE-2021-44228".to_string());
+        def.cves = vec!["CVE-2021-44228".to_string()];
         let f = ScanFilters {
             exclude_cve: vec!["CVE-2021-44228".to_string()],
             ..Default::default()

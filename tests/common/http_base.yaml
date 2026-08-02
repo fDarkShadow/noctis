@@ -2,7 +2,6 @@
 # The `probe` step result is available as {{probe.status}}, {{probe.body}}, etc.
 uid: 94efedaa-c8cd-4a81-a1bc-b2cf9e529903
 name: "Common HTTP base"
-type: misconfig
 severity: info
 confidence_base: 1.0
 

@@ -116,8 +116,9 @@ pub struct StepOutcome {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct FindingSpec {
+    /// Overrides the feed-level `cves` list for this specific finding. `None` inherits.
     #[serde(default)]
-    pub cve: Option<String>,
+    pub cves: Option<Vec<String>>,
     #[serde(default)]
     pub cvss: Option<f32>,
     #[serde(default)]

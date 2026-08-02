@@ -37,8 +37,8 @@ gh issue list \
 
 ```bash
 ISSUE=<number from above>
-CVE=<cve id parsed from issue title/body>
-BRANCH="feat/$CVE"
+ID=<vulnerability id parsed from issue title/body — see Step 4>
+BRANCH="feat/$ID"
 
 # Does the issue already carry status:review?
 gh issue view $ISSUE --json labels --jq '[.labels[].name] | contains(["status:review"])'
@@ -57,8 +57,8 @@ gh issue edit $ISSUE \
   --remove-label "status:in-progress"
 
 # Remove stale worktree if still on disk
-git worktree list | grep "noctis-$CVE" \
-  && git worktree remove "../noctis-$CVE" --force || true
+git worktree list | grep "noctis-$ID" \
+  && git worktree remove "../noctis-$ID" --force || true
 ```
 
 Then continue to Step 2 — do not re-implement this issue.
@@ -67,7 +67,7 @@ Then continue to Step 2 — do not re-implement this issue.
 
 ```bash
 # Is the worktree still on disk?
-git worktree list | grep "noctis-$CVE"
+git worktree list | grep "noctis-$ID"
 ```
 
 Determine the resume point by checking what already exists:
@@ -81,7 +81,7 @@ Determine the resume point by checking what already exists:
 
 If the worktree is gone, recreate it:
 ```bash
-git worktree add "../noctis-$CVE" "$BRANCH"
+git worktree add "../noctis-$ID" "$BRANCH"
 ```
 
 Once resumed, continue from the identified step and complete the iteration normally.
@@ -113,31 +113,57 @@ gh issue edit $ISSUE \
 ### 4. Parse the issue body
 
 Extract from the body:
-- CVE ID or check name
+- CVE ID(s) — zero, one, or several (see "CVE ID(s)" field)
 - Product, affected versions, severity, target services
 - Description, detection strategy, references, Docker mock notes
+
+Derive `$ID`:
+- Exactly one CVE → `ID` = that CVE ID (e.g. `CVE-2024-1234`)
+- Zero or several CVEs → `ID` = a descriptive kebab-case slug
+  (e.g. `ivanti-connect-secure-auth-bypass-rce`, `exposed-admin-paths`)
+
+Derive `$PRODUCT` (the vendor/product subfolder): check `infra/docker/MOCKS.md` for an
+existing mock matching this product. If one exists, reuse its slug (e.g. `ivanti-epm`).
+If not, pick a new short product slug (normally the mock directory name you're about to
+create, minus `-mock`).
 
 ### 5. Create an isolated worktree
 
 ```bash
-CVE=<cve-id>   # e.g. CVE-2024-1234
-BRANCH="feat/$CVE"
-git worktree add "../noctis-$CVE" -b "$BRANCH"
-cd "../noctis-$CVE"
+ID=<vulnerability id>   # e.g. CVE-2024-1234, or a kebab-case slug
+BRANCH="feat/$ID"
+git worktree add "../noctis-$ID" -b "$BRANCH"
+cd "../noctis-$ID"
 ```
 
 ### 6. Implement
 
-Follow CLAUDE.md strictly. For each CVE/misconfig:
+Follow CLAUDE.md strictly. For each vulnerability:
 
-**a) YAML feed** — `tests/cve/<CVE>.yaml` or `tests/misconfig/<name>.yaml`
+**a) YAML feed** — `tests/vulnerabilities/<PRODUCT>/<ID>.yaml`
   - Generate a fresh valid UUID v4 (variant byte `[89ab]`)
+  - Set `cves: []` to the 0, 1, or N CVE IDs from the issue; set `category:` for
+    free-form classification regardless of `cves` (always set for a 0-CVE feed)
   - Always set `services:`
   - Use `tcp_connect` for any URL-encoded path payload
   - Use `resp.banner` (never `resp.data`)
   - Never define `port:` or `scheme:` in `vars:`
 
-**b) Docker mock** — `infra/docker/<name>/`
+**b) Docker mock** — `infra/docker/<name>-mock/`
+  - **Before writing anything, run `task mocks-manifest` (from `infra/`) and check
+    `infra/docker/MOCKS.md` for this mock name.** If any CVE other than the one you're
+    implementing is listed, **this mock is a shared dependency — do not overwrite its
+    existing endpoints or response format.** This exact mistake has broken merged tests
+    twice before (CVE-2026-1603's mock overwrote CVE-2024-29824's SOAP endpoint;
+    CVE-2023-43770 overwrote CVE-2025-49113's JSON version format) — both went
+    undetected because the agent only tested its own new CVE and never re-ran the other
+    CVE that quietly broke.
+    - **Add** a new `elif self.path == ...` branch / new response variant for your
+      endpoint. Never replace an existing branch's status code, body format, or
+      the exact matched strings/fields another feed's `match` step depends on.
+    - If you must change shared state (e.g. the version string format), first read
+      *every* feed listed for this mock in `MOCKS.md` and confirm your change is still
+      compatible with each one's `pattern:`/`source:`.
   - `Dockerfile.vuln` + `Dockerfile.patched`
   - Use `python:3.11-slim` base for proprietary appliances
   - Serve HTTP:80 + HTTPS:443 (self-signed cert via openssl)
@@ -145,7 +171,7 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
   - Use `SSLSessionCache none` + `Mutex file:` for Apache (not shmcb)
   - Debian Buster EOL: patch sources.list to archive.debian.org first
 
-**c) Inventory** — `infra/inventories/<CVE>/hosts.yml`
+**c) Inventory** — `infra/inventories/<PRODUCT>/<ID>/hosts.yml`
   - 4 hosts: `_vuln`, `_vuln_https`, `_patched`, `_patched_https`
   - Add `container_port: 443` on HTTPS hosts
   - Never add `target_port`
@@ -199,8 +225,12 @@ Follow CLAUDE.md strictly. For each CVE/misconfig:
     QoD reachable without OOB). The patched OOB host is essential: it proves the patched mock
     does NOT call back even when the scanner has OOB active.
 
-**d) Playbook** — `infra/playbooks/10-<CVE>.yml` (copy an existing one — the `10-` prefix is mandatory;
-  `task test-all` auto-discovers playbooks by sorted filename)
+**d) Playbook** — `infra/playbooks/10-<PRODUCT>-<ID>.yml` (copy an existing one — the
+  `10-` prefix is mandatory, but playbooks stay flat; `task test-all` discovers them by
+  walking `infra/inventories/*/*/` and matching `10-<product>-<id>.yml`, not by a
+  filename glob). Set `expected_cves: []` (matching the feed's `cves:`) alongside the
+  display `cve_id` var and `feed_path`
+  (`{{ noctis_feeds_dir }}/vulnerabilities/<PRODUCT>/<ID>.yaml`).
 
 **e) Mock image** — create `infra/docker/<product-name>/Dockerfile.vuln` + `Dockerfile.patched`.
   `task build` auto-discovers every directory under `infra/docker/` that contains a
@@ -219,7 +249,7 @@ If it fails: diagnose, fix, retry. Do not proceed until images build successfull
 ### 8. Run tests and verify branch coverage
 
 ```bash
-task test CVE=<CVE>
+task test ID=<ID>
 ```
 
 Expected: **4 passing tests** — but a green count is not enough. After the run, check:
@@ -262,6 +292,20 @@ Expected: **4 passing tests** — but a green count is not enough. After the run
   in the inventory. Verify the "Findings detail" shows `qod: 97` — this proves the OOB
   callback was actually received, not just that the HTTP request was sent.
 
+**e) Shared mock regression check — mandatory if Step 6b found other consumers**
+
+  If the mock you touched is used by any other CVE (per `MOCKS.md`, Step 6b), re-run
+  `task test ID=<other-CVE>` for **every** one of them now, even though you didn't
+  intend to change their behavior:
+  ```bash
+  task test ID=<other-cve-1>
+  task test ID=<other-cve-2>
+  ```
+  A regression here is silent otherwise — it won't appear in your own CVE's test
+  output, only in the other CVE's, and will merge unnoticed until a full
+  `task test-all` run catches it much later (or never). Do not open the PR until
+  every shared consumer still passes.
+
 On any failure:
 - Analyse the Ansible output (confidence, QoD, evidence)
 - Fix the feed or the mock, rebuild if needed
@@ -271,25 +315,30 @@ On any failure:
 **If the failure is caused by a bug in the Rust engine** (not in the feed or the mock):
 → see [Handling engine bugs](#handling-engine-bugs) below.
 
-### 9. Validate the schema
+### 9. Validate the schema and feed integrity
 
 ```bash
 cd ..  # repo root
 npx ajv-cli validate -s schemas/feed.schema.json \
-  -d "tests/cve/<CVE>.yaml" --spec=draft7 --allow-union-types
+  -d "tests/vulnerabilities/<PRODUCT>/<ID>.yaml" --spec=draft7 --allow-union-types
+cd infra
+task feeds-check -- --write   # regenerates tests/vulnerabilities/.feed-shas.json
+task mocks-manifest           # regenerates infra/docker/MOCKS.md if you added/reused a mock
 ```
 
-Fix any validation error before continuing.
+Fix any validation error before continuing. Both generated files (`.feed-shas.json`,
+`MOCKS.md`) must be committed alongside the feed — CI fails otherwise.
 
 ### 10. Commit and push
 
 ```bash
 git add tests/ infra/
-git commit -m "feat(<CVE>): add detection feed and test infrastructure
+git commit -m "feat(<ID>): add detection feed and test infrastructure
 
 - Feed YAML with <detection_method>
 - Python/Docker mock (vuln + patched), HTTP + HTTPS
 - Ansible inventory + playbook, 4 test cases
+- Updated MOCKS.md / .feed-shas.json
 
 Closes #<ISSUE>"
 git push origin "$BRANCH"
@@ -299,19 +348,19 @@ git push origin "$BRANCH"
 
 ```bash
 gh pr create \
-  --title "feat(<CVE>): <product> — <short description>" \
+  --title "feat(<ID>): <product> — <short description>" \
   --assignee fDarkShadow \
   --body "$(cat <<'EOF'
-## CVE / Check
+## Vulnerability
 
 **Issue:** #<ISSUE>
-**CVE:** <CVE_ID>
+**CVE(s):** <CVE_ID, CVE_ID, ... or "None">
 **Product:** <product>
 **CVSS:** <cvss>
 
 ## Implementation
 
-- Feed: `tests/cve/<CVE>.yaml`
+- Feed: `tests/vulnerabilities/<PRODUCT>/<ID>.yaml`
 - Mock: `infra/docker/<name>/` (HTTP:80 + HTTPS:443)
 - Tests: 4 cases (vuln/patched × HTTP/HTTPS)
 - Detection branch: `expected_qod=<N>` / `expected_min_confidence=<X.XX>`
@@ -319,7 +368,7 @@ gh pr create \
 ## Test results
 
 \`\`\`
-<paste task test output here — include the "Findings detail" lines showing cve_id, severity, confidence%, qod, evidence>
+<paste task test output here — include the "Findings detail" lines showing cve_ids, severity, confidence%, qod, evidence>
 \`\`\`
 
 ## Checklist
@@ -330,8 +379,9 @@ gh pr create \
 - [ ] Schema respected (additionalProperties)
 - [ ] `expected_qod` set in inventory — right detection branch fired (QoD ≥ expected)
 - [ ] `expected_min_confidence` set in inventory — confidence proves steps ran, not just base
-- [ ] Finding `cve_id` matches CVE
+- [ ] Finding `cve_ids` matches the expected CVE(s) (or is empty, for a 0-CVE check)
 - [ ] Patched mock produces zero findings (no false positive)
+- [ ] If the mock is shared with other CVEs: re-ran their tests too, still passing
 EOF
 )"
 ```
@@ -348,15 +398,15 @@ gh issue comment $ISSUE --body "PR opened: <pr_url>"
 ### 13. Clean up the worktree
 
 ```bash
-cd /home/flo/workspace/iscan
-git worktree remove "../noctis-$CVE" --force
+cd /home/florian/workspace/noctis
+git worktree remove "../noctis-$ID" --force
 ```
 
 ### 14. Stop
 
 Print a one-line summary and exit:
 ```
-✔ agent-loop done — <CVE> — PR #<N> opened — <N> issues remaining
+✔ agent-loop done — <ID> — PR #<N> opened — <N> issues remaining
 ```
 
 **Do not pick another issue. Do not continue.** The orchestrator (run-agents.sh or
@@ -404,7 +454,7 @@ cargo test 2>&1
 Both must pass before continuing. Include the fix in the commit:
 
 ```
-feat(<CVE>): add feed + fix <what> in src/<file>.rs
+feat(<ID>): add feed + fix <what> in src/<file>.rs
 
 - Feed YAML with <detection_method>
 - Python/Docker mock (vuln + patched), HTTP + HTTPS
