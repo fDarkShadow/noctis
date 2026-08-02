@@ -3,11 +3,18 @@ import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("ROUNDCUBE_MODE", "patched") == "vuln"
-VERSION = "1.6.2" if VULN_MODE else "1.6.3"
+VERSION = "1.6.2" if VULN_MODE else "1.6.11"
+# Roundcube encodes its version as a 4-digit MMMP integer (e.g. 1.6.2 -> 1602).
+RCVERSION = 1602 if VULN_MODE else 1611
 
+# Both version encodings are served together: CVE-2023-43770 fingerprints the
+# dotted `rcversion='X.Y.Z'` JS var, CVE-2025-49113 fingerprints the 4-digit
+# `"rcversion":MMMP` JSON field. Keep both in sync with VERSION/RCVERSION above
+# when touching this mock — see CLAUDE.md's shared-mock warning.
 LOGIN_HTML = """<html><head><title>Roundcube Webmail :: Welcome to Roundcube Webmail</title>
 <script>var rcversion='{v}', rcube_server_version='{v}';</script>
-</head><body>Login to Roundcube...</body></html>""".format(v=VERSION)
+<script>var rcmail_env = {{"rcversion":{rcversion},"skin":"elastic"}};</script>
+</head><body>Login to Roundcube {v}...</body></html>""".format(v=VERSION, rcversion=RCVERSION)
 
 APP_JS = "/* Roundcube Webmail v{v} */\nvar rcmail = null;\n".format(v=VERSION)
 

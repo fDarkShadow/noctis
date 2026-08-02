@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, ssl, threading, json
+import json, os, re, ssl, threading, urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("IVANTI_EPM_MODE", "patched") == "vuln"
@@ -13,6 +13,20 @@ AUTH_DENIED = json.dumps({
     "sessionid": None,
     "error": "Authentication required"
 })
+
+# CVE-2024-29824 — UpdateStatusEvents SOAP action accepts the stacked SQLi
+# payload and would execute it via xp_cmdshell on a real vulnerable server.
+SOAP_RESPONSE = """<?xml version="1.0" encoding="utf-8"?>
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+<soap12:Body><UpdateStatusEventsResponse xmlns="http://tempuri.org/"><UpdateStatusEventsResult>true</UpdateStatusEventsResult></UpdateStatusEventsResponse></soap12:Body>
+</soap12:Envelope>"""
+
+
+def _fetch_url(url):
+    try:
+        urllib.request.urlopen(url, timeout=10)
+    except Exception:
+        pass
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -42,6 +56,14 @@ class Handler(BaseHTTPRequestHandler):
                     self._send(200, AUTH_DENIED)
             except (json.JSONDecodeError, AttributeError):
                 self._send(400, json.dumps({"error": "Invalid request"}))
+        elif self.path.startswith("/WSStatusEvents/EventHandler.asmx"):
+            if VULN_MODE:
+                m = re.search(r"curl\s+(https?://[^\s'\"]+)", body)
+                if m:
+                    threading.Thread(target=_fetch_url, args=(m.group(1),), daemon=True).start()
+                self._send(200, SOAP_RESPONSE, "text/xml; charset=utf-8")
+            else:
+                self._send(404, json.dumps({"error": "Not found"}))
         else:
             self._send(404, json.dumps({"error": "Not found"}))
 
