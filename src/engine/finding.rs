@@ -316,7 +316,10 @@ mod tests {
         let step = make_step("s");
         let mut c = ctx();
         let mut spec = make_spec();
-        spec.cves = Some(vec!["CVE-2023-46805".to_string(), "CVE-2024-21887".to_string()]);
+        spec.cves = Some(vec![
+            "CVE-2023-46805".to_string(),
+            "CVE-2024-21887".to_string(),
+        ]);
         let out = StepOutcome {
             finding: Some(spec),
             set_vars: None,
