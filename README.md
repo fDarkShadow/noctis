@@ -243,7 +243,7 @@ End-to-end tests use Ansible + rootless Podman. Two `noctis serve` instances sta
 cd infra
 
 task build          # build all mock images in parallel (docker buildx bake)
-task test CVE=CVE-2021-41773    # true-positive + true-negative for one CVE
+task test ID=CVE-2021-41773     # true-positive + true-negative for one CVE
 task test-all       # all CVEs — servers start once, all inventories in one run
 task check-deps     # verify prerequisites
 ```
@@ -275,11 +275,11 @@ Most of the time is spent on step timeouts for non-matching services. Increase `
 See [`CLAUDE.md`](CLAUDE.md) for the full authoring guide: feed conventions, Python mock template, inventory structure, known pitfalls, and reference feeds to copy from.
 
 In short:
-1. Write a feed in `tests/cve/` with a stable UUID v4 `uid`
+1. Write a feed in `tests/vulnerabilities/<vendor>/` with a stable UUID v4 `uid`
 2. Add a Podman mock in `infra/docker/` (HTTP:80 + HTTPS:443)
 3. Add an inventory in `infra/inventories/` (4 hosts: vuln, vuln_https, patched, patched_https)
 4. Add `infra/playbooks/10-<CVE>.yml` (auto-discovered) and a bake target in `infra/bake/<family>.hcl` (auto-discovered)
-5. Run `task build && task test CVE=<your-cve>` — expect 4 passing tests
+5. Run `task build && task test ID=<your-cve>` — expect 4 passing tests
 
 ---
 

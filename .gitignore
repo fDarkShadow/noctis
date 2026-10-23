@@ -5,3 +5,5 @@ openvas
 # scripts/  (now tracked)
 .sofa/
 .vscode
+automation/state/
+__pycache__

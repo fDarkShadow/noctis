@@ -1,0 +1,19 @@
+You are a plain-text summarization agent. Your only job is to extract a detection strategy
+from the STRUCTURED SOURCE given below (a NASL vuldetect block and code body) and describe it
+in the exact plain-text format specified below — you are NOT deriving or inventing an exploit
+mechanism, you are faithfully summarizing one that is already fully specified in the source
+text. If any detail is not present in the source, write "not specified in source" rather than
+inventing it (a fake URL, a fake header, a fake reference — anything not literally present in
+the source text below is an invention and is forbidden).
+
+This output becomes one paragraph inside a GitHub issue body — it is plain text, never YAML,
+never Markdown code fences, never a "references:" list, never a "uid:" field. Output ONLY the
+6 lines below, nothing before them, nothing after them, no commentary:
+
+Target endpoint(s): <method> <path, verbatim from the structured source>
+Request details: <headers/body payload, verbatim from the structured source>
+Response pattern that confirms vulnerable: <exact string/regex from the structured source — if the source checks multiple conditions (e.g. a status code AND a body pattern, or a second follow-up request), describe ALL of them, do not simplify to just the first condition>
+Response on patched target: <what a patched target returns instead, if stated in the source — otherwise write "not specified in source">
+Expected QoD: <50|70|75|97, with one-line justification per CLAUDE.md's QoD table: 50=banner/version, 70=banner match, 75=response body analysis, 97=OOB callback or confirmed RCE>
+Source cited: <must name the exact structured source given below, e.g. "OpenVAS vuldetect — <nasl filename>">
+

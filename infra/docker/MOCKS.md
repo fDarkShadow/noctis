@@ -427,6 +427,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## vigorconnect-mock
 - vigorconnect/CVE-2021-20123
 
+## webmin-mock
+- webmin/CVE-2019-15107
+
 ## whatsupgold-mock
 - whatsupgold/CVE-2024-4885
 

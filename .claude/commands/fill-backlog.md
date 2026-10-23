@@ -284,7 +284,7 @@ check (e.g. `exposed-admin-paths`).
 ```bash
 gh issue create \
   --title "<ID> — <Product> <short type> (KEV / EPSS X.XX)" \
-  --label "type:vulnerability,status:available,priority:<high|medium|low>" \
+  --label "type:cve,status:available,priority:<high|medium|low>" \
   --body "$(cat <<'BODY'
 <body>
 BODY

@@ -522,6 +522,51 @@ gh issue comment $ISSUE --body "PR opened: <pr_url> — blocked by engine bug <b
 
 ---
 
+## Handling a missing engine feature
+
+Distinct from an engine **bug** (Case A/B above, where existing behaviour is wrong): sometimes
+the detection strategy needs a capability noctis's engine simply doesn't have at all — e.g. the
+CVE's confirmation mechanism requires raw TCP/ICMP packet capture, a protocol `checks/` doesn't
+implement, or a new `action:` type. Nothing is broken; it just doesn't exist yet. Do not force a
+workaround that silently changes what's actually being tested (e.g. faking a "confirmation" that
+doesn't really prove the vulnerability) — treat this the same way Stage 2 of the automated
+pipeline does (`automation/stage2_backlog_review/review_pending_backlog.md`), so issues stay
+consistent whether they were flagged by triage or discovered mid-implementation:
+
+**1. Check for an existing feature request first:**
+```bash
+gh issue list --label type:feature --state open --json number,title,body
+```
+Match on the underlying capability, not exact wording — don't create a duplicate.
+
+**2. If none exists, open one:**
+```bash
+gh issue create \
+  --title "feature: <short description of the missing engine capability>" \
+  --label "type:feature,priority:medium" \
+  --body "Needed to implement <ID> (noctis issue #<ISSUE>). <Describe exactly what's missing —
+e.g. an action/check that can capture a raw TCP SYN or ICMP echo, or a new protocol handler —
+and why the existing http_request/tcp_connect/oob primitives don't cover it. Reference the
+structured source (NASL/Nuclei/PoC) that specifies the mechanism.>"
+```
+
+**3. Cross-reference and block the vulnerability issue** — do not open a PR for this one:
+```bash
+gh issue comment $ISSUE --body "Blocked on missing engine feature: <feature_issue_url>"
+gh issue edit $ISSUE \
+  --add-label "status:delayed" \
+  --remove-label "status:in-progress"
+```
+`status:delayed` means "not claimable, not in the ~50-item backlog count, waiting on the linked
+`type:feature` issue" — distinct from `needs-help` (which means a human needs to unstick an
+in-progress attempt, not that a capability is genuinely absent). Re-activating a `status:delayed`
+issue once the feature ships is a manual step, not automatic.
+
+**4. Do not remove the worktree yet if you were mid-implementation and might resume once the
+feature lands** — otherwise clean up as usual.
+
+---
+
 ## Hard rules
 
 - Never merge a PR
