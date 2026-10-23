@@ -113,3 +113,59 @@ pub async fn run_ssh(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bo
         }
     }
 }
+
+/// Build the `(user, password)` list from the step: the explicit `credentials`
+/// list ("user:password" each), falling back to a single `username`/`password`.
+fn ssh_credentials(step: &Step, ctx: &Context) -> Result<Vec<(String, String)>> {
+    let mut creds = Vec::new();
+    if !step.credentials.is_empty() {
+        for raw in &step.credentials {
+            let pair = crate::expr::interpolate(raw, &ctx.vars)?;
+            let (u, p) = pair.split_once(':').unwrap_or((pair.as_str(), ""));
+            creds.push((u.to_string(), p.to_string()));
+        }
+    } else if let Some(user) = &step.username {
+        let u = crate::expr::interpolate(user, &ctx.vars)?;
+        let p = match &step.password {
+            Some(pw) => crate::expr::interpolate(pw, &ctx.vars)?,
+            None => String::new(),
+        };
+        creds.push((u, p));
+    }
+    Ok(creds)
+}
+
+pub async fn run_ssh_exec(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .unwrap_or(22);
+    let creds = ssh_credentials(step, ctx)?;
+    let command = match &step.command {
+        Some(c) => Some(crate::expr::interpolate(c, &ctx.vars)?),
+        None => None,
+    };
+
+    match ssh::exec(&ctx.target_host, port, creds, command, step.timeout_secs).await {
+        Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                authenticated = r.authenticated,
+                "ssh_exec"
+            );
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
+            if r.authenticated {
+                handle_outcome(&step.on_success, step, def, ctx, None)
+            } else {
+                handle_outcome(&step.on_failure, step, def, ctx, None)
+            }
+        }
+        Err(e) => {
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "ssh_exec error: {e}");
+            handle_outcome(&step.on_failure, step, def, ctx, None)
+        }
+    }
+}
