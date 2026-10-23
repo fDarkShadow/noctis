@@ -51,6 +51,18 @@ pub struct Step {
     #[serde(default)]
     pub auth_methods: Vec<String>,
 
+    // ── ssh_exec ──────────────────────────────────────────────────────────
+    #[serde(default)]
+    pub username: Option<String>,
+    #[serde(default)]
+    pub password: Option<String>,
+    /// Explicit credential list to try, each "user:password"; first success wins.
+    #[serde(default)]
+    pub credentials: Vec<String>,
+    /// Command to run once a credential authenticates (stdout/stderr captured).
+    #[serde(default)]
+    pub command: Option<String>,
+
     // ── Match ─────────────────────────────────────────────────────────────
     #[serde(default)]
     pub source: Option<String>,
