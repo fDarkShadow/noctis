@@ -63,6 +63,16 @@ pub struct Step {
     #[serde(default)]
     pub command: Option<String>,
 
+    // ── snmp_get (v2c) ────────────────────────────────────────────────────
+    #[serde(default)]
+    pub community: Option<String>,
+    /// Explicit community list to try, first that responds wins.
+    #[serde(default)]
+    pub communities: Vec<String>,
+    /// OIDs to GET (default sysDescr).
+    #[serde(default)]
+    pub oids: Vec<String>,
+
     // ── Match ─────────────────────────────────────────────────────────────
     #[serde(default)]
     pub source: Option<String>,
