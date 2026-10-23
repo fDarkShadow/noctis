@@ -39,6 +39,9 @@ pub enum NoctisError {
     #[error("SSH check failed: {0}")]
     Ssh(String),
 
+    #[error("SNMP check failed: {0}")]
+    Snmp(String),
+
     #[error("Regex error: {0}")]
     Regex(#[from] regex::Error),
 

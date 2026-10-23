@@ -62,6 +62,7 @@ validator = { version = "0.20.0", features = ["derive"] }
 
 # Terminal output
 colored = "3.1.1"
+csnmp = "0.6.0"
 
 [profile.release]
 opt-level = 3
