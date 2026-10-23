@@ -55,6 +55,7 @@ fn build_engine() -> Engine {
     let mut engine = Engine::new();
     engine.set_max_operations(100_000);
     engine.set_max_string_size(1024 * 1024);
+    super::builtins::register(&mut engine);
     engine
 }
 
