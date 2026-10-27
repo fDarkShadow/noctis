@@ -64,6 +64,11 @@ validator = { version = "0.20.0", features = ["derive"] }
 colored = "3.1.1"
 csnmp = "0.6.0"
 pnet = "0.35.0"
+base64 = "0.22"
+md-5 = "0.10"
+sha1 = "0.10"
+sha2 = "0.10"
+hmac = "0.12"
 
 [profile.release]
 opt-level = 3
