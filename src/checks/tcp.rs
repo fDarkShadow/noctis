@@ -16,7 +16,7 @@ use crate::error::{NoctisError, Result};
 /// Accepts any server certificate — used for raw TLS connections over HTTPS test targets
 /// that carry self-signed certs (never used in production scanning of external hosts).
 #[derive(Debug)]
-struct NoCertVerifier;
+pub(crate) struct NoCertVerifier;
 
 impl ServerCertVerifier for NoCertVerifier {
     fn verify_server_cert(
@@ -68,6 +68,19 @@ pub struct TcpResult {
     pub connected: bool,
     pub banner: Option<String>,
     pub duration_ms: u64,
+}
+
+/// A rustls client config that accepts any certificate — shared by the raw-TLS
+/// paths (`tcp_connect`, `tcp_dialogue`) that probe self-signed test targets.
+pub(crate) fn insecure_client_config() -> Result<ClientConfig> {
+    ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))
+        .with_safe_default_protocol_versions()
+        .map_err(|e| NoctisError::Tcp(format!("TLS config: {e}")))
+        .map(|c| {
+            c.dangerous()
+                .with_custom_certificate_verifier(Arc::new(NoCertVerifier))
+                .with_no_client_auth()
+        })
 }
 
 pub async fn connect_and_grab(
@@ -135,15 +148,7 @@ async fn connect_and_grab_tls(
         .map_err(|_| NoctisError::Tcp(format!("connect timeout: {addr}")))?
         .map_err(|e| NoctisError::Tcp(format!("connect {addr}: {e}")))?;
 
-    let config =
-        ClientConfig::builder_with_provider(Arc::new(rustls::crypto::ring::default_provider()))
-            .with_safe_default_protocol_versions()
-            .map_err(|e| NoctisError::Tcp(format!("TLS config: {e}")))?
-            .dangerous()
-            .with_custom_certificate_verifier(Arc::new(NoCertVerifier))
-            .with_no_client_auth();
-
-    let connector = TlsConnector::from(Arc::new(config));
+    let connector = TlsConnector::from(Arc::new(insecure_client_config()?));
     let server_name = ServerName::try_from(host.to_string())
         .map_err(|e| NoctisError::Tcp(format!("invalid host for TLS SNI: {e}")))?;
 

@@ -63,6 +63,20 @@ pub struct Step {
     #[serde(default)]
     pub command: Option<String>,
 
+    // ── tcp_dialogue ──────────────────────────────────────────────────────
+    /// Commands sent in order, each followed by a reply read (line protocols).
+    #[serde(default)]
+    pub commands: Vec<String>,
+    /// Read the server greeting before sending commands (default true).
+    #[serde(default)]
+    pub read_banner: Option<bool>,
+    /// Wrap the connection in TLS (FTPS/SMTPS/IMAPS); default false.
+    #[serde(default)]
+    pub tls: Option<bool>,
+    /// Line terminator appended to each command (default "\r\n").
+    #[serde(default)]
+    pub line_ending: Option<String>,
+
     // ── snmp_get (v2c) ────────────────────────────────────────────────────
     #[serde(default)]
     pub community: Option<String>,

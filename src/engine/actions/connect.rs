@@ -1,4 +1,4 @@
-use crate::checks::{snmp, ssh, tcp, tls};
+use crate::checks::{dialogue, snmp, ssh, tcp, tls};
 use crate::engine::context::Context;
 use crate::engine::finding::{handle_outcome, to_json};
 use crate::error::{NoctisError, Result};
@@ -212,6 +212,66 @@ pub async fn run_snmp_get(step: &Step, def: &TestDef, ctx: &mut Context) -> Resu
         }
         Err(e) => {
             tracing::warn!(step = %step.id, host = %ctx.target_host, port, "snmp error: {e}");
+            handle_outcome(&step.on_failure, step, def, ctx, None)
+        }
+    }
+}
+
+pub async fn run_tcp_dialogue(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "port",
+            action: "tcp_dialogue",
+            step: step.id.clone(),
+        })?;
+
+    // TLS: explicit `tls:` wins, else auto-detect from an https scheme (like tcp_connect).
+    let use_tls = step
+        .tls
+        .unwrap_or_else(|| ctx.vars.get("scheme").and_then(|v| v.as_str()) == Some("https"));
+    let read_banner = step.read_banner.unwrap_or(true);
+    let line_ending = match &step.line_ending {
+        Some(s) => crate::expr::interpolate(s, &ctx.vars)?,
+        None => "\r\n".to_string(),
+    };
+    let mut commands = Vec::new();
+    for c in &step.commands {
+        commands.push(crate::expr::interpolate(c, &ctx.vars)?);
+    }
+
+    match dialogue::run(
+        &ctx.target_host,
+        port,
+        use_tls,
+        read_banner,
+        commands,
+        line_ending,
+        step.timeout_secs,
+    )
+    .await
+    {
+        Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                tls = use_tls,
+                connected = r.connected,
+                replies = r.responses.len(),
+                "tcp_dialogue"
+            );
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
+            if r.connected {
+                handle_outcome(&step.on_success, step, def, ctx, None)
+            } else {
+                handle_outcome(&step.on_failure, step, def, ctx, None)
+            }
+        }
+        Err(e) => {
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "tcp_dialogue error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }
