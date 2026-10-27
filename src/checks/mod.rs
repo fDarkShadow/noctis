@@ -1,3 +1,4 @@
+pub mod dialogue;
 pub mod http;
 pub mod snmp;
 pub mod ssh;
