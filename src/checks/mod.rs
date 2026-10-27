@@ -5,6 +5,7 @@ pub mod ssh;
 pub mod synscan;
 pub mod tcp;
 pub mod tls;
+pub mod udp;
 
 use serde::{Deserialize, Serialize};
 

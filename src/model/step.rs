@@ -48,6 +48,9 @@ pub struct Step {
     pub port: Option<String>,
     #[serde(default)]
     pub send: Option<String>,
+    /// Binary UDP payload as a hex string (udp_probe); takes precedence over `send`.
+    #[serde(default)]
+    pub send_hex: Option<String>,
     #[serde(default)]
     pub auth_methods: Vec<String>,
 

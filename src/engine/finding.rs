@@ -160,6 +160,7 @@ mod tests {
             tls_insecure: false,
             port: None,
             send: None,
+            send_hex: None,
             auth_methods: vec![],
             username: None,
             password: None,
