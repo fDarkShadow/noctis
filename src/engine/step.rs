@@ -35,6 +35,7 @@ pub async fn execute_step(
         "ssh_exec" => connect::run_ssh_exec(step, def, ctx).await,
         "snmp_get" => connect::run_snmp_get(step, def, ctx).await,
         "tcp_dialogue" => connect::run_tcp_dialogue(step, def, ctx).await,
+        "tcp_syn" => connect::run_tcp_syn(step, def, ctx).await,
         "match" => logic::run_match(step, def, ctx),
         "script" => logic::run_script(step, ctx),
         "wait_oob" => oob::run_wait_oob(step, def, ctx).await,

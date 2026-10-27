@@ -1,4 +1,4 @@
-use crate::checks::{dialogue, snmp, ssh, tcp, tls};
+use crate::checks::{dialogue, snmp, ssh, synscan, tcp, tls};
 use crate::engine::context::Context;
 use crate::engine::finding::{handle_outcome, to_json};
 use crate::error::{NoctisError, Result};
@@ -272,6 +272,42 @@ pub async fn run_tcp_dialogue(step: &Step, def: &TestDef, ctx: &mut Context) -> 
         }
         Err(e) => {
             tracing::warn!(step = %step.id, host = %ctx.target_host, port, "tcp_dialogue error: {e}");
+            handle_outcome(&step.on_failure, step, def, ctx, None)
+        }
+    }
+}
+
+pub async fn run_tcp_syn(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "port",
+            action: "tcp_syn",
+            step: step.id.clone(),
+        })?;
+
+    match synscan::syn_probe(&ctx.target_host, port, step.timeout_secs).await {
+        Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                state = %r.state,
+                "tcp_syn"
+            );
+            let ran = matches!(r.state.as_str(), "open" | "closed" | "filtered");
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
+            if ran {
+                handle_outcome(&step.on_success, step, def, ctx, None)
+            } else {
+                // unprivileged / error: the probe could not run
+                handle_outcome(&step.on_failure, step, def, ctx, None)
+            }
+        }
+        Err(e) => {
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "tcp_syn error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }

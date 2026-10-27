@@ -2,6 +2,7 @@ pub mod dialogue;
 pub mod http;
 pub mod snmp;
 pub mod ssh;
+pub mod synscan;
 pub mod tcp;
 pub mod tls;
 
