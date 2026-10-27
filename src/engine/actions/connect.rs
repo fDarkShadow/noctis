@@ -1,4 +1,4 @@
-use crate::checks::{dialogue, snmp, ssh, synscan, tcp, tls};
+use crate::checks::{dialogue, snmp, ssh, synscan, tcp, tls, udp};
 use crate::engine::context::Context;
 use crate::engine::finding::{handle_outcome, to_json};
 use crate::error::{NoctisError, Result};
@@ -308,6 +308,51 @@ pub async fn run_tcp_syn(step: &Step, def: &TestDef, ctx: &mut Context) -> Resul
         }
         Err(e) => {
             tracing::warn!(step = %step.id, host = %ctx.target_host, port, "tcp_syn error: {e}");
+            handle_outcome(&step.on_failure, step, def, ctx, None)
+        }
+    }
+}
+
+pub async fn run_udp_probe(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
+    let port = resolve_port(&step.port, ctx)
+        .or(ctx.target_port)
+        .ok_or_else(|| NoctisError::MissingField {
+            field: "port",
+            action: "udp_probe",
+            step: step.id.clone(),
+        })?;
+
+    // Payload: `send_hex` (binary) wins over `send` (text); either is templated first.
+    let payload: Vec<u8> = if let Some(hex) = &step.send_hex {
+        udp::decode_hex(&crate::expr::interpolate(hex, &ctx.vars)?)?
+    } else if let Some(text) = &step.send {
+        crate::expr::interpolate(text, &ctx.vars)?.into_bytes()
+    } else {
+        Vec::new()
+    };
+
+    match udp::probe(&ctx.target_host, port, &payload, step.timeout_secs).await {
+        Ok(r) => {
+            tracing::debug!(
+                step = %step.id,
+                host = %ctx.target_host,
+                port,
+                responded = r.responded,
+                len = r.length,
+                "udp_probe"
+            );
+            let responded = r.responded;
+            if let Some(key) = &step.store_as {
+                ctx.set(key.clone(), to_json(&r, step, def)?);
+            }
+            if responded {
+                handle_outcome(&step.on_success, step, def, ctx, None)
+            } else {
+                handle_outcome(&step.on_failure, step, def, ctx, None)
+            }
+        }
+        Err(e) => {
+            tracing::warn!(step = %step.id, host = %ctx.target_host, port, "udp_probe error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }
