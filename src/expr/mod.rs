@@ -1,4 +1,5 @@
 mod builtins;
+mod crypto;
 mod rhai;
 mod template;
 
