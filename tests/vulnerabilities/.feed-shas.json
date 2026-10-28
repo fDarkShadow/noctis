@@ -53,6 +53,7 @@
   "general/ftp-anonymous.yaml": "5b6a668d52b2656d96d8f2cf6c68bccc37ccce842d20ffb118aea8467999e074",
   "general/http-security-headers.yaml": "63d4de9c6074db050a330e02520f18d5e2355430409dc2d8cb4cc74e7dfad5f9",
   "general/memcached-udp-exposed.yaml": "1748bfa4eb3679ccafdf505e4585087bc5624d34e219603d6a5077c6587b1524",
+  "general/ntp-monlist.yaml": "e98f893b61a801c401f3d0deeeb9d2163923470ec93872830d76f8fcb5d14c94",
   "general/redis-unauthenticated.yaml": "6170c58e43f33084ae3c6a2fb923bc17aad88541b3539ecb62bc461017a5e595",
   "general/smtp-open-relay.yaml": "8c2a536579b0ecb10bef7b947d72b9ed4b182efa6015cc09a03f0225e171327a",
   "general/snmp-default-community.yaml": "2a94e14ae642d17ad455e6bdffbf225edd90a0f540916a84aa77833bb809657f",
