@@ -1,0 +1,5 @@
+FROM python:3.11-slim
+COPY server.py /app/server.py
+ENV SNMP_MODE=vuln
+EXPOSE 161/udp
+CMD ["python3", "/app/server.py"]

@@ -91,11 +91,19 @@ pub async fn get(
         duration_ms: 0,
     };
 
+    // Bind a socket of the target's address family. csnmp defaults to [::]:0
+    // (IPv6) when bind_addr is None, which fails on IPv4-only hosts (EAFNOSUPPORT).
+    let bind_addr: SocketAddr = if target.is_ipv4() {
+        "0.0.0.0:0".parse().unwrap()
+    } else {
+        "[::]:0".parse().unwrap()
+    };
+
     for community in &communities {
         let client = match Snmp2cClient::new(
             target,
             community.as_bytes().to_vec(),
-            None,
+            Some(bind_addr),
             Some(timeout),
             0,
         )
