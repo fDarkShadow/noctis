@@ -1,0 +1,10 @@
+---
+- name: "ftp-anonymous — anonymous FTP access enabled"
+  hosts: ftp_anonymous
+  gather_facts: false
+  vars:
+    cve_id: "ftp-anonymous"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/ftp-anonymous.yaml"
+  roles:
+    - common_docker

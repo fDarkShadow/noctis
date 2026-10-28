@@ -49,6 +49,7 @@
   "fortios-ssl-vpn/CVE-2024-21762.yaml": "deb34f5e67c66edd847d7f811db574a89fb1a0adf43ad2bd6f08d81c6c119011",
   "fortiweb/CVE-2025-25257.yaml": "0eaa3aedb9638c2dcb462e2230aad47a619969492ec7bc21d50bbb8b3ec1ebbc",
   "general/exposed-paths.yaml": "ecebec4b49fb833e9c9888af1b1dc888cbc54ff3641c34be5114d87eed608a23",
+  "general/ftp-anonymous.yaml": "5b6a668d52b2656d96d8f2cf6c68bccc37ccce842d20ffb118aea8467999e074",
   "general/http-security-headers.yaml": "63d4de9c6074db050a330e02520f18d5e2355430409dc2d8cb4cc74e7dfad5f9",
   "general/ssh-weak-auth.yaml": "a9d690bb8e3d672363611aa42c71eb7f88d58c99b27e28ea869d52afdee455db",
   "general/tls-weak-config.yaml": "b50b9c4c513c0ffb560ce2ab5cfb3c3899c72e5a5943b0b200d5926b758a7bc9",
