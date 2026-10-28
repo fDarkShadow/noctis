@@ -1,0 +1,10 @@
+---
+- name: "dns-open-resolver — open recursive DNS resolver"
+  hosts: dns_open_resolver
+  gather_facts: false
+  vars:
+    cve_id: "dns-open-resolver"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/dns-open-resolver.yaml"
+  roles:
+    - common_docker

@@ -1,0 +1,5 @@
+FROM python:3.11-slim
+COPY server.py /app/server.py
+ENV DNS_MODE=vuln
+EXPOSE 53/udp
+CMD ["python3", "/app/server.py"]
