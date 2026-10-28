@@ -1,0 +1,10 @@
+---
+- name: "snmp-default-community — SNMP default community string"
+  hosts: snmp_default_community
+  gather_facts: false
+  vars:
+    cve_id: "snmp-default-community"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/snmp-default-community.yaml"
+  roles:
+    - common_docker

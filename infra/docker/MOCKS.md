@@ -379,6 +379,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## smtp-mock
 - general/smtp-open-relay
 
+## snmp-mock
+- general/snmp-default-community
+
 ## sonicwall-sma-mock
 - sonicwall-sma/CVE-2024-38475
 
