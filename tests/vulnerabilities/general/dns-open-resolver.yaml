@@ -1,0 +1,44 @@
+# Detect open recursive DNS resolvers (reflection/amplification risk).
+#
+# Send a recursive A query (RD=1) for an external name. An open resolver answers
+# with "recursion available" and NOERROR (flags 0x8180); a closed server REFUSES
+# (rcode 5) or clears the RA bit.
+uid: 19ef8b3a-aeec-4b90-8f17-03562f81e69c
+name: "Open DNS resolver"
+description: |
+  The DNS server performs recursion for external clients, answering a recursive
+  query with "recursion available" — abusable for reflection/amplification DDoS.
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.50
+tags: [dns, open-resolver, amplification, exposure, misconfig]
+services: [domain]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.cisa.gov/news-events/alerts/2013/03/29/dns-amplification-attacks"
+
+steps:
+  - id: dns-query
+    action: udp_probe
+    port: "{{port}}"
+    # DNS A query for example.com, txid 0x1337, RD=1
+    send_hex: "133701000001000000000000076578616d706c6503636f6d0000010001"
+    timeout_secs: 5
+    store_as: dns
+
+  - id: check-recursion
+    action: match
+    source: dns.response_hex
+    # txid 1337 + flags 8180 (QR, RD, RA set, rcode NOERROR) = recursion available
+    pattern: "^13378180"
+    condition: "dns.responded == true"
+    on_match:
+      finding:
+        title: "Open DNS resolver"
+        description: "The server answered a recursive query with recursion-available + NOERROR, confirming an open resolver."
+        remediation: "Restrict recursion to trusted clients (allow-recursion) or disable it."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "DNS response (hex): {{dns.response_hex}}"
