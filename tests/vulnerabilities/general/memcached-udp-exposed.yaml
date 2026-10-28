@@ -1,0 +1,44 @@
+# Detect memcached exposed over UDP (reflection/amplification risk).
+#
+# memcached with UDP enabled answers an unauthenticated `stats` with a large
+# response — abused for DDoS amplification. Send the 8-byte memcached UDP frame
+# header + "stats\r\n"; a reply containing STAT lines confirms UDP exposure.
+uid: 4c84cb60-cba2-457e-b227-2077c4508582
+name: "memcached exposed over UDP"
+description: |
+  The memcached server answers unauthenticated `stats` over UDP, exposing server
+  statistics and enabling reflection/amplification DDoS.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.50
+tags: [memcached, udp, amplification, exposure, misconfig]
+services: [memcached]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.cisa.gov/news-events/alerts/2018/02/27/memcached-ddos-attacks"
+
+steps:
+  - id: memcached-stats
+    action: udp_probe
+    port: "{{port}}"
+    # memcached UDP frame header (req-id 0, seq 0, 1 datagram, reserved) + "stats\r\n"
+    send_hex: "000000000001000073746174730d0a"
+    timeout_secs: 5
+    store_as: mc
+
+  - id: check-stat
+    action: match
+    source: mc.response_hex
+    # hex of "STAT" — the reply is binary (8-byte UDP header) so match on hex
+    pattern: "53544154"
+    condition: "mc.responded == true"
+    on_match:
+      finding:
+        title: "memcached exposed over UDP"
+        description: "The server answered an unauthenticated UDP 'stats' with STAT output — reflection/amplification risk."
+        remediation: "Disable UDP (-U 0), bind to localhost, and firewall port 11211."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "UDP stats reply (hex): {{mc.response_hex}}"

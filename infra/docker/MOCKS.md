@@ -252,6 +252,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## manageengine-mock
 - manageengine/CVE-2022-47966
 
+## memcached-mock
+- general/memcached-udp-exposed
+
 ## metabase-mock
 - metabase/CVE-2021-41277
 
