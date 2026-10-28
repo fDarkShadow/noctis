@@ -1,0 +1,44 @@
+# Detect FTP servers that accept anonymous login.
+#
+# Connects, reads the 220 greeting, then USER anonymous / PASS <any>. A 230 reply
+# to the password means anonymous access is enabled (classic exposure).
+uid: 59a8b856-44d8-4c0c-9b8e-0c8b82e901b7
+name: "Anonymous FTP access enabled"
+description: |
+  The FTP server accepts anonymous authentication (USER anonymous with any
+  password), exposing its contents without credentials.
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.50
+tags: [ftp, anonymous, exposure, misconfig]
+services: [ftp]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://cwe.mitre.org/data/definitions/287.html"
+
+steps:
+  - id: ftp-login
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    timeout_secs: 10
+    commands:
+      - "USER anonymous"
+      - "PASS noctis@example.com"
+    store_as: ftp
+
+  - id: check-anonymous
+    action: match
+    source: ftp.transcript
+    # a 230 reply code (start of a line) = login accepted
+    pattern: "(^|\\n)230[ -]"
+    on_match:
+      finding:
+        title: "Anonymous FTP access enabled"
+        description: "The server accepted 'USER anonymous' and returned a 230 success to the password."
+        remediation: "Disable the anonymous account in the FTP server configuration."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "FTP dialogue: {{ftp.transcript}}"

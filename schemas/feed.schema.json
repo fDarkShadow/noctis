@@ -81,7 +81,7 @@
         "id": { "type": "string", "description": "Unique identifier within this feed." },
         "action": {
           "type": "string",
-          "enum": ["http_request", "tcp_connect", "tls_check", "ssh_check", "match", "script", "wait_oob", "set_var"]
+          "enum": ["http_request", "tcp_connect", "tcp_dialogue", "tcp_syn", "udp_probe", "tls_check", "ssh_check", "ssh_exec", "snmp_get", "match", "script", "wait_oob", "set_var"]
         },
         "condition": {
           "type": "string",
@@ -129,12 +129,67 @@
         },
         "send": {
           "type": "string",
-          "description": "Raw bytes to send after connect. tcp_connect only. Supports {{var}} templates."
+          "description": "Raw bytes to send after connect. tcp_connect / udp_probe. Supports {{var}} templates."
+        },
+        "send_hex": {
+          "type": "string",
+          "description": "Binary payload as a hex string. udp_probe only; takes precedence over send."
         },
         "auth_methods": {
           "type": "array",
           "items": { "type": "string" },
           "description": "ssh_check only."
+        },
+        "commands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "tcp_dialogue only — commands sent in order, each followed by a reply read. Supports {{var}} templates."
+        },
+        "read_banner": {
+          "type": "boolean",
+          "default": true,
+          "description": "tcp_dialogue only — read the server greeting before sending commands."
+        },
+        "tls": {
+          "type": "boolean",
+          "default": false,
+          "description": "tcp_dialogue only — wrap the connection in TLS (FTPS/SMTPS/IMAPS)."
+        },
+        "line_ending": {
+          "type": "string",
+          "default": "\r\n",
+          "description": "tcp_dialogue only — terminator appended to each command."
+        },
+        "username": {
+          "type": "string",
+          "description": "ssh_exec only — single credential username. Supports {{var}} templates."
+        },
+        "password": {
+          "type": "string",
+          "description": "ssh_exec only — single credential password. Supports {{var}} templates."
+        },
+        "credentials": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "ssh_exec only — explicit \"user:password\" list, first success wins."
+        },
+        "command": {
+          "type": "string",
+          "description": "ssh_exec only — command to run after authentication; stdout/stderr captured."
+        },
+        "community": {
+          "type": "string",
+          "description": "snmp_get only — single SNMP v2c community. Supports {{var}} templates."
+        },
+        "communities": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "snmp_get only — community list tried in order, first that responds wins."
+        },
+        "oids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "snmp_get only — OIDs to GET (required for snmp_get)."
         },
         "source": {
           "type": "string",
