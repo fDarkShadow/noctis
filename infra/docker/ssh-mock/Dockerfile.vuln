@@ -1,0 +1,6 @@
+FROM python:3.11-slim
+RUN pip install --no-cache-dir paramiko
+COPY server.py /app/server.py
+ENV SSH_MODE=vuln
+EXPOSE 22
+CMD ["python3", "/app/server.py"]

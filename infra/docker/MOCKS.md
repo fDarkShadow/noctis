@@ -400,6 +400,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## spring4shell-mock
 - spring4shell/CVE-2022-22965
 
+## ssh-mock
+- general/ssh-default-credentials
+
 ## ssh-terrapin-mock
 - ssh-terrapin/CVE-2023-48795
 
