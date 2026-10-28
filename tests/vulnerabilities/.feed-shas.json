@@ -54,6 +54,7 @@
   "general/memcached-udp-exposed.yaml": "1748bfa4eb3679ccafdf505e4585087bc5624d34e219603d6a5077c6587b1524",
   "general/smtp-open-relay.yaml": "8c2a536579b0ecb10bef7b947d72b9ed4b182efa6015cc09a03f0225e171327a",
   "general/snmp-default-community.yaml": "2a94e14ae642d17ad455e6bdffbf225edd90a0f540916a84aa77833bb809657f",
+  "general/ssh-default-credentials.yaml": "6a72bc7cbd49c535ec5638a3f520c4de5af2062f5e939477396286daa6205f92",
   "general/ssh-weak-auth.yaml": "a9d690bb8e3d672363611aa42c71eb7f88d58c99b27e28ea869d52afdee455db",
   "general/tls-weak-config.yaml": "b50b9c4c513c0ffb560ce2ab5cfb3c3899c72e5a5943b0b200d5926b758a7bc9",
   "geoserver/CVE-2024-36401.yaml": "8f565e947ea12d0c016756ad263e996bdd524da0f3cf61d67cca434955a62328",
