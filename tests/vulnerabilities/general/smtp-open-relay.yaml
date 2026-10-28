@@ -1,0 +1,48 @@
+# Detect SMTP servers that relay mail for arbitrary external domains (open relay).
+#
+# Safe check: EHLO / MAIL FROM / RCPT TO with an external sender and recipient,
+# then stop — DATA is never sent, so no mail is relayed. An open relay accepts the
+# external RCPT TO with a 250; a hardened server rejects it with a 5xx.
+uid: 974dd800-8911-4db0-929f-f8f6b5de97f5
+name: "SMTP open relay"
+description: |
+  The SMTP server accepts mail from an external sender to an external recipient
+  (MAIL FROM / RCPT TO both non-local), i.e. it is an open relay. The check stops
+  before DATA, so nothing is actually relayed.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.50
+tags: [smtp, open-relay, exposure, misconfig]
+services: [smtp]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://cwe.mitre.org/data/definitions/269.html"
+
+steps:
+  - id: smtp-relay
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    timeout_secs: 10
+    commands:
+      - "EHLO noctis.test"
+      - "MAIL FROM:<prober@external-noctis.test>"
+      - "RCPT TO:<relay-check@external-noctis.test>"
+    store_as: smtp
+
+  - id: check-relay
+    action: match
+    source: smtp.transcript
+    # the LAST reply (to RCPT TO, external->external) starting 250 = relay accepted;
+    # anchored to end-of-transcript so the 250s from EHLO/MAIL FROM don't match.
+    pattern: "(^|\\n)250[ -][^\\n]*$"
+    on_match:
+      finding:
+        title: "SMTP open relay"
+        description: "Server accepted RCPT TO for an external recipient from an external sender (250), indicating an open relay."
+        remediation: "Restrict relaying to authenticated users / trusted networks only."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "SMTP dialogue: {{smtp.transcript}}"

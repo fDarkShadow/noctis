@@ -1,0 +1,10 @@
+---
+- name: "smtp-open-relay — SMTP open relay"
+  hosts: smtp_open_relay
+  gather_facts: false
+  vars:
+    cve_id: "smtp-open-relay"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/smtp-open-relay.yaml"
+  roles:
+    - common_docker
