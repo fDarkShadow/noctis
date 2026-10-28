@@ -1,0 +1,45 @@
+# Detect NTP servers with the legacy mode-7 monlist command enabled (CVE-2013-5211).
+#
+# A tiny mode-7 MON_GETLIST_1 request returns a large list of recent clients —
+# a major reflection/amplification DDoS vector. A patched/ntpd ignores mode 7.
+uid: a432ee80-8e5f-46be-9e0f-52cd757a28b2
+name: "NTP monlist enabled (amplification)"
+cves: [CVE-2013-5211]
+cvss: 7.5
+category: amplification
+severity: high
+confidence_base: 0.50
+tags: [ntp, monlist, amplification, ddos]
+services: [ntp]
+author: noctis
+version: "1.0.0"
+description: |
+  The NTP server answers the deprecated mode-7 `monlist` (MON_GETLIST_1) request,
+  returning recent client data — abusable for high-ratio reflection/amplification.
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2013-5211"
+  - "https://www.cisa.gov/news-events/alerts/2014/01/13/ntp-amplification-attacks-using-cve-2013-5211"
+
+steps:
+  - id: ntp-monlist
+    action: udp_probe
+    port: "{{port}}"
+    # mode 7 (private), impl=XNTPD(3), reqcode=MON_GETLIST_1(42=0x2a)
+    send_hex: "1700032a00000000"
+    timeout_secs: 5
+    store_as: ntp
+
+  - id: check-monlist
+    action: match
+    source: ntp.response_hex
+    # mode-7 response (byte0 0x97 or, with the "more" bit, 0xd7), impl 03, reqcode 2a
+    pattern: "^(97|d7)00032a"
+    condition: "ntp.responded == true"
+    on_match:
+      finding:
+        title: "NTP monlist enabled (amplification)"
+        description: "The server replied to a mode-7 monlist request, confirming CVE-2013-5211 amplification exposure."
+        remediation: "Upgrade ntpd (>= 4.2.7p26) or set 'disable monitor' / 'noquery'."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "mode-7 monlist reply (hex): {{ntp.response_hex}}"

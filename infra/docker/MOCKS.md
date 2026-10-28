@@ -291,6 +291,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## nextjs-mock
 - nextjs/CVE-2025-29927
 
+## ntp-mock
+- general/ntp-monlist
+
 ## ofbiz-32113-mock
 - ofbiz/CVE-2024-32113
 

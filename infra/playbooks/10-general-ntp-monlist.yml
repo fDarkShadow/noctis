@@ -1,0 +1,10 @@
+---
+- name: "ntp-monlist — NTP monlist amplification (CVE-2013-5211)"
+  hosts: ntp_monlist
+  gather_facts: false
+  vars:
+    cve_id: "ntp-monlist"
+    expected_cves: ["CVE-2013-5211"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/ntp-monlist.yaml"
+  roles:
+    - common_docker
