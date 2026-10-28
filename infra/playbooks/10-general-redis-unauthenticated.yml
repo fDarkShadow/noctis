@@ -1,0 +1,10 @@
+---
+- name: "redis-unauthenticated — Redis unauthenticated access"
+  hosts: redis_unauthenticated
+  gather_facts: false
+  vars:
+    cve_id: "redis-unauthenticated"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/redis-unauthenticated.yaml"
+  roles:
+    - common_docker

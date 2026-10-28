@@ -1,0 +1,47 @@
+# Detect Redis instances reachable without authentication.
+#
+# Send INFO over the inline protocol. An unauthenticated Redis replies with the
+# server info (containing redis_version); one with requirepass set replies
+# "-NOAUTH Authentication required." instead.
+uid: eccb6a4c-957c-4b76-acfc-591ef8104a20
+name: "Redis unauthenticated access"
+description: |
+  The Redis server accepts commands without authentication, exposing data and
+  often enabling remote code execution (e.g. via CONFIG SET + module/cron abuse).
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [redis, unauthenticated, exposure, misconfig]
+services: [redis]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://redis.io/docs/management/security/"
+
+steps:
+  - id: redis-info
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    commands:
+      - "PING"
+      - "INFO server"
+    store_as: redis
+
+  - id: check-unauth
+    action: match
+    source: redis.transcript
+    # redis_version only appears if INFO ran without auth; a protected server
+    # answers "-NOAUTH Authentication required." instead.
+    pattern: "redis_version:"
+    condition: "redis.connected == true"
+    on_match:
+      finding:
+        title: "Redis unauthenticated access"
+        description: "The Redis server returned INFO output without authentication."
+        remediation: "Set 'requirepass' (or enable ACLs), bind to localhost, and firewall port 6379."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "INFO reply: {{redis.transcript}}"
