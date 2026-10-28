@@ -1,0 +1,10 @@
+---
+- name: "memcached-udp-exposed — memcached exposed over UDP"
+  hosts: memcached_udp_exposed
+  gather_facts: false
+  vars:
+    cve_id: "memcached-udp-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/memcached-udp-exposed.yaml"
+  roles:
+    - common_docker
