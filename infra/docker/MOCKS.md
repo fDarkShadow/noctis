@@ -122,6 +122,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## drupal-sqli-mock
 - drupal-sqli/CVE-2026-9082
 
+## elasticsearch-mock
+- general/elasticsearch-unauth
+
 ## epmm-mock
 - epmm/CVE-2025-4427
 

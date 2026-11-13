@@ -1,0 +1,10 @@
+---
+- name: "elasticsearch-unauth — Elasticsearch exposed without authentication"
+  hosts: elasticsearch_unauth
+  gather_facts: false
+  vars:
+    cve_id: "elasticsearch-unauth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/elasticsearch-unauth.yaml"
+  roles:
+    - common_docker
