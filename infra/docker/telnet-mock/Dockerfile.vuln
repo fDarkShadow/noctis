@@ -1,0 +1,5 @@
+FROM python:3.11-slim
+COPY server.py /app/server.py
+ENV TELNET_MODE=vuln
+EXPOSE 23
+CMD ["python3", "/app/server.py"]
