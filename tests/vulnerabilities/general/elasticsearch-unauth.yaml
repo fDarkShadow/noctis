@@ -1,0 +1,49 @@
+# Detect Elasticsearch nodes reachable without authentication.
+#
+# A GET / on an unauthenticated node returns a JSON banner with the cluster
+# name, a version number, and the tagline "You Know, for Search". A node with
+# security enabled answers 401 with a security_exception instead, so the banner
+# never appears — making this a reliable, safe exposure check.
+uid: 7f3d1b9a-4c62-4e8d-9a07-2b5e6c1f84d0
+name: "Elasticsearch exposed without authentication"
+description: |
+  The Elasticsearch REST API responds to an unauthenticated GET / with the
+  cluster banner, exposing cluster metadata and, in almost all cases, every
+  indexed document. A high-value data-leak exposure.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [elasticsearch, unauthenticated, exposure, misconfig, data-leak]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-cluster.html"
+
+steps:
+  - id: es-root
+    action: http_request
+    method: GET
+    path: "/"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: es
+
+  - id: check-unauth
+    action: match
+    source: es.body
+    # The tagline is unique to the Elasticsearch root banner and is only
+    # returned when the request succeeds without credentials.
+    pattern: "You Know, for Search"
+    condition: "es.status == 200"
+    on_match:
+      finding:
+        title: "Elasticsearch exposed without authentication"
+        description: "GET / returned the Elasticsearch cluster banner without any credentials."
+        remediation: "Enable the Elasticsearch security features (authentication + TLS), bind to localhost, and firewall port 9200."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "Unauthenticated banner (HTTP {{es.status}}): {{es.body}}"
