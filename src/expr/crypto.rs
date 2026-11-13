@@ -8,7 +8,7 @@
 
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine as _;
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use rhai::Engine;
 use sha2::{Digest, Sha256};
 
