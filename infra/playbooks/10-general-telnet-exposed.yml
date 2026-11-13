@@ -1,0 +1,10 @@
+---
+- name: "telnet-exposed — Telnet service exposed (cleartext)"
+  hosts: telnet_exposed
+  gather_facts: false
+  vars:
+    cve_id: "telnet-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/telnet-exposed.yaml"
+  roles:
+    - common_docker

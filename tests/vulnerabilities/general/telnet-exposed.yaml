@@ -1,0 +1,46 @@
+# Flag a reachable Telnet service.
+#
+# Telnet carries credentials and session data in cleartext. A live server
+# greets a new connection with IAC option negotiation (0xFF ...) followed by a
+# login prompt. We read that banner and match the printable "login:" prompt —
+# the IAC bytes themselves are not valid UTF-8, so the prompt is the reliable
+# signal. A port with no Telnet service sends no such greeting.
+uid: 2d9f6c41-8a73-4e52-b1c6-0f3a7d84e915
+name: "Telnet service exposed (cleartext)"
+description: |
+  A Telnet service is reachable on the target. Telnet transmits credentials and
+  all session data in cleartext and should be replaced by SSH.
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.40
+tags: [telnet, cleartext, exposure, misconfig]
+services: [telnet]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.rfc-editor.org/rfc/rfc854"
+
+steps:
+  - id: telnet-banner
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    timeout_secs: 10
+    store_as: telnet
+
+  - id: check-login-prompt
+    action: match
+    source: telnet.transcript
+    # Telnet servers present a login prompt after IAC negotiation. A bare port
+    # with no telnet service produces an empty transcript and never matches.
+    pattern: "(?i)login:|username:|password:"
+    condition: "telnet.connected == true"
+    on_match:
+      finding:
+        title: "Telnet service exposed (cleartext)"
+        description: "The service presented a Telnet login prompt, confirming a cleartext administrative interface."
+        remediation: "Disable Telnet and use SSH instead; firewall port 23 if the service is required internally."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "Telnet banner: {{telnet.transcript}}"

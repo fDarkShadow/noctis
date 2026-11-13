@@ -439,6 +439,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## telerik-report-mock
 - telerik-report/CVE-2024-4358
 
+## telnet-mock
+- general/telnet-exposed
+
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
 
