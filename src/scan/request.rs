@@ -106,10 +106,7 @@ impl ScanFilters {
                 return true;
             }
         }
-        if self.exclude_tags.iter().any(|t| def.tags.contains(t)) {
-            return true;
-        }
-        false
+        self.exclude_tags.iter().any(|t| def.tags.contains(t))
     }
 }
 
