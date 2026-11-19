@@ -1,0 +1,41 @@
+# Flag a Memcached server reachable over TCP that answers `stats` without auth.
+# An unauthenticated memcached leaks server stats (and all cached data is
+# readable/writable). A SASL-protected instance rejects commands pre-auth.
+uid: 3e8c5a92-6b14-4d7f-a0e9-1c2b7d64f085
+name: "Memcached exposed without authentication (TCP)"
+description: |
+  The Memcached server returned stats over TCP without authentication, exposing
+  server internals and implying all cached data is reachable.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [memcached, unauthenticated, exposure, misconfig]
+services: [memcached]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://github.com/memcached/memcached/wiki/ProtocolCommands"
+steps:
+  - id: mc-stats
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    line_ending: "\r\n"
+    timeout_secs: 10
+    commands:
+      - "stats"
+    store_as: mc
+  - id: check-stats
+    action: match
+    source: mc.transcript
+    pattern: "STAT version"
+    condition: "mc.connected == true"
+    on_match:
+      finding:
+        title: "Memcached exposed without authentication (TCP)"
+        description: "The memcached server returned STAT output to an unauthenticated client."
+        remediation: "Enable SASL authentication, bind to localhost, use -l 127.0.0.1, and firewall port 11211."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "stats reply: {{mc.transcript}}"
