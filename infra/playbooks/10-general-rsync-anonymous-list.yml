@@ -1,0 +1,10 @@
+---
+- name: "rsync-anonymous-list — rsync daemon allows anonymous module listing"
+  hosts: rsync_anonymous_list
+  gather_facts: false
+  vars:
+    cve_id: "rsync-anonymous-list"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/rsync-anonymous-list.yaml"
+  roles:
+    - common_docker
