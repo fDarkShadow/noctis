@@ -1,0 +1,10 @@
+---
+- name: "smbv1-enabled — SMBv1 enabled (legacy protocol exposed)"
+  hosts: smbv1_enabled
+  gather_facts: false
+  vars:
+    cve_id: "smbv1-enabled"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/smbv1-enabled.yaml"
+  roles:
+    - common_docker
