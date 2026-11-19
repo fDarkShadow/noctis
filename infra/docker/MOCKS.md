@@ -360,6 +360,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## pop3-mock
 - general/pop3-cleartext-auth
 
+## postgres-mock
+- general/postgres-trust-auth
+
 ## projectsend-mock
 - projectsend/CVE-2024-11680
 
