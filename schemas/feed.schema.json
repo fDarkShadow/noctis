@@ -81,7 +81,7 @@
         "id": { "type": "string", "description": "Unique identifier within this feed." },
         "action": {
           "type": "string",
-          "enum": ["http_request", "tcp_connect", "tcp_dialogue", "tcp_syn", "udp_probe", "tls_check", "ssh_check", "ssh_exec", "snmp_get", "match", "script", "wait_oob", "set_var"]
+          "enum": ["http_request", "tcp_connect", "tcp_dialogue", "tcp_syn", "udp_probe", "tls_check", "ssh_check", "ssh_exec", "snmp_get", "match", "script", "wait_oob", "set_var", "sleep"]
         },
         "condition": {
           "type": "string",
@@ -230,6 +230,11 @@
           "type": "integer",
           "minimum": 1,
           "default": 10
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "sleep action only: pause duration in milliseconds (capped at 60000)."
         }
       }
     },

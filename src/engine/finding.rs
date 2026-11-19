@@ -170,6 +170,7 @@ mod tests {
             read_banner: None,
             tls: None,
             line_ending: None,
+            duration_ms: None,
             community: None,
             communities: vec![],
             oids: vec![],

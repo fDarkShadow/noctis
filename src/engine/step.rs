@@ -41,6 +41,7 @@ pub async fn execute_step(
         "script" => logic::run_script(step, ctx),
         "wait_oob" => oob::run_wait_oob(step, def, ctx).await,
         "set_var" => logic::run_set_var(step, ctx),
+        "sleep" => logic::run_sleep(step, ctx).await,
         unknown => Err(NoctisError::StepError {
             test: def.uid.to_string(),
             step: step.id.clone(),
