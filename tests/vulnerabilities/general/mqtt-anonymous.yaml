@@ -1,0 +1,42 @@
+# Flag an MQTT broker that accepts anonymous connections.
+# Sends an MQTT 3.1.1 CONNECT (no username/password) as a binary tcp_dialogue
+# frame. A CONNACK with return code 0 (0x20 0x02 0x00 0x00) = connection
+# accepted anonymously; return code 5 (0x20 0x02 0x00 0x05) = not authorized.
+uid: 2a7e4c93-8d16-4b50-9f02-6c1a3e85d7b0
+name: "MQTT broker accepts anonymous connections"
+description: |
+  The MQTT broker accepted a CONNECT with no credentials (CONNACK return code 0),
+  allowing anyone to subscribe/publish to topics without authentication.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [mqtt, anonymous, unauthenticated, exposure, iot, misconfig]
+services: [mqtt]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718035"
+steps:
+  - id: mqtt-connect
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # MQTT 3.1.1 CONNECT, clean session, client id "noctis", no auth.
+    send_hex: "101200044d5154540402003c00066e6f63746973"
+    store_as: mqtt
+  - id: check-connack
+    action: match
+    source: mqtt.response_hex
+    # CONNACK accepted = 20 02 xx 00 (return code 0). Rejected = return code != 0.
+    pattern: "^2002..00"
+    condition: "mqtt.connected == true"
+    on_match:
+      finding:
+        title: "MQTT broker accepts anonymous connections"
+        description: "The broker returned CONNACK with return code 0 to an unauthenticated CONNECT."
+        remediation: "Require authentication (allow_anonymous false), use TLS client certs/passwords, and firewall port 1883."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "CONNACK (hex): {{mqtt.response_hex}}"
