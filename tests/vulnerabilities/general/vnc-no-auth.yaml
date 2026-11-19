@@ -1,0 +1,50 @@
+# Flag a VNC/RFB server that offers the "None" security type (no password).
+#
+# RFB handshake: the server sends a fixed 12-byte ProtocolVersion banner, the
+# client echoes a version, then the server sends its security types. In RFB 3.7+
+# that is [count:u8][type:u8 x count]; security type 1 is "None" — no password.
+# response_hex is: 24 hex chars (12-byte banner) + 2 (count) + the type bytes, so
+# a type byte 01 anywhere in the type list (offset >= 26, byte-aligned) means
+# None is offered. The regex skips the count byte to avoid matching it.
+# (Also matches RFB 3.3's 4-byte security type 00000001.)
+uid: 4f2b7c19-3d8e-4a65-9c01-5e7a2d6b84f3
+name: "VNC server allows connections without authentication"
+description: |
+  The VNC server advertises the RFB "None" security type, allowing anyone who
+  can reach the port to open an interactive desktop session without a password.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [vnc, rfb, unauthenticated, exposure, misconfig]
+services: [vnc]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.rfc-editor.org/rfc/rfc6143#section-7.1.2"
+
+steps:
+  - id: rfb-handshake
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    timeout_secs: 10
+    # Client ProtocolVersion "RFB 003.008\n" sent verbatim as a binary frame.
+    send_hex: "524642203030332e3030380a"
+    store_as: vnc
+
+  - id: check-none-security
+    action: match
+    source: vnc.response_hex
+    # After the 12-byte banner (24 hex) and the 1-byte count, a byte-aligned 01
+    # in the security-type list = the "None" type is offered.
+    pattern: "^.{26}(?:..)*01"
+    condition: "vnc.connected == true"
+    on_match:
+      finding:
+        title: "VNC server allows connections without authentication"
+        description: "The RFB handshake advertises the None security type (1); the desktop is reachable without a password."
+        remediation: "Require VNC authentication (or tunnel VNC over SSH/VPN) and firewall port 5900."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "RFB handshake (hex): {{vnc.response_hex}}"
