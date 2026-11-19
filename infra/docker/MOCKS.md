@@ -243,6 +243,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## langflow-mock
 - langflow/CVE-2025-3248
 
+## ldap-mock
+- general/ldap-anonymous-bind
+
 ## livewire-mock
 - livewire/CVE-2025-54068
 
