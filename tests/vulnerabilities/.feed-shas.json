@@ -51,6 +51,7 @@
   "general/dns-open-resolver.yaml": "403e3e42722f99784d627946a4004d0011e6482ac0c88fe8e1c17aacff80e00c",
   "general/elasticsearch-unauth.yaml": "fb26dc55e1d3807ca126a1d1204f7502fe19a9d5401bd32ef3e1635770689e64",
   "general/exposed-paths.yaml": "ecebec4b49fb833e9c9888af1b1dc888cbc54ff3641c34be5114d87eed608a23",
+  "general/finger-exposed.yaml": "9b920ba8a36081ca8c954971c489b97b04cca4a1acc0a5a0e146d9e761b5a604",
   "general/ftp-anonymous.yaml": "5b6a668d52b2656d96d8f2cf6c68bccc37ccce842d20ffb118aea8467999e074",
   "general/http-security-headers.yaml": "63d4de9c6074db050a330e02520f18d5e2355430409dc2d8cb4cc74e7dfad5f9",
   "general/imap-cleartext-auth.yaml": "54e52a79c0f92748a40bda403f29a518ff7aedfe3e02dde743e25c72801a57b3",

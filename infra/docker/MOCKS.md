@@ -143,6 +143,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## expedition-sqli-mock
 - expedition-sqli/CVE-2024-9465
 
+## finger-mock
+- general/finger-exposed
+
 ## forticlientems-21643-mock
 - forticlientems/CVE-2026-21643
 
