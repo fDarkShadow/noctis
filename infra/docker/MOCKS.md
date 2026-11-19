@@ -95,6 +95,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## confluence-ssti-mock
 - confluence-ssti/CVE-2023-22527
 
+## consul-mock
+- general/consul-no-acl
+
 ## couchdb-mock
 - general/couchdb-unauth
 
