@@ -526,6 +526,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## workspace-one-mock
 - workspace-one/CVE-2022-22954
 
+## x11-mock
+- general/x11-open
+
 ## xwiki-mock
 - xwiki/CVE-2025-24893
 

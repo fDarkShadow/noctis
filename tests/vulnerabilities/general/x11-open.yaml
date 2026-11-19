@@ -1,0 +1,44 @@
+# Flag an X11 display that accepts connections without authentication.
+# Sends an X11 connection-setup request (no auth protocol) as a binary
+# tcp_dialogue frame. The server's reply begins with 0x01 (Success) when the
+# display is open to anyone, or 0x00 (Failed, "No protocol specified") when it
+# requires MIT-MAGIC-COOKIE / xauth. An open display exposes the full desktop
+# (keystrokes, screenshots, input injection).
+uid: 5c2a7e94-1d63-4b08-9f01-6e3c8a24b075
+name: "X11 display open without authentication"
+description: |
+  The X11 server accepted a connection-setup request with no authorization,
+  exposing the display to screen capture, keystroke logging and input injection.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [x11, unauthenticated, exposure, misconfig]
+services: [x11]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.x.org/releases/current/doc/xproto/x11protocol.html#Connection_Setup"
+steps:
+  - id: x11-setup
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # X11 connection setup, little-endian, protocol 11.0, no auth.
+    send_hex: "6c000b000000000000000000"
+    store_as: x11
+  - id: check-success
+    action: match
+    source: x11.response_hex
+    # Setup reply byte 0: 0x01 = Success (open), 0x00 = Failed (auth required).
+    pattern: "^01"
+    condition: "x11.connected == true"
+    on_match:
+      finding:
+        title: "X11 display open without authentication"
+        description: "The X11 setup request succeeded (reply 0x01) with no authorization — the display is open."
+        remediation: "Require xauth (MIT-MAGIC-COOKIE-1), disable -nolisten tcp or bind locally, and firewall ports 6000-6009."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "X11 setup reply (hex): {{x11.response_hex}}"

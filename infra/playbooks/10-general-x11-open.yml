@@ -1,0 +1,10 @@
+---
+- name: "x11-open — X11 display open without authentication"
+  hosts: x11_open
+  gather_facts: false
+  vars:
+    cve_id: "x11-open"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/x11-open.yaml"
+  roles:
+    - common_docker
