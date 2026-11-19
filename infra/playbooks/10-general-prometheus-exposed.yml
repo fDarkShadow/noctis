@@ -1,0 +1,10 @@
+---
+- name: "prometheus-exposed — Prometheus exposed without authentication"
+  hosts: prometheus_exposed
+  gather_facts: false
+  vars:
+    cve_id: "prometheus-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/prometheus-exposed.yaml"
+  roles:
+    - common_docker

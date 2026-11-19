@@ -1,0 +1,43 @@
+# Flag a Prometheus server reachable without authentication.
+# Prometheus ships no auth of its own; if reachable directly, GET
+# /api/v1/status/config returns the full scrape configuration (which often
+# embeds credentials/bearer tokens for scrape targets). Behind a proper auth
+# proxy the request returns 401.
+uid: 2e8c5a73-9d14-4b06-a0f1-7c3b6e24d508
+name: "Prometheus exposed without authentication"
+description: |
+  The Prometheus server returned its runtime scrape configuration to an
+  unauthenticated request, leaking target lists and any embedded credentials.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [prometheus, unauthenticated, exposure, info-disclosure, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://prometheus.io/docs/operating/security/"
+steps:
+  - id: prom-config
+    action: http_request
+    method: GET
+    path: "/api/v1/status/config"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: prom
+  - id: check-config
+    action: match
+    source: prom.body
+    pattern: "\"status\"\\s*:\\s*\"success\""
+    condition: "prom.status == 200"
+    on_match:
+      finding:
+        title: "Prometheus exposed without authentication"
+        description: "GET /api/v1/status/config returned the scrape configuration without credentials."
+        remediation: "Put Prometheus behind an authenticating reverse proxy (or enable its web.config.file basic auth/TLS), bind locally, and firewall the port."
+        confidence_delta: 0.30
+        qod: 75
+        evidence: "GET /api/v1/status/config (HTTP {{prom.status}}): {{prom.body}}"
