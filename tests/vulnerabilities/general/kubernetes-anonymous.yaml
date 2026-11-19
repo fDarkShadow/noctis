@@ -1,0 +1,42 @@
+# Flag a Kubernetes API server that allows anonymous access to cluster resources.
+# With anonymous-auth enabled and a permissive RBAC binding, an unauthenticated
+# client can list namespaces/secrets. GET /api/v1/namespaces returns a
+# NamespaceList (200); a locked-down server returns 401/403 Forbidden.
+uid: 7a4c9e63-8b25-4d10-9f03-2e6b1c74a085
+name: "Kubernetes API allows anonymous access"
+description: |
+  The Kubernetes API server returned cluster resources to an unauthenticated
+  request (anonymous-auth with a permissive RBAC binding), exposing the cluster.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [kubernetes, anonymous, unauthenticated, exposure, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests"
+steps:
+  - id: k8s-ns
+    action: http_request
+    method: GET
+    path: "/api/v1/namespaces"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: k8s
+  - id: check-ns
+    action: match
+    source: k8s.body
+    pattern: "\"kind\"\\s*:\\s*\"NamespaceList\""
+    condition: "k8s.status == 200"
+    on_match:
+      finding:
+        title: "Kubernetes API allows anonymous access"
+        description: "GET /api/v1/namespaces returned a NamespaceList without credentials — anonymous access to cluster resources."
+        remediation: "Disable anonymous-auth (--anonymous-auth=false) or remove permissive RBAC bindings for system:anonymous/system:unauthenticated; firewall the API port."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "GET /api/v1/namespaces (HTTP {{k8s.status}}): {{k8s.body}}"
