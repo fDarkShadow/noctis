@@ -134,6 +134,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## erlang-otp-ssh-mock
 - erlang-otp-ssh/CVE-2025-32433
 
+## etcd-mock
+- general/etcd-unauth
+
 ## exchange-mock
 - exchange/CVE-2021-26855
 

@@ -1,0 +1,42 @@
+# Flag an etcd server that serves key reads without authentication.
+# GET /v2/keys/ returns the key listing when auth is disabled — etcd commonly
+# stores cluster secrets and Kubernetes state, so this is a high-value leak.
+# A secured etcd returns 401.
+uid: 6b2e8d41-3c97-4a05-b1f8-2d7a9c640e53
+name: "etcd exposed without authentication"
+description: |
+  The etcd server returned key data to an unauthenticated request, exposing
+  cluster configuration/secrets stored in the key space.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [etcd, unauthenticated, exposure, data-leak, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://etcd.io/docs/latest/op-guide/authentication/"
+steps:
+  - id: etcd-keys
+    action: http_request
+    method: GET
+    path: "/v2/keys/"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: etcd
+  - id: check-keys
+    action: match
+    source: etcd.body
+    pattern: "\"action\"\\s*:\\s*\"get\""
+    condition: "etcd.status == 200"
+    on_match:
+      finding:
+        title: "etcd exposed without authentication"
+        description: "GET /v2/keys/ returned key data without credentials — etcd authentication is disabled."
+        remediation: "Enable etcd authentication and client-cert TLS (--client-cert-auth), bind to the peer network, and firewall ports 2379/2380."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "GET /v2/keys/ (HTTP {{etcd.status}}): {{etcd.body}}"
