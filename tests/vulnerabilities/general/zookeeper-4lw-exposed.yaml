@@ -1,0 +1,42 @@
+# Flag a ZooKeeper node that answers unauthenticated 4-letter-word (4lw) admin
+# commands. `envi` dumps the server environment (version, hostname, paths) to
+# any client when the 4lw whitelist is open — information disclosure. A locked
+# down node (restricted 4lw.commands.whitelist) refuses the command.
+uid: 7c3a9e15-4d62-4b08-9a71-2e6f5c08d4a7
+name: "ZooKeeper 4-letter-word admin commands exposed"
+description: |
+  The ZooKeeper server answered the unauthenticated `envi` 4lw command, leaking
+  server environment details (version, hostname, filesystem paths).
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.45
+tags: [zookeeper, 4lw, exposure, info-disclosure, misconfig]
+services: [zookeeper]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#The+Four+Letter+Words"
+steps:
+  - id: zk-envi
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    line_ending: ""
+    timeout_secs: 10
+    commands:
+      - "envi"
+    store_as: zk
+  - id: check-envi
+    action: match
+    source: zk.transcript
+    pattern: "zookeeper.version"
+    condition: "zk.connected == true"
+    on_match:
+      finding:
+        title: "ZooKeeper 4-letter-word admin commands exposed"
+        description: "The `envi` 4lw command returned the server environment without authentication."
+        remediation: "Restrict 4lw.commands.whitelist to the minimum (e.g. srvr), enable auth/ACLs, and firewall port 2181."
+        confidence_delta: 0.30
+        qod: 70
+        evidence: "envi output: {{zk.transcript}}"

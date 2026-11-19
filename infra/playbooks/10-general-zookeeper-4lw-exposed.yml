@@ -1,0 +1,10 @@
+---
+- name: "zookeeper-4lw-exposed — ZooKeeper 4-letter-word admin commands exposed"
+  hosts: zookeeper_4lw_exposed
+  gather_facts: false
+  vars:
+    cve_id: "zookeeper-4lw-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/zookeeper-4lw-exposed.yaml"
+  roles:
+    - common_docker
