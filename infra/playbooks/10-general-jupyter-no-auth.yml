@@ -1,0 +1,10 @@
+---
+- name: "jupyter-no-auth — Jupyter server with authentication disabled"
+  hosts: jupyter_no_auth
+  gather_facts: false
+  vars:
+    cve_id: "jupyter-no-auth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/jupyter-no-auth.yaml"
+  roles:
+    - common_docker

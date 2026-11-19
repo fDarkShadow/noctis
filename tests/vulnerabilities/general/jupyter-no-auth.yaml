@@ -1,0 +1,43 @@
+# Flag a Jupyter Notebook/Server with authentication disabled.
+# With no token/password, GET /api/contents returns the notebook directory
+# listing to anyone — and a Jupyter session grants arbitrary code execution on
+# the host. A secured server returns 403 (Forbidden) without a token.
+uid: 6c1a9e47-3d82-4b05-a0f2-7e3c5b84d916
+name: "Jupyter server with authentication disabled"
+description: |
+  The Jupyter server returned its contents API to an unauthenticated request,
+  indicating token/password auth is disabled — this allows arbitrary code
+  execution on the host via a notebook/terminal.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [jupyter, unauthenticated, exposure, rce, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://jupyter-server.readthedocs.io/en/latest/operators/security.html"
+steps:
+  - id: jupyter-contents
+    action: http_request
+    method: GET
+    path: "/api/contents"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: jup
+  - id: check-contents
+    action: match
+    source: jup.body
+    pattern: "\"type\"\\s*:\\s*\"directory\""
+    condition: "jup.status == 200"
+    on_match:
+      finding:
+        title: "Jupyter server with authentication disabled"
+        description: "GET /api/contents returned a directory listing without a token — Jupyter auth is disabled (code execution risk)."
+        remediation: "Enable token or password auth (ServerApp.token / .password), bind to localhost, and front with an authenticating proxy."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "GET /api/contents (HTTP {{jup.status}}): {{jup.body}}"
