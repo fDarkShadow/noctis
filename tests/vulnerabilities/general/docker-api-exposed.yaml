@@ -1,0 +1,43 @@
+# Flag a Docker Engine API exposed over plain TCP without authentication.
+# An unauthenticated Docker API (default on 2375) is equivalent to root on the
+# host: anyone can create a privileged container mounting the host filesystem.
+# GET /version returns the engine version JSON ("ApiVersion"); a TLS-protected
+# or absent daemon does not answer this over plain HTTP.
+uid: 8d1b6c47-2e59-4a03-b7f0-3c6a9e24d5f1
+name: "Docker Engine API exposed without authentication"
+description: |
+  The Docker Engine API answered an unauthenticated /version request over plain
+  TCP. This grants full control of the host (privileged containers, host mounts).
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [docker, api, unauthenticated, exposure, rce, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://docs.docker.com/engine/security/protect-access/"
+steps:
+  - id: docker-version
+    action: http_request
+    method: GET
+    path: "/version"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: dkr
+  - id: check-version
+    action: match
+    source: dkr.body
+    pattern: "\"ApiVersion\""
+    condition: "dkr.status == 200"
+    on_match:
+      finding:
+        title: "Docker Engine API exposed without authentication"
+        description: "GET /version returned the Docker engine version without credentials — the API grants full host control."
+        remediation: "Never expose the Docker API on plain TCP; use a local socket or mTLS (2376), and firewall port 2375."
+        confidence_delta: 0.40
+        qod: 75
+        evidence: "GET /version (HTTP {{dkr.status}}): {{dkr.body}}"
