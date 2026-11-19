@@ -1,0 +1,5 @@
+FROM python:3.11-slim
+COPY server.py /app/server.py
+ENV MONGO_MODE=vuln
+EXPOSE 27017
+CMD ["python3", "/app/server.py"]

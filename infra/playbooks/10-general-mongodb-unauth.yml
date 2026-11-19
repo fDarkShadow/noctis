@@ -1,0 +1,10 @@
+---
+- name: "mongodb-unauth — MongoDB exposed without authentication"
+  hosts: mongodb_unauth
+  gather_facts: false
+  vars:
+    cve_id: "mongodb-unauth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/mongodb-unauth.yaml"
+  roles:
+    - common_docker
