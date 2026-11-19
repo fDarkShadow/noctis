@@ -1,0 +1,10 @@
+---
+- name: "pop3-cleartext-auth — POP3 cleartext authentication allowed"
+  hosts: pop3_cleartext_auth
+  gather_facts: false
+  vars:
+    cve_id: "pop3-cleartext-auth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/pop3-cleartext-auth.yaml"
+  roles:
+    - common_docker

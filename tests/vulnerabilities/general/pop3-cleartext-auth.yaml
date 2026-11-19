@@ -1,0 +1,66 @@
+# Flag a POP3 server that allows cleartext login (no TLS required).
+#
+# A POP3 server that enforces TLS advertises STLS in its CAPA list and refuses
+# USER/PASS until STLS succeeds. If the CAPA reply comes back WITHOUT STLS,
+# plaintext authentication is accepted over the clear channel, exposing
+# credentials. We read the banner, send CAPA, and report when the reply arrived
+# but STLS is absent.
+uid: adbc946d-4ad7-4158-b2a7-ce44c7f8f74e
+name: "POP3 cleartext authentication allowed"
+description: |
+  The POP3 server's CAPA list does not advertise STLS, so it accepts plaintext
+  USER/PASS without TLS — credentials can be sent in the clear and intercepted.
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.40
+tags: [pop3, cleartext, stls, starttls, exposure, misconfig]
+services: [pop3]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.rfc-editor.org/rfc/rfc2595#section-4"
+
+steps:
+  - id: init
+    action: set_var
+    var_name: got_caps
+    var_value: false
+
+  - id: pop3-capa
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    line_ending: "\r\n"
+    timeout_secs: 10
+    commands:
+      - "CAPA"
+    store_as: pop3
+
+  # Confirm a CAPA listing came back (USER is advertised by any CAPA-capable
+  # server); guards the negated STLS match against a non-answering server.
+  - id: got-capa
+    action: match
+    source: pop3.transcript
+    pattern: "USER"
+    case_insensitive: true
+    condition: "pop3.connected == true"
+    on_match:
+      set_vars:
+        got_caps: true
+
+  - id: check-stls-absent
+    action: match
+    source: pop3.transcript
+    pattern: "STLS"
+    case_insensitive: true
+    negate: true
+    condition: "got_caps == true"
+    on_match:
+      finding:
+        title: "POP3 cleartext authentication allowed"
+        description: "The POP3 CAPA list does not advertise STLS; plaintext USER/PASS is accepted without TLS."
+        remediation: "Advertise and require STLS before accepting USER/PASS, or disable plaintext POP3 on port 110."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "CAPA reply (no STLS): {{pop3.transcript}}"
