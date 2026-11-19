@@ -1,0 +1,67 @@
+# Flag an IMAP server that allows cleartext login (no TLS required).
+#
+# An IMAP server advertises LOGINDISABLED in its pre-TLS CAPABILITY list when it
+# refuses plaintext logins until STARTTLS. If the CAPABILITY reply comes back
+# WITHOUT LOGINDISABLED, plaintext authentication is accepted over the clear
+# channel, exposing credentials. We read the banner, ask for CAPABILITY, and
+# report when the reply arrived but LOGINDISABLED is absent.
+uid: 2b98bf08-ac86-41bb-b1f2-ec8bbb159b11
+name: "IMAP cleartext authentication allowed"
+description: |
+  The IMAP server's pre-TLS CAPABILITY list does not advertise LOGINDISABLED,
+  so it accepts plaintext LOGIN before STARTTLS — credentials can be sent in
+  the clear and intercepted.
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.40
+tags: [imap, cleartext, starttls, exposure, misconfig]
+services: [imap]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.rfc-editor.org/rfc/rfc3501#section-6.2.3"
+
+steps:
+  - id: init
+    action: set_var
+    var_name: got_caps
+    var_value: false
+
+  - id: imap-capability
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    line_ending: "\r\n"
+    timeout_secs: 10
+    commands:
+      - "a1 CAPABILITY"
+    store_as: imap
+
+  # Confirm we actually received a CAPABILITY reply (guards the negated match
+  # below against a server that never answered → empty transcript).
+  - id: got-capability
+    action: match
+    source: imap.transcript
+    pattern: "CAPABILITY"
+    case_insensitive: true
+    condition: "imap.connected == true"
+    on_match:
+      set_vars:
+        got_caps: true
+
+  - id: check-logindisabled-absent
+    action: match
+    source: imap.transcript
+    pattern: "LOGINDISABLED"
+    case_insensitive: true
+    negate: true
+    condition: "got_caps == true"
+    on_match:
+      finding:
+        title: "IMAP cleartext authentication allowed"
+        description: "The IMAP CAPABILITY list does not advertise LOGINDISABLED; plaintext LOGIN is accepted before STARTTLS."
+        remediation: "Advertise LOGINDISABLED until STARTTLS succeeds (and require TLS), or disable plaintext IMAP on port 143."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "CAPABILITY reply (no LOGINDISABLED): {{imap.transcript}}"

@@ -1,0 +1,10 @@
+---
+- name: "imap-cleartext-auth — IMAP cleartext authentication allowed"
+  hosts: imap_cleartext_auth
+  gather_facts: false
+  vars:
+    cve_id: "imap-cleartext-auth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/imap-cleartext-auth.yaml"
+  roles:
+    - common_docker

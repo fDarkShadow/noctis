@@ -188,6 +188,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## hugegraph-mock
 - hugegraph/CVE-2024-27348
 
+## imap-mock
+- general/imap-cleartext-auth
+
 ## ingress-nginx-mock
 - ingress-nginx/CVE-2025-1974
 
@@ -341,6 +344,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## phpunit-vuln
 - phpunit/CVE-2017-9841
+
+## pop3-mock
+- general/pop3-cleartext-auth
 
 ## projectsend-mock
 - projectsend/CVE-2024-11680
