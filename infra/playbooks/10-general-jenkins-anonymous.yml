@@ -1,0 +1,10 @@
+---
+- name: "jenkins-anonymous — Jenkins anonymous read access"
+  hosts: jenkins_anonymous
+  gather_facts: false
+  vars:
+    cve_id: "jenkins-anonymous"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/jenkins-anonymous.yaml"
+  roles:
+    - common_docker
