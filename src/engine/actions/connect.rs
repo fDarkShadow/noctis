@@ -240,6 +240,13 @@ pub async fn run_tcp_dialogue(step: &Step, def: &TestDef, ctx: &mut Context) -> 
         commands.push(crate::expr::interpolate(c, &ctx.vars)?);
     }
 
+    // Binary mode: a raw hex frame sent verbatim (e.g. a length-prefixed MongoDB
+    // wire-protocol message). Templated first, then decoded from hex.
+    let send_hex = match &step.send_hex {
+        Some(hex) => Some(udp::decode_hex(&crate::expr::interpolate(hex, &ctx.vars)?)?),
+        None => None,
+    };
+
     match dialogue::run(
         &ctx.target_host,
         port,
@@ -247,6 +254,7 @@ pub async fn run_tcp_dialogue(step: &Step, def: &TestDef, ctx: &mut Context) -> 
         read_banner,
         commands,
         line_ending,
+        send_hex,
         step.timeout_secs,
     )
     .await

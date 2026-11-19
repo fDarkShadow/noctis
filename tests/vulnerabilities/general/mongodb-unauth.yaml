@@ -1,0 +1,52 @@
+# Detect a MongoDB instance reachable without authentication.
+#
+# Sends a MongoDB wire-protocol OP_MSG `listDatabases` command (binary frame via
+# tcp_dialogue's send_hex). An unauthenticated/open node returns the database
+# listing (reply contains `totalSize`, ok:1). A node with access control enabled
+# answers "command listDatabases requires authentication" (Unauthorized) and
+# never includes `totalSize` — so matching `totalSize` cleanly distinguishes an
+# open node from a secured one (the error message itself echoes "listDatabases",
+# which is why we key on `totalSize` rather than "databases").
+uid: 9c1e5a37-6b24-4d81-8f0a-7e2c4b9d6153
+name: "MongoDB exposed without authentication"
+description: |
+  The MongoDB server answered an unauthenticated listDatabases command with the
+  database listing, confirming access control is disabled — all databases are
+  readable by anyone who can reach the port.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [mongodb, unauthenticated, exposure, data-leak, misconfig]
+services: [mongodb]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.mongodb.com/docs/manual/core/authentication/"
+
+steps:
+  - id: mongo-listdatabases
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # OP_MSG (opcode 2013) carrying {listDatabases: 1, $db: "admin"}, length-prefixed.
+    send_hex: "3c0000000100000000000000dd070000000000000027000000106c697374446174616261736573000100000002246462000600000061646d696e0000"
+    store_as: mongo
+
+  - id: check-unauth-listing
+    action: match
+    source: mongo.transcript
+    # `totalSize` appears only in a successful listDatabases reply (open node);
+    # a secured node returns an Unauthorized error without it.
+    pattern: "totalSize"
+    case_insensitive: true
+    condition: "mongo.connected == true"
+    on_match:
+      finding:
+        title: "MongoDB exposed without authentication"
+        description: "An unauthenticated listDatabases command returned the database listing, confirming access control is disabled."
+        remediation: "Enable access control (authorization: enabled) with a user/role model, bind to localhost, and firewall port 27017."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "Unauthenticated listDatabases reply: {{mongo.transcript}}"

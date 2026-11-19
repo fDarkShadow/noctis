@@ -48,7 +48,9 @@ pub struct Step {
     pub port: Option<String>,
     #[serde(default)]
     pub send: Option<String>,
-    /// Binary UDP payload as a hex string (udp_probe); takes precedence over `send`.
+    /// Binary payload as a hex string. For `udp_probe` it is the datagram and
+    /// takes precedence over `send`; for `tcp_dialogue` it is a raw frame sent
+    /// verbatim (binary mode) instead of `commands`.
     #[serde(default)]
     pub send_hex: Option<String>,
     #[serde(default)]

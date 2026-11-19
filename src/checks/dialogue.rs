@@ -1,7 +1,13 @@
-//! Generic line-oriented TCP dialogue: connect, read the greeting, then send a
-//! feed-supplied sequence of commands and capture each reply. Expresses FTP, SMTP,
-//! Telnet, POP3, IMAP and similar text protocols without any protocol specifics in
-//! the engine — the feed drives the exchange.
+//! Generic TCP dialogue: connect, read the greeting, then send a feed-supplied
+//! exchange and capture the reply. Two modes:
+//!
+//! - text: a sequence of `commands`, each terminated by `line_ending` (FTP,
+//!   SMTP, Telnet, POP3, IMAP and similar line protocols).
+//! - binary: a single raw `send_hex` frame sent verbatim, with the reply
+//!   captured as both lossy text and hex (length-prefixed binary protocols
+//!   such as MongoDB's wire protocol).
+//!
+//! No protocol specifics live in the engine — the feed drives the exchange.
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -28,11 +34,19 @@ pub struct DialogueResult {
     pub banner: Option<String>,
     pub responses: Vec<String>,
     pub transcript: String,
+    /// All received bytes (banner + replies) as lowercase hex, when any arrived.
+    /// Lets feeds match binary replies that are not valid UTF-8.
+    pub response_hex: Option<String>,
     pub duration_ms: u64,
 }
 
+/// Lossy-decode received bytes to a trimmed string (how text protocols are matched).
+fn to_text(bytes: &[u8]) -> String {
+    String::from_utf8_lossy(bytes).trim_end().to_string()
+}
+
 /// Read until no more bytes arrive for `READ_IDLE_MS`, EOF, or the byte cap.
-async fn read_reply<S: AsyncReadExt + Unpin>(stream: &mut S) -> Option<String> {
+async fn read_reply<S: AsyncReadExt + Unpin>(stream: &mut S) -> Option<Vec<u8>> {
     let mut acc = Vec::new();
     let mut chunk = [0u8; 4096];
     loop {
@@ -51,8 +65,14 @@ async fn read_reply<S: AsyncReadExt + Unpin>(stream: &mut S) -> Option<String> {
     if acc.is_empty() {
         None
     } else {
-        Some(String::from_utf8_lossy(&acc).trim_end().to_string())
+        Some(acc)
     }
+}
+
+/// Raw bytes received from one exchange: the optional banner plus one entry per reply.
+struct Exchange {
+    banner: Option<Vec<u8>>,
+    replies: Vec<Vec<u8>>,
 }
 
 async fn converse<S: AsyncReadExt + AsyncWriteExt + Unpin>(
@@ -60,32 +80,29 @@ async fn converse<S: AsyncReadExt + AsyncWriteExt + Unpin>(
     read_banner: bool,
     commands: &[String],
     line_ending: &str,
-) -> (Option<String>, Vec<String>) {
+    send_hex: Option<&[u8]>,
+) -> Exchange {
     let banner = if read_banner {
         read_reply(stream).await
     } else {
         None
     };
-    let mut responses = Vec::new();
-    for cmd in commands {
-        let line = format!("{cmd}{line_ending}");
-        if stream.write_all(line.as_bytes()).await.is_err() {
-            break;
+    let mut replies = Vec::new();
+    if let Some(frame) = send_hex {
+        // Binary mode: one raw frame, one reply.
+        if stream.write_all(frame).await.is_ok() {
+            replies.push(read_reply(stream).await.unwrap_or_default());
         }
-        responses.push(read_reply(stream).await.unwrap_or_default());
+    } else {
+        for cmd in commands {
+            let line = format!("{cmd}{line_ending}");
+            if stream.write_all(line.as_bytes()).await.is_err() {
+                break;
+            }
+            replies.push(read_reply(stream).await.unwrap_or_default());
+        }
     }
-    (banner, responses)
-}
-
-fn assemble(banner: &Option<String>, responses: &[String]) -> String {
-    let mut parts: Vec<&str> = Vec::new();
-    if let Some(b) = banner {
-        parts.push(b);
-    }
-    for r in responses {
-        parts.push(r);
-    }
-    parts.join("\n")
+    Exchange { banner, replies }
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -96,6 +113,7 @@ pub async fn run(
     read_banner: bool,
     commands: Vec<String>,
     line_ending: String,
+    send_hex: Option<Vec<u8>>,
     timeout_secs: u64,
 ) -> Result<DialogueResult> {
     let addr = format!("{host}:{port}");
@@ -110,12 +128,14 @@ pub async fn run(
                 banner: None,
                 responses: Vec::new(),
                 transcript: String::new(),
+                response_hex: None,
                 duration_ms: start.elapsed().as_millis() as u64,
             })
         }
     };
 
-    let (banner, responses) = if use_tls {
+    let send_hex = send_hex.as_deref();
+    let ex = if use_tls {
         let connector = TlsConnector::from(Arc::new(insecure_client_config()?));
         let server_name = ServerName::try_from(host.to_string())
             .map_err(|e| NoctisError::Tcp(format!("invalid host for TLS SNI: {e}")))?;
@@ -123,18 +143,44 @@ pub async fn run(
             .connect(server_name, tcp)
             .await
             .map_err(|e| NoctisError::Tcp(format!("TLS handshake {addr}: {e}")))?;
-        converse(&mut stream, read_banner, &commands, &line_ending).await
+        converse(&mut stream, read_banner, &commands, &line_ending, send_hex).await
     } else {
         let mut stream = tcp;
-        converse(&mut stream, read_banner, &commands, &line_ending).await
+        converse(&mut stream, read_banner, &commands, &line_ending, send_hex).await
     };
 
-    let transcript = assemble(&banner, &responses);
+    // Text views (lossy) for line protocols and ASCII markers inside binary replies.
+    let banner = ex.banner.as_deref().map(to_text);
+    let responses: Vec<String> = ex.replies.iter().map(|b| to_text(b)).collect();
+    let mut transcript_parts: Vec<&str> = Vec::new();
+    if let Some(b) = &banner {
+        transcript_parts.push(b);
+    }
+    for r in &responses {
+        transcript_parts.push(r);
+    }
+    let transcript = transcript_parts.join("\n");
+
+    // Hex view (all raw bytes, banner then replies) for binary protocols.
+    let mut raw: Vec<u8> = Vec::new();
+    if let Some(b) = &ex.banner {
+        raw.extend_from_slice(b);
+    }
+    for r in &ex.replies {
+        raw.extend_from_slice(r);
+    }
+    let response_hex = if raw.is_empty() {
+        None
+    } else {
+        Some(raw.iter().map(|b| format!("{b:02x}")).collect())
+    };
+
     Ok(DialogueResult {
         connected: true,
         banner,
         responses,
         transcript,
+        response_hex,
         duration_ms: start.elapsed().as_millis() as u64,
     })
 }
@@ -182,6 +228,7 @@ mod tests {
             true,
             vec!["EHLO x".into(), "QUIT".into()],
             "\r\n".into(),
+            None,
             5,
         )
         .await
@@ -208,6 +255,7 @@ mod tests {
             false,
             vec!["NOOP".into()],
             "\r\n".into(),
+            None,
             5,
         )
         .await
@@ -215,5 +263,49 @@ mod tests {
         assert!(r.banner.is_none());
         assert_eq!(r.responses.len(), 1);
         assert!(r.responses[0].contains("220 ready"));
+    }
+
+    /// A server that replies to one binary frame with binary bytes (0x00 .. marker).
+    async fn binary_server() -> std::net::SocketAddr {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move {
+            if let Ok((mut sock, _)) = listener.accept().await {
+                let mut buf = [0u8; 1024];
+                if let Ok(n) = sock.read(&mut buf).await {
+                    if n > 0 {
+                        // reply: a NUL, a non-UTF8 byte, then an ASCII marker
+                        let _ = sock.write_all(&[0x00, 0xff]).await;
+                        let _ = sock.write_all(b"databases").await;
+                    }
+                }
+            }
+        });
+        addr
+    }
+
+    #[tokio::test]
+    async fn binary_frame_sends_and_captures_hex() {
+        let addr = binary_server().await;
+        let r = run(
+            &addr.ip().to_string(),
+            addr.port(),
+            false,
+            false,
+            Vec::new(),
+            "\r\n".into(),
+            Some(vec![0xde, 0xad, 0xbe, 0xef]),
+            5,
+        )
+        .await
+        .unwrap();
+
+        assert!(r.connected);
+        let hex = r.response_hex.expect("response_hex present");
+        // 0x00 0xff then "databases" (646174616261736573)
+        assert!(hex.starts_with("00ff"));
+        assert!(hex.contains("646174616261736573"));
+        // ASCII marker survives in the lossy transcript too
+        assert!(r.transcript.contains("databases"));
     }
 }
