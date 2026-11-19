@@ -197,6 +197,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## grafana-mock
 - grafana/CVE-2021-43798
 
+## hadoop-yarn-mock
+- general/hadoop-yarn-exposed
+
 ## hfs-mock
 - hfs/CVE-2024-23692
 
