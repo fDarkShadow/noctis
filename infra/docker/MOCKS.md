@@ -122,6 +122,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dns-mock
 - general/dns-open-resolver
 
+## docker-api-mock
+- general/docker-api-exposed
+
 ## drupal-sqli-mock
 - drupal-sqli/CVE-2026-9082
 

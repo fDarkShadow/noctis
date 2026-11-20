@@ -1,0 +1,10 @@
+---
+- name: "docker-api-exposed — Docker Engine API exposed without authentication"
+  hosts: docker_api_exposed
+  gather_facts: false
+  vars:
+    cve_id: "docker-api-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/docker-api-exposed.yaml"
+  roles:
+    - common_docker
