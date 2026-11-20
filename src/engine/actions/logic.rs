@@ -99,3 +99,12 @@ pub fn run_set_var(step: &Step, ctx: &mut Context) -> Result<bool> {
     ctx.set(name.to_string(), val);
     Ok(false)
 }
+
+/// `sleep` — pause the test for `duration_ms` milliseconds (capped at 60s to
+/// bound runaway feeds). Useful for write-then-read propagation gaps.
+pub async fn run_sleep(step: &Step, _ctx: &mut Context) -> Result<bool> {
+    const MAX_SLEEP_MS: u64 = 60_000;
+    let ms = step.duration_ms.unwrap_or(0).min(MAX_SLEEP_MS);
+    tokio::time::sleep(std::time::Duration::from_millis(ms)).await;
+    Ok(false)
+}

@@ -1,3 +1,4 @@
+mod binpack;
 mod builtins;
 mod crypto;
 mod rhai;

@@ -82,6 +82,11 @@ pub struct Step {
     #[serde(default)]
     pub line_ending: Option<String>,
 
+    /// `sleep` action: how long to pause, in milliseconds (capped in the runner).
+    /// Lets a feed wait between steps (e.g. a write-then-read propagation gap).
+    #[serde(default)]
+    pub duration_ms: Option<u64>,
+
     // ── snmp_get (v2c) ────────────────────────────────────────────────────
     #[serde(default)]
     pub community: Option<String>,
