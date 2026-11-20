@@ -75,6 +75,7 @@
   "general/smbv1-enabled.yaml": "efbb35f50311302cc9ddddc27be2256358f63f116503134a3aceb56bf47b8121",
   "general/smtp-open-relay.yaml": "8c2a536579b0ecb10bef7b947d72b9ed4b182efa6015cc09a03f0225e171327a",
   "general/snmp-default-community.yaml": "2a94e14ae642d17ad455e6bdffbf225edd90a0f540916a84aa77833bb809657f",
+  "general/spark-master-exposed.yaml": "270d69f3e864ed45833cc279d310ee3f1c2e3ad64ab790772c5d5d450337b2d1",
   "general/ssh-default-credentials.yaml": "6a72bc7cbd49c535ec5638a3f520c4de5af2062f5e939477396286daa6205f92",
   "general/ssh-weak-auth.yaml": "a9d690bb8e3d672363611aa42c71eb7f88d58c99b27e28ea869d52afdee455db",
   "general/telnet-exposed.yaml": "70f0207fa591b1eedb3727eb2ffd5129a69298bfe4b6f242beec7ad6e538d127",

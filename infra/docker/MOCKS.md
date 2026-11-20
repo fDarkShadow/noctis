@@ -455,6 +455,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## sonicwall-sslvpn-mock
 - sonicwall-sslvpn/CVE-2024-53704
 
+## spark-mock
+- general/spark-master-exposed
+
 ## splunk-pg-mock
 - splunk-pg/CVE-2026-20253
 

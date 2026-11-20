@@ -1,0 +1,10 @@
+---
+- name: "spark-master-exposed — Apache Spark master exposed without authentication"
+  hosts: spark_master_exposed
+  gather_facts: false
+  vars:
+    cve_id: "spark-master-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/spark-master-exposed.yaml"
+  roles:
+    - common_docker

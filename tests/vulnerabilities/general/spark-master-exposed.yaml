@@ -1,0 +1,44 @@
+# Flag an Apache Spark standalone master exposed without authentication.
+# The master UI/REST reachable unauthenticated means the cluster state is
+# readable and (via the standalone REST submission gateway) arbitrary
+# applications can be submitted — remote code execution on the workers.
+# GET /json/ returns the cluster status (spark:// URL, ALIVE, worker list).
+uid: 4a9c2e68-7d13-4b05-9f20-6c1b8e34a0d7
+name: "Apache Spark master exposed without authentication"
+description: |
+  The Spark standalone master returned cluster status to an unauthenticated
+  request. An exposed master commonly permits unauthenticated application
+  submission (remote code execution on the cluster).
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.45
+tags: [spark, unauthenticated, exposure, rce, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://spark.apache.org/docs/latest/security.html"
+steps:
+  - id: spark-json
+    action: http_request
+    method: GET
+    path: "/json/"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: spark
+  - id: check-cluster
+    action: match
+    source: spark.body
+    pattern: "spark://"
+    condition: "spark.status == 200"
+    on_match:
+      finding:
+        title: "Apache Spark master exposed without authentication"
+        description: "GET /json/ returned the Spark cluster status without credentials; the standalone master is exposed."
+        remediation: "Enable authentication (spark.authenticate), restrict the master/REST ports (7077/6066/8080) behind the cluster network, and firewall them."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "GET /json/ (HTTP {{spark.status}}): {{spark.body}}"
