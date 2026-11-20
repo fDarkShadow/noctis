@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use noctis in your work, please cite it using this metadata."
+title: "noctis"
+abstract: >-
+  noctis is a Rust black-box vulnerability scanner driven by self-contained YAML
+  feeds. It detects CVEs and misconfigurations by running structured, evidence-based
+  test sequences against live services, grading each finding with a Quality-of-Detection
+  (QoD) score.
+type: software
+authors:
+  - name: "fDarkShadow"
+    alias: fDarkShadow
+repository-code: "https://github.com/fDarkShadow/noctis"
+url: "https://github.com/fDarkShadow/noctis"
+license: MIT
+keywords:
+  - vulnerability-scanner
+  - security
+  - cve
+  - pentesting
+  - devsecops
+  - rust
+  - network-security
+  - black-box-testing
