@@ -8,11 +8,29 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  # Fail fast (before the expensive builds) if the tag and Cargo.toml disagree,
+  # so a release can never ship a version that doesn't match the crate.
+  version-check:
+    name: Tag matches Cargo.toml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify tag == Cargo.toml version
+        run: |
+          cargo_version="$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"(.*)".*/\1/')"
+          tag_version="${GITHUB_REF_NAME#v}"
+          echo "Cargo.toml = $cargo_version | tag = $GITHUB_REF_NAME"
+          if [ "$cargo_version" != "$tag_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Cargo.toml version $cargo_version — bump Cargo.toml or retag."
+            exit 1
+          fi
+
   # Build each architecture on its own native runner, in parallel, and push the
   # per-arch image to GHCR *by digest* (no tags yet). arm64 runs on a native ARM
   # runner — no QEMU emulation — so both builds finish at native speed.
   build:
     name: Build ${{ matrix.arch }}
+    needs: [version-check]
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
