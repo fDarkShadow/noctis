@@ -2,40 +2,73 @@
   <img src="assets/noctis-logo.png" alt="noctis" width="420">
 </p>
 
-<h1 align="center">noctis — Rust vulnerability scanner driven by YAML feeds</h1>
+<h1 align="center">noctis</h1>
 
-Noctis detects CVEs and misconfigurations by running structured YAML test sequences against live services — no agent, no shared cache, no false-positive-prone version guessing. Each feed is a self-contained, reproducible detection unit.
+<p align="center">
+  <strong>A black-box vulnerability scanner driven by YAML feeds.</strong><br>
+  Detects CVEs, misconfigurations and exposed services on live targets — with evidence, not version guesses.
+</p>
 
-[![CI](https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml/badge.svg)](https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-%3E%3D1.75-orange)](https://www.rust-lang.org)
-[![Docker](https://ghcr-badge.egpl.dev/fdarkShadow/noctis/size?tag=edge&label=image)](https://github.com/fDarkShadow/noctis/pkgs/container/noctis)
+<p align="center">
+  <a href="https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml"><img src="https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-stable-orange" alt="Rust"></a>
+  <a href="https://github.com/fDarkShadow/noctis/pkgs/container/noctis"><img src="https://ghcr-badge.egpl.dev/fdarkShadow/noctis/size?tag=latest&label=image" alt="Docker image"></a>
+</p>
+
+<p align="center">
+  <a href="#why-noctis">Why</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#run-with-docker">Docker</a> ·
+  <a href="#rest-api">REST API</a> ·
+  <a href="#writing-feeds">Writing feeds</a> ·
+  <a href="#available-feeds">Feeds</a> ·
+  <a href="#contributing">Contributing</a>
+</p>
 
 ---
 
-## Demo
+## Contents
 
-<!-- Replace with an asciinema cast or a GIF showing a scan from POST /scans to a finding.
-     Example: [![asciicast](https://asciinema.org/a/XXXXXX.svg)](https://asciinema.org/a/XXXXXX) -->
-<p align="center"><em>Demo coming soon — until then, see <a href="#quick-start">Quick start</a>.</em></p>
+- [Why noctis?](#why-noctis)
+- [How it works](#how-it-works)
+- [Features](#features)
+- [Quick start](#quick-start)
+- [Run with Docker](#run-with-docker)
+- [REST API](#rest-api)
+- [Writing feeds](#writing-feeds)
+  - [Anatomy of a feed](#anatomy-of-a-feed)
+  - [Automatic variables](#automatic-variables)
+  - [Actions](#actions)
+  - [Confidence / QoD scale](#confidence--qod-scale)
+  - [`tcp_connect` vs `http_request`](#tcp_connect-vs-http_request)
+  - [Validating a feed](#validating-a-feed)
+- [Available feeds](#available-feeds)
+- [Test infrastructure](#test-infrastructure)
+- [Performance](#performance)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
 ## Why noctis?
 
-Most network vulnerability scanners either **guess from version banners** (noisy and
-false-positive-prone) or bury detection logic in compiled code. noctis takes a different path:
+Most network vulnerability scanners either **guess from version banners** — noisy and
+false-positive-prone — or bury their detection logic in compiled code you can't read or audit.
+noctis takes a different path:
 
-- **Proof over guessing** — a finding is raised only when a step *observes* the vulnerable
-  behaviour (an LFI response, an unauthenticated reply, an out-of-band callback), and each is
-  graded with an OpenVAS-style Quality-of-Detection (QoD) score.
-- **Detection as data** — every check is a self-contained YAML feed, not compiled code. Read it,
-  audit it, or write your own in minutes.
-- **No agent, no shared state** — point it at live services over the network; each feed is
-  standalone and reproducible.
-- **Rust single binary** — fast, memory-safe, with a REST API for automation and CI/CD.
+- **Proof over guessing.** A finding is raised only when a step *observes* the vulnerable
+  behaviour — an LFI response, an unauthenticated reply, an out-of-band callback — and every
+  finding is graded with an OpenVAS-style **Quality-of-Detection (QoD)** score.
+- **Detection as data.** Every check is a self-contained **YAML feed**, not compiled code. Read
+  it, audit it, diff it in review, or write your own in minutes — no recompile.
+- **No agent, no shared state.** Point it at live services over the network. Each feed is
+  standalone and reproducible; there is no knowledge base to prime or poison.
+- **One fast binary.** Rust, memory-safe, with a REST API built for automation and CI/CD, and a
+  multi-arch container image a few MB in size.
 
-If you've used **Nuclei** or **OpenVAS**: noctis sits between them — data-driven feeds like the
+If you've used **Nuclei** or **OpenVAS**, noctis sits between them — data-driven feeds like the
 former, evidence-graded findings like the latter.
 
 | | Version-based scanners | Template scanners | **noctis** |
@@ -43,33 +76,42 @@ former, evidence-graded findings like the latter.
 | Detection logic | code / CPE match | templates | **YAML feeds** |
 | Evidence-graded findings | partial | varies | **yes (QoD)** |
 | Blind / OOB detection | rarely | varies | **built-in callback server** |
+| Non-HTTP protocols | varies | limited | **TCP / UDP / TLS / SSH / SNMP** |
 | Raw-TCP payloads (no URL normalisation) | rarely | varies | **yes** |
 | Runtime | varies | Go | **Rust (single binary)** |
 
 ---
 
-## Use cases
+## How it works
 
-- **DevSecOps / CI-CD** — run `noctis serve` and submit scans from a pipeline over the REST API;
-  gate releases on findings.
-- **Pentest & red team** — fast, evidence-based black-box checks against live targets with no
-  prior knowledge of the infrastructure.
-- **Continuous exposure monitoring** — surface misconfigurations (open databases, unauthenticated
-  services, weak TLS) across a fleet.
-- **Custom detections** — express an in-house check as a YAML feed without touching the engine.
+```
+         POST /scans                 ┌───────────────────────────────┐
+  host + discovered services  ─────▶ │  noctis engine                │
+  (port + service name)             │   match feeds ⇄ services       │
+                                     │   run steps (build confidence) │
+         GET /scans/{id}/findings    │   grade with QoD               │
+  evidence-graded findings   ◀────── └───────────────────────────────┘
+                                             ▲
+                                     YAML feeds (tests/vulnerabilities/)
+```
+
+You give noctis a host and the services discovered on it (e.g. from an nmap scan: a port + a
+service name). The engine selects every feed whose declared `services:` match, runs each feed's
+steps against the live service, and returns findings graded by how strong the evidence is.
 
 ---
 
 ## Features
 
-- **YAML feeds** — one file per CVE or misconfig; declare steps, patterns, and confidence deltas
-- **Service-aware** — feeds declare target services (`http`, `https`, `ssh`…); the engine maps them to discovered ports
-- **Raw TCP** — `tcp_connect` sends bytes verbatim for encoded payloads (path traversal, injections), bypassing HTTP normalisation
-- **Graduated confidence** — each finding carries a QoD score (OpenVAS-compatible)
-- **OOB detection** — built-in HTTP callback server for blind detections (Log4Shell, SSRF, XXE)
-- **Protocols** — HTTP/HTTPS (reqwest), raw TCP, TLS (rustls), SSH (libssh2)
-- **REST API** — `noctis serve` exposes scan submission, status polling, and findings retrieval
-- **Reproducible tests** — Ansible + rootless Podman, dynamic port allocation, automated TP/TN assertions
+- **YAML feeds** — one file per vulnerability (0, 1, or several CVEs); declare steps, patterns, and confidence deltas.
+- **Service-aware** — feeds declare target services (`http`, `https`, `ssh`, `ftp`…); the engine maps them to discovered ports.
+- **Many protocols** — HTTP/HTTPS (reqwest), raw TCP, line/binary TCP dialogues, UDP, TLS (rustls), SSH (libssh2), SNMP.
+- **Raw TCP** — `tcp_connect` sends bytes verbatim for encoded payloads (path traversal, injections), bypassing HTTP normalisation.
+- **Graduated confidence** — each finding carries an OpenVAS-compatible QoD score.
+- **OOB detection** — built-in HTTP callback server for blind bugs (Log4Shell, SSRF, XXE).
+- **Scriptable** — a [Rhai](https://rhai.rs) scripting layer with string/regex, crypto/encoding, and binary pack/unpack builtins.
+- **REST API** — `noctis serve` exposes scan submission, status polling, and findings retrieval.
+- **Reproducible tests** — Ansible + rootless Podman mocks, dynamic port allocation, automated true-positive / true-negative assertions.
 
 ---
 
@@ -93,7 +135,7 @@ curl -s -X POST http://localhost:8080/scans \
       {"port": 80,  "service": "http",  "protocol": "tcp"},
       {"port": 443, "service": "https", "protocol": "tcp"}
     ],
-    "tests": ["tests/cve/"],
+    "tests": ["tests/vulnerabilities/"],
     "concurrency": 10
   }' | jq .
 
@@ -101,13 +143,12 @@ curl -s -X POST http://localhost:8080/scans \
 curl -s http://localhost:8080/scans/<id>/findings | jq .
 ```
 
-Findings response:
+A findings response:
 
 ```json
 [
   {
-    "type": "cve",
-    "cve_id": "CVE-2021-41773",
+    "cve_ids": ["CVE-2021-41773"],
     "severity": "critical",
     "confidence": 0.95,
     "qod": 75,
@@ -118,13 +159,15 @@ Findings response:
 ]
 ```
 
+> `tests` is a list of paths or directories, resolved recursively — point it at the whole feed
+> tree (`tests/vulnerabilities/`), a product directory, or individual feed files.
+
 ---
 
 ## Run with Docker
 
-Prebuilt images are published to the **GitHub Container Registry (GHCR)** as a minimal
-`scratch` image (a static musl binary — no shell, a few MB), for **`linux/amd64`** and
-**`linux/arm64`**.
+Prebuilt images are published to the **GitHub Container Registry (GHCR)** as a minimal `scratch`
+image — a static musl binary, no shell, a few MB — for **`linux/amd64`** and **`linux/arm64`**.
 
 ```sh
 # Pull the latest release
@@ -135,8 +178,6 @@ docker run --rm -v ./tests:/feeds -p 8080:8080 \
   ghcr.io/fdarkshadow/noctis serve --host 0.0.0.0 --port 8080
 ```
 
-**Tags:**
-
 | Tag | Points to |
 |-----|-----------|
 | `latest` | the most recent release |
@@ -144,39 +185,17 @@ docker run --rm -v ./tests:/feeds -p 8080:8080 \
 | `edge` | the latest commit on `main` |
 
 Images are published automatically: `:edge` on every push to `main`, and the versioned
-`:X.Y.Z` / `:latest` tags when a `vX.Y.Z` release is tagged. See all tags on the
+`:X.Y.Z` / `:latest` tags when a `vX.Y.Z` release is tagged. Browse all tags on the
 [package page](https://github.com/fDarkShadow/noctis/pkgs/container/noctis).
 
 ---
 
-## Requirements
-
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| Rust | ≥ 1.75 | Build |
-| pkg-config + libssl-dev | system | Build (libssh2 is vendored; OpenSSL headers needed at compile time) |
-| Ansible-core | ≥ 2.15 | E2E tests only |
-| Podman | ≥ 4.0 | E2E tests only (build + run) |
-| [Task](https://taskfile.dev) | ≥ 3.0 | E2E tests only |
-
----
-
-## CLI reference
+## REST API
 
 ```sh
-# Verbosity
-noctis -v serve ...    # INFO
-noctis -vv serve ...   # DEBUG
-
-# OOB for blind detections (Log4Shell, SSRF)
-noctis serve --oob --oob-host <public-ip> --oob-port 9090
-
-# Docker (see "Run with Docker" above)
-docker run -v ./tests:/feeds -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest serve --host 0.0.0.0 --port 8080
-```
-
-```sh
-noctis serve --host 0.0.0.0 --port 8080
+noctis serve --host 0.0.0.0 --port 8080        # start the daemon
+noctis -v serve ...                            # -v = INFO, -vv = DEBUG
+noctis serve --oob --oob-host <public-ip> --oob-port 9090   # enable OOB callbacks
 ```
 
 | Method | Route | Description |
@@ -188,7 +207,7 @@ noctis serve --host 0.0.0.0 --port 8080
 | `DELETE` | `/scans/{id}` | Cancel a scan |
 | `GET` | `/scans/{id}/findings` | Findings for a scan |
 
-**POST /scans body:**
+**`POST /scans` body:**
 
 ```json
 {
@@ -197,87 +216,104 @@ noctis serve --host 0.0.0.0 --port 8080
     { "port": 80,  "service": "http",  "protocol": "tcp" },
     { "port": 443, "service": "https", "protocol": "tcp" }
   ],
-  "tests": ["tests/cve/", "tests/misconfig/"],
+  "tests": ["tests/vulnerabilities/"],
   "concurrency": 10
 }
 ```
 
----
-
-## Available feeds
-
-CVE feeds live in [`tests/cve/`](tests/cve/) — one YAML file per CVE. Coverage includes
-critical vulnerabilities across Apache, Atlassian, F5, Fortinet, GitLab, Ivanti, Jenkins,
-Microsoft Exchange, OpenSSH, PHP, Pulse Secure, VMware, and more.
-
-Misconfiguration checks live in [`tests/misconfig/`](tests/misconfig/): exposed paths,
-missing HTTP security headers, weak SSH auth, and weak TLS configuration.
+`services` is required (min 1). `concurrency` defaults to `5` (range 1–100). Optional fields
+include `webhook_url`, `oob`, and `filters` (e.g. exclude a CVE).
 
 ---
 
-## YAML feed format
+## Writing feeds
 
-A feed is a YAML file describing metadata and a sequence of steps. Steps build up confidence toward a finding.
+A feed is a YAML file describing metadata and a sequence of steps. Each step can probe a service,
+match a pattern, run a script, or wait for a callback; matching steps raise the finding's
+confidence toward a result.
+
+### Anatomy of a feed
 
 ```yaml
 uid: a3c7f4e2-1b9d-4f6a-8e3c-2d5a0f1e9b4c   # stable UUID v4 — never change
-name: "Apache httpd 2.4.49 Path Traversal / RCE (CVE-2021-41773)"
-type: cve                   # cve | misconfig
-cve: CVE-2021-41773
-cvss: 9.8
+name: "Apache httpd 2.4.49 path traversal / RCE"
+cves: [CVE-2021-41773]      # 0, 1, or several CVE IDs — [] for a misconfig/heuristic check
+cvss: 9.8                   # omit when cves is empty
 severity: critical          # info | low | medium | high | critical
-confidence_base: 0.30
+category: path-traversal    # optional free-form classifier (the main label for 0-CVE feeds)
+confidence_base: 0.30       # starting confidence, before any step runs
 tags: [apache, path-traversal, rce]
-services: [http, https]     # nmap service names — empty = all ports
+services: [http, https]     # nmap service names — [] means "run on every port"
 author: noctis
 version: "1.0.0"
 
 steps:
   - id: probe
-    action: tcp_connect      # raw TCP — payload sent verbatim
+    action: tcp_connect      # raw TCP — payload sent verbatim (no URL normalisation)
     port: "{{port}}"
     send: "GET /icons/.%2e/.%2e/etc/passwd HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
     store_as: resp
 
   - id: match
     action: match
-    source: resp.banner      # always .banner on tcp_connect results
+    source: resp.banner      # tcp_connect results expose .banner (never .data)
     pattern: "root:[x*!]:0:0"
     on_match:
       finding:
         confidence_delta: 0.65
         qod: 75
-        evidence: "LFI confirmed — /etc/passwd readable"
+        evidence: "LFI confirmed — /etc/passwd readable"   # a string template, not a list
       stop: true
 ```
 
+> A feed is a **vulnerability test**, not a "CVE test": `cves:` can be empty (a misconfiguration
+> or heuristic check — classify it with `category:`), hold one CVE (the common case), or hold
+> several (a chain tracked by multiple CVE IDs).
+
 ### Automatic variables
+
+Injected into every step; do not redefine `port` or `scheme` in a feed's `vars:`.
 
 | Variable | Value |
 |----------|-------|
 | `{{target_host}}` | Target IP / hostname |
-| `{{port}}` | Port of the matched service (injected by engine — do not redefine) |
+| `{{port}}` | Port of the matched service |
 | `{{scheme}}` | `http` or `https` — derived from the matched service name |
 | `{{oob_token}}` | UUID unique to this run |
 | `{{oob_url}}` | Full OOB callback URL |
-| `{{oob_host}}` | OOB server host |
-| `{{oob_port}}` | OOB server port |
+| `{{oob_host}}` / `{{oob_port}}` | OOB server host / port |
 | `{{oob_enabled}}` | `true` when `--oob` is configured |
 
-### Available actions
+### Actions
 
-| Action | Description |
-|--------|-------------|
-| `http_request` | HTTP/HTTPS request (reqwest); result fields: `resp.status`, `resp.body`, `resp.headers` |
-| `tcp_connect` | Raw TCP socket + banner grab; result field: `resp.banner` |
-| `tls_check` | TLS version, cipher, certificate inspection |
-| `ssh_check` | SSH banner + auth methods; result fields: `resp.banner`, `resp.auth_methods` |
-| `match` | Regex match on a context variable |
-| `script` | Arbitrary [Rhai](https://rhai.rs) script |
-| `wait_oob` | Wait for OOB HTTP callback |
-| `set_var` | Assign a context variable |
+Each probe action stores its result via `store_as`; later `match` / `script` steps read the
+fields below (e.g. `resp.status`, `resp.banner`).
+
+| Action | Purpose | Key result fields |
+|--------|---------|-------------------|
+| `http_request` | HTTP/HTTPS request (reqwest) | `resp.status`, `resp.body`, `resp.headers` |
+| `tcp_connect` | Raw TCP + banner grab (auto-TLS on `https`); bytes sent verbatim | `resp.banner`, `resp.connected` |
+| `tcp_dialogue` | Multi-step line **or** binary TCP exchange (FTP/SMTP/Telnet/POP3/IMAP/Redis; `send_hex` → `response_hex`) | `resp.responses`, `resp.response_hex`, `resp.transcript`, `resp.banner` |
+| `udp_probe` | UDP datagram send/recv (DNS, NTP, memcached) | `resp.responded`, `resp.response`, `resp.response_hex` |
+| `tcp_syn` | Raw TCP SYN half-open probe (needs `CAP_NET_RAW`) | `resp.state`, `resp.flags` |
+| `tls_check` | TLS version / cipher / certificate inspection | `resp.protocol_version`, `resp.cipher_suite`, `resp.cert_*` |
+| `ssh_check` | SSH banner + offered auth methods | `resp.banner`, `resp.auth_methods` |
+| `ssh_exec` | SSH auth matrix + optional command execution | `resp.authenticated`, `resp.auth_user`, `resp.exec_output` |
+| `snmp_get` | SNMP v2c community probe + OID get | `resp.responded`, `resp.community`, `resp.varbinds` |
+| `match` | Regex match on a stored value | — |
+| `script` | [Rhai](https://rhai.rs) script (string/regex, crypto, pack/unpack builtins) | — |
+| `set_var` | Assign a context variable (`var_name` / `var_value`) | — |
+| `sleep` | Pause between steps (`duration_ms`, capped) | — |
+| `wait_oob` | Wait for an out-of-band HTTP callback | — |
+
+Scripting builtins available in `script` / `condition:` include string & regex helpers
+(`ereg`, `eregmatch`, `egrep`, `ereg_replace`, `substr`, `strlen`, `hexstr`, `ord`, `split`, …),
+crypto/encoding (`md5`, `sha1`, `sha256`, `sha512`, `hmac_sha256`, `base64_encode/decode`), and
+binary pack/unpack (`p8`/`p16be`/`p32be`/`p64be`/… and `u8`/`u16be`/… plus `rand_int`/`rand_str`/`rand_hex`).
 
 ### Confidence / QoD scale
+
+`confidence_base + confidence_delta` is clamped to `[0.0, 1.0]`; `qod` grades the evidence.
 
 | QoD | Meaning |
 |-----|---------|
@@ -289,10 +325,11 @@ steps:
 
 ### `tcp_connect` vs `http_request`
 
-Use `tcp_connect` for any payload encoded in the path — reqwest normalises URLs before sending (`%2e` → `.` then resolves `../`), which breaks path traversal exploits.
+Use `tcp_connect` for any payload encoded in the path: reqwest normalises URLs before sending
+(`%2e` → `.`, then resolves `../`), which breaks path-traversal exploits. `tcp_connect` sends
+the bytes verbatim.
 
 ```yaml
-# Correct — verbatim bytes, no normalisation
 - action: tcp_connect
   send: "GET /cgi-bin/.%2e/.%2e/etc/passwd HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
   store_as: resp
@@ -302,41 +339,73 @@ Use `tcp_connect` for any payload encoded in the path — reqwest normalises URL
   pattern: "root:.*:0:0"
 ```
 
-Feed validation is available via JSON Schema:
+### Validating a feed
 
 ```sh
 npx ajv-cli validate -s schemas/feed.schema.json \
-  -d "tests/cve/*.yaml" --spec=draft7 --allow-union-types
+  -d "tests/vulnerabilities/*/*.yaml" --spec=draft7 --allow-union-types
 ```
 
-The Red Hat YAML VS Code extension picks up the schema automatically via `.vscode/settings.json`.
+The Red Hat YAML VS Code extension picks up `schemas/feed.schema.json` automatically for feeds.
+
+---
+
+## Available feeds
+
+Feeds live under [`tests/vulnerabilities/`](tests/vulnerabilities/), one YAML file per
+vulnerability, grouped by product:
+
+```
+tests/vulnerabilities/<product>/<id>.yaml    # <id> = the CVE, or a kebab-case slug for 0-CVE checks
+tests/common/                                # reusable includes
+```
+
+Coverage spans **CVE detections** across Apache, Atlassian (Confluence/Jira), F5 BIG-IP,
+Fortinet, Ivanti, Citrix NetScaler, VMware, Cisco, GitLab, Jenkins, ColdFusion, CrushFTP, Cleo,
+PaperCut, and many more — plus a growing set of **protocol / exposure checks** under
+[`tests/vulnerabilities/general/`](tests/vulnerabilities/general/): unauthenticated Redis,
+MongoDB, Elasticsearch, CouchDB, etcd, Docker API, Kubernetes, Cassandra; exposed SNMP, Telnet,
+cleartext POP3/IMAP, finger, rsync, X11, VNC, LDAP anonymous bind, SMBv1; weak TLS and SSH auth;
+and more.
+
+```sh
+grep -rl '^cves:' tests/vulnerabilities | wc -l   # how many feeds today
+```
+
+See **[CLAUDE.md](CLAUDE.md)** for the full authoring reference and reference feeds to copy from.
 
 ---
 
 ## Test infrastructure
 
-End-to-end tests use Ansible + rootless Podman. Two `noctis serve` instances start once for the suite — one plain, one with OOB — and tests submit scans via the REST API (`POST /scans`).
+End-to-end tests use **Ansible + rootless Podman**. Two `noctis serve` instances start once for
+the whole suite — one plain, one with OOB — and tests submit scans over the REST API, asserting a
+true positive on the vulnerable mock and a true negative on the patched one.
 
 ```sh
 cd infra
 
-task build          # build all mock images in parallel (docker buildx bake)
-task test ID=CVE-2021-41773     # true-positive + true-negative for one CVE
-task test-all       # all CVEs — servers start once, all inventories in one run
-task check-deps     # verify prerequisites
+task build                      # build all mock images (podman build, in parallel)
+task test ID=CVE-2021-41773     # true-positive + true-negative for one vulnerability
+task test-all                   # every vulnerability — servers start once
+task feeds-check                # feed sha lockfile + uid-uniqueness check
+task mocks-manifest             # regenerate infra/docker/MOCKS.md
 ```
 
-Each CVE test covers four cases: `vuln` (HTTP), `vuln_https`, `patched` (HTTP), `patched_https`.
+Each vulnerability is exercised on four hosts — `vuln` (HTTP), `vuln_https`, `patched`,
+`patched_https` — and `task test-all` discovers them from the inventories under
+`infra/inventories/<product>/<id>/`. Feeds that use OOB add two extra hosts to exercise the
+callback path.
 
-Playbooks are auto-discovered by sorted filename: `00-build-mocks` → `00-build-noctis` → `01-start-servers` → `10-CVE-*` → `99-stop-servers`.
-
-For full details on adding feeds and writing mocks, see [`CLAUDE.md`](CLAUDE.md).
+For the full guide to adding a feed, writing a mock, and the inventory/playbook layout, see
+**[CLAUDE.md](CLAUDE.md)**.
 
 ---
 
 ## Performance
 
-At default concurrency (`--concurrency 5`) and 10s step timeout, a scan of 50 services against 300 feeds generates roughly 4 000 tasks. Expected wall-clock time:
+At the default concurrency (`5`) with a 10 s step timeout, a scan of ~50 services against the
+full feed set generates on the order of thousands of tasks. Rough wall-clock:
 
 | Concurrency | Local network | Remote / WAN |
 |-------------|--------------|--------------|
@@ -344,15 +413,30 @@ At default concurrency (`--concurrency 5`) and 10s step timeout, a scan of 50 se
 | 20 | 3–6 min | 8–15 min |
 | 50 | 1–3 min | 3–8 min |
 
-Most of the time is spent on step timeouts for non-matching services. Increase `--concurrency` and reduce `timeout_secs` in feeds to speed up large scans.
+Most of the time is step timeouts against non-matching services. Raise `--concurrency` (up to
+100) and tighten `timeout_secs` in feeds to speed up large scans.
+
+---
+
+## Requirements
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| Rust | stable | Build |
+| `libssh2-1-dev` + `pkg-config` | system | Build (Debian/Ubuntu package names; the SSH checks link libssh2) |
+| Ansible-core | ≥ 2.15 | E2E tests only |
+| Podman | ≥ 4.0 | E2E tests only (build + run) |
+| [Task](https://taskfile.dev) | ≥ 3.0 | E2E tests only |
+
+The release container image is fully static (musl) and needs none of these at runtime.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Start with **[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers the dev
+Contributions are welcome. Start with **[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers the dev
 setup, design principles, and the step-by-step workflow for adding a detection feed or an engine
-capability. [`CLAUDE.md`](CLAUDE.md) holds the deep authoring reference (conventions, mock
+capability. **[CLAUDE.md](CLAUDE.md)** is the deep authoring reference (conventions, mock
 template, inventory structure, pitfalls, and reference feeds to copy from).
 
 Please also read our [Code of Conduct](CODE_OF_CONDUCT.md). To report a security issue in noctis
