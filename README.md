@@ -11,6 +11,53 @@ Noctis detects CVEs and misconfigurations by running structured YAML test sequen
 
 ---
 
+## Demo
+
+<!-- Replace with an asciinema cast or a GIF showing a scan from POST /scans to a finding.
+     Example: [![asciicast](https://asciinema.org/a/XXXXXX.svg)](https://asciinema.org/a/XXXXXX) -->
+<p align="center"><em>Demo coming soon — until then, see <a href="#quick-start">Quick start</a>.</em></p>
+
+---
+
+## Why noctis?
+
+Most network vulnerability scanners either **guess from version banners** (noisy and
+false-positive-prone) or bury detection logic in compiled code. noctis takes a different path:
+
+- **Proof over guessing** — a finding is raised only when a step *observes* the vulnerable
+  behaviour (an LFI response, an unauthenticated reply, an out-of-band callback), and each is
+  graded with an OpenVAS-style Quality-of-Detection (QoD) score.
+- **Detection as data** — every check is a self-contained YAML feed, not compiled code. Read it,
+  audit it, or write your own in minutes.
+- **No agent, no shared state** — point it at live services over the network; each feed is
+  standalone and reproducible.
+- **Rust single binary** — fast, memory-safe, with a REST API for automation and CI/CD.
+
+If you've used **Nuclei** or **OpenVAS**: noctis sits between them — data-driven feeds like the
+former, evidence-graded findings like the latter.
+
+| | Version-based scanners | Template scanners | **noctis** |
+|---|---|---|---|
+| Detection logic | code / CPE match | templates | **YAML feeds** |
+| Evidence-graded findings | partial | varies | **yes (QoD)** |
+| Blind / OOB detection | rarely | varies | **built-in callback server** |
+| Raw-TCP payloads (no URL normalisation) | rarely | varies | **yes** |
+| Runtime | varies | Go | **Rust (single binary)** |
+
+---
+
+## Use cases
+
+- **DevSecOps / CI-CD** — run `noctis serve` and submit scans from a pipeline over the REST API;
+  gate releases on findings.
+- **Pentest & red team** — fast, evidence-based black-box checks against live targets with no
+  prior knowledge of the infrastructure.
+- **Continuous exposure monitoring** — surface misconfigurations (open databases, unauthenticated
+  services, weak TLS) across a fleet.
+- **Custom detections** — express an in-house check as a YAML feed without touching the engine.
+
+---
+
 ## Features
 
 - **YAML feeds** — one file per CVE or misconfig; declare steps, patterns, and confidence deltas
@@ -272,14 +319,13 @@ Most of the time is spent on step timeouts for non-matching services. Increase `
 
 ## Contributing
 
-See [`CLAUDE.md`](CLAUDE.md) for the full authoring guide: feed conventions, Python mock template, inventory structure, known pitfalls, and reference feeds to copy from.
+Contributions are welcome! Start with **[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers the dev
+setup, design principles, and the step-by-step workflow for adding a detection feed or an engine
+capability. [`CLAUDE.md`](CLAUDE.md) holds the deep authoring reference (conventions, mock
+template, inventory structure, pitfalls, and reference feeds to copy from).
 
-In short:
-1. Write a feed in `tests/vulnerabilities/<vendor>/` with a stable UUID v4 `uid`
-2. Add a Podman mock in `infra/docker/` (HTTP:80 + HTTPS:443)
-3. Add an inventory in `infra/inventories/` (4 hosts: vuln, vuln_https, patched, patched_https)
-4. Add `infra/playbooks/10-<CVE>.yml` (auto-discovered) and a bake target in `infra/bake/<family>.hcl` (auto-discovered)
-5. Run `task build && task test ID=<your-cve>` — expect 4 passing tests
+Please also read our [Code of Conduct](CODE_OF_CONDUCT.md). To report a security issue in noctis
+itself, follow [SECURITY.md](SECURITY.md) — **do not open a public issue**.
 
 ---
 

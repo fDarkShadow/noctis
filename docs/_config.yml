@@ -1,0 +1,7 @@
+title: noctis
+description: >-
+  A Rust black-box vulnerability scanner driven by self-contained YAML feeds —
+  detects CVEs and misconfigurations with evidence-graded findings.
+theme: jekyll-theme-cayman
+show_downloads: true
+# GitHub Pages serves this folder (Settings → Pages → Source: main /docs).
