@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="150" viewBox="0 0 560 150" fill="none" role="img" aria-label="noctis">
+  <defs>
+    <linearGradient id="g" x1="18" y1="38" x2="94" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="gw" x1="170" y1="0" x2="545" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2dd4bf"/>
+      <stop offset="0.5" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <mask id="m">
+      <rect width="150" height="150" fill="#000"/>
+      <circle cx="56" cy="75" r="40" fill="#fff"/>
+      <circle cx="73" cy="62" r="35" fill="#000"/>
+    </mask>
+  </defs>
+  <circle cx="56" cy="75" r="40" fill="url(#g)" mask="url(#m)"/>
+  <!-- Wordmark uses a bold sans-serif; outline to paths if exact rendering matters. -->
+  <text x="168" y="104" font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-weight="800"
+        font-size="92" letter-spacing="-3" fill="url(#gw)">noctis</text>
+</svg>

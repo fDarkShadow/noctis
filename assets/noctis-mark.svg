@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="92" height="92" viewBox="0 0 92 92" fill="none" role="img" aria-label="noctis mark">
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="84" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <mask id="m">
+      <rect width="92" height="92" fill="#000"/>
+      <circle cx="46" cy="46" r="40" fill="#fff"/>
+      <circle cx="63" cy="33" r="35" fill="#000"/>
+    </mask>
+  </defs>
+  <circle cx="46" cy="46" r="40" fill="url(#g)" mask="url(#m)"/>
+</svg>

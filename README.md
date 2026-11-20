@@ -1,6 +1,8 @@
-# noctis
+<p align="center">
+  <img src="assets/noctis-logo.png" alt="noctis" width="420">
+</p>
 
-**Rust vulnerability scanner driven by YAML feeds.**
+<h1 align="center">noctis — Rust vulnerability scanner driven by YAML feeds</h1>
 
 Noctis detects CVEs and misconfigurations by running structured YAML test sequences against live services — no agent, no shared cache, no false-positive-prone version guessing. Each feed is a self-contained, reproducible detection unit.
 
