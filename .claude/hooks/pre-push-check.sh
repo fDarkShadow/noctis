@@ -50,6 +50,7 @@ run "cargo fmt --check" cargo fmt --check
 run "cargo clippy --locked -D warnings" cargo clippy --locked -- -D warnings
 [ -f scripts/check_feeds.py ] && run "check_feeds.py" python3 scripts/check_feeds.py
 [ -f scripts/gen_mocks_manifest.py ] && run "gen_mocks_manifest --check" python3 scripts/gen_mocks_manifest.py --check
+[ -f scripts/check_docs.py ] && run "check_docs.py" python3 scripts/check_docs.py
 rm -f /tmp/prepush.$$
 
 if [ -n "$fails" ]; then

@@ -88,6 +88,9 @@ jobs:
       - name: Mock manifest up to date
         run: python3 scripts/gen_mocks_manifest.py --check
 
+      - name: Docs in sync with engine
+        run: python3 scripts/check_docs.py
+
   codeql:
     name: CodeQL SAST
     runs-on: ubuntu-latest
