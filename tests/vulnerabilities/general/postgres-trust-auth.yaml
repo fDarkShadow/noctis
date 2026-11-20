@@ -1,0 +1,45 @@
+# Flag a PostgreSQL server that grants access with no password (trust auth).
+# Sends a protocol-3 StartupMessage (user/database = postgres) as a binary
+# tcp_dialogue frame. If the server answers AuthenticationOk (message 'R',
+# length 8, auth type 0) it accepted the connection without any credentials —
+# a pg_hba.conf "trust" rule exposed to the network. A server requiring a
+# password answers AuthenticationMD5Password/CleartextPassword (auth type != 0).
+uid: 1f6d9c40-7a28-4e53-b9c1-3d08a265e7f4
+name: "PostgreSQL passwordless access (trust authentication)"
+description: |
+  The PostgreSQL server completed authentication with no password (AuthenticationOk),
+  indicating a 'trust' pg_hba.conf rule reachable from the network — full database
+  access without credentials.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [postgresql, trust, unauthenticated, exposure, misconfig]
+services: [postgresql]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.postgresql.org/docs/current/auth-trust.html"
+steps:
+  - id: pg-startup
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # Protocol 3.0 StartupMessage: user=postgres database=postgres.
+    send_hex: "00000029000300007573657200706f73746772657300646174616261736500706f7374677265730000"
+    store_as: pg
+  - id: check-auth-ok
+    action: match
+    source: pg.response_hex
+    # AuthenticationOk: 'R'(0x52) + length 8 + auth type 0.
+    pattern: "520000000800000000"
+    condition: "pg.connected == true"
+    on_match:
+      finding:
+        title: "PostgreSQL passwordless access (trust authentication)"
+        description: "The server returned AuthenticationOk to an unauthenticated StartupMessage — a 'trust' rule grants passwordless access."
+        remediation: "Replace 'trust' with scram-sha-256 in pg_hba.conf, bind to localhost/limited hosts, and firewall port 5432."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "startup response (hex): {{pg.response_hex}}"

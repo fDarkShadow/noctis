@@ -1,0 +1,10 @@
+---
+- name: "postgres-trust-auth — PostgreSQL passwordless access (trust authentication)"
+  hosts: postgres_trust_auth
+  gather_facts: false
+  vars:
+    cve_id: "postgres-trust-auth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/postgres-trust-auth.yaml"
+  roles:
+    - common_docker
