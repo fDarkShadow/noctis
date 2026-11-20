@@ -117,15 +117,25 @@ steps against the live service, and returns findings graded by how strong the ev
 
 ## Features
 
-- **YAML feeds** — one file per vulnerability (0, 1, or several CVEs); declare steps, patterns, and confidence deltas.
-- **Service-aware** — feeds declare target services (`http`, `https`, `ssh`, `ftp`…); the engine maps them to discovered ports.
-- **Many protocols** — HTTP/HTTPS (reqwest), raw TCP, line/binary TCP dialogues, UDP, TLS (rustls), SSH (libssh2), SNMP.
-- **Raw TCP** — `tcp_connect` sends bytes verbatim for encoded payloads (path traversal, injections), bypassing HTTP normalisation.
-- **Graduated confidence** — each finding carries an OpenVAS-compatible QoD score.
-- **OOB detection** — built-in HTTP callback server for blind bugs (Log4Shell, SSRF, XXE).
-- **Scriptable** — a [Rhai](https://rhai.rs) scripting layer with string/regex, crypto/encoding, and binary pack/unpack builtins.
-- **REST API** — `noctis serve` exposes scan submission, status polling, and findings retrieval.
-- **Reproducible tests** — Ansible + rootless Podman mocks, dynamic port allocation, automated true-positive / true-negative assertions.
+**Available today**
+
+- [x] **YAML feeds** — one file per vulnerability (0, 1, or several CVEs); steps, patterns, confidence deltas
+- [x] **Service-aware matching** — feeds declare `services:` (`http`, `https`, `ssh`, `ftp`…); the engine maps them to discovered ports
+- [x] **HTTP/HTTPS** probes (reqwest) and **raw TCP** with verbatim byte payloads (path traversal, injections — no URL normalisation)
+- [x] **Non-HTTP protocols** — line & binary TCP dialogues, UDP, TLS (rustls), SSH (libssh2), SNMP v2c
+- [x] **OpenVAS-style QoD** grading on every finding
+- [x] **Out-of-band detection** — built-in HTTP callback server (Log4Shell, SSRF, XXE)
+- [x] **Scripting** — [Rhai](https://rhai.rs) with string/regex, crypto/encoding, and binary pack/unpack builtins
+- [x] **REST API** — submit scans, poll status, fetch findings; optional result webhook
+- [x] **Reproducible E2E tests** — Ansible + rootless Podman mocks, dynamic ports, automated true-positive / true-negative assertions
+- [x] **Multi-arch container** — static `scratch` image on GHCR (`linux/amd64` + `linux/arm64`)
+
+**On the roadmap**
+
+- [ ] SMB negotiate probe — dialect / signing / SMBv1 detection ([#354](https://github.com/fDarkShadow/noctis/issues/354))
+- [ ] Multi-round-trip binary protocol with keyed hash — epmd / Erlang distribution ([#316](https://github.com/fDarkShadow/noctis/issues/316))
+- [ ] On-host validation of the raw SYN probe (`tcp_syn`, needs `CAP_NET_RAW`) ([#330](https://github.com/fDarkShadow/noctis/issues/330))
+- [ ] Growing the feed catalogue via the `automation/feed-sourcing` pipeline and the open [CVE backlog](https://github.com/fDarkShadow/noctis/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Acve)
 
 ---
 
