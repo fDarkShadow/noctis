@@ -58,6 +58,7 @@
   "general/ftp-anonymous.yaml": "5b6a668d52b2656d96d8f2cf6c68bccc37ccce842d20ffb118aea8467999e074",
   "general/http-security-headers.yaml": "63d4de9c6074db050a330e02520f18d5e2355430409dc2d8cb4cc74e7dfad5f9",
   "general/imap-cleartext-auth.yaml": "54e52a79c0f92748a40bda403f29a518ff7aedfe3e02dde743e25c72801a57b3",
+  "general/kubernetes-anonymous.yaml": "f8480d3349668e4df672c2547edf44a42da4d1d1d600db5273ab252c86e1f236",
   "general/ldap-anonymous-bind.yaml": "c86d4ef1849ce1b07b3176662165c0b7490ed518ce2e16a2083d57bb8239ee89",
   "general/memcached-tcp-exposed.yaml": "35aa6a798ab53dc33358d6693f9c6db47f70e9a6df8623b680d3175a4f1ec607",
   "general/memcached-udp-exposed.yaml": "1748bfa4eb3679ccafdf505e4585087bc5624d34e219603d6a5077c6587b1524",

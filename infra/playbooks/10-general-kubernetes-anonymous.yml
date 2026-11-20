@@ -1,0 +1,10 @@
+---
+- name: "kubernetes-anonymous — Kubernetes API allows anonymous access"
+  hosts: kubernetes_anonymous
+  gather_facts: false
+  vars:
+    cve_id: "kubernetes-anonymous"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/kubernetes-anonymous.yaml"
+  roles:
+    - common_docker
