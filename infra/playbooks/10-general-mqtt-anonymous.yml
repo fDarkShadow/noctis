@@ -1,0 +1,10 @@
+---
+- name: "mqtt-anonymous — MQTT broker accepts anonymous connections"
+  hosts: mqtt_anonymous
+  gather_facts: false
+  vars:
+    cve_id: "mqtt-anonymous"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/mqtt-anonymous.yaml"
+  roles:
+    - common_docker

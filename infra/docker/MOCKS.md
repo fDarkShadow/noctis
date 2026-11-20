@@ -291,6 +291,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## moveit-mock
 - moveit/CVE-2023-34362
 
+## mqtt-mock
+- general/mqtt-anonymous
+
 ## n8n-mock
 - n8n/CVE-2025-68613
 
