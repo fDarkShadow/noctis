@@ -1,1 +1,11 @@
+# Forbid issues without a template: the "Open a blank issue" option is removed,
+# so every new issue must go through one of the forms in this directory.
 blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 Question or discussion
+    url: https://github.com/fDarkShadow/noctis/discussions
+    about: Ask a question or discuss an idea here — please don't open an issue for questions.
+  - name: 🔒 Report a security vulnerability in noctis
+    url: https://github.com/fDarkShadow/noctis/security/policy
+    about: Do not open a public issue — follow the security policy for private disclosure.

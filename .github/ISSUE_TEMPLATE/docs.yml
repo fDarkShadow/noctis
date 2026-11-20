@@ -1,0 +1,36 @@
+name: Documentation
+description: A fix or improvement to the documentation (README, docs site, CLAUDE.md)
+body:
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - README
+        - Docs site (docs/)
+        - CLAUDE.md
+        - CONTRIBUTING.md
+        - Code comments / rustdoc
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong, missing, or unclear?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested change
+      description: How it should read, or what should be added.
+
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: File and/or URL, if you can point to it.
+      placeholder: "README.md → 'Writing feeds', or https://fdarkshadow.github.io/noctis/..."
