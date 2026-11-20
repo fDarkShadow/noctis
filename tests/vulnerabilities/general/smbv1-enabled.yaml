@@ -1,0 +1,49 @@
+# Flag a server that still answers the legacy SMBv1 protocol.
+#
+# SMBv1 is the EternalBlue/WannaCry-era protocol (MS17-010 and family) and
+# should be disabled everywhere. Sends an SMB1 NEGOTIATE request (NBSS-framed,
+# dialect "NT LM 0.12") as a binary tcp_dialogue frame. An SMB1-capable server
+# replies with an SMB1 message — signature 0xFF 'SMB' (ff534d42). A host with
+# SMBv1 disabled replies with SMB2 (fe534d42) or does not answer.
+uid: 6e0c2a84-7f19-4b3d-8a52-1c9d4e6075b2
+name: "SMBv1 enabled (legacy protocol exposed)"
+description: |
+  The server responded to an SMBv1 NEGOTIATE, confirming the legacy SMB1
+  protocol is enabled — the protocol family behind EternalBlue (MS17-010).
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [smb, smbv1, legacy, exposure, misconfig, eternalblue]
+services: [smb, microsoft-ds]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://learn.microsoft.com/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3"
+
+steps:
+  - id: smb1-negotiate
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # SMB1 NEGOTIATE request, NBSS-framed, single dialect "NT LM 0.12".
+    send_hex: "0000002fff534d4272000000001853c800000000000000000000000000002f4b00000000000c00024e54204c4d20302e313200"
+    store_as: smb
+
+  - id: check-smbv1-reply
+    action: match
+    source: smb.response_hex
+    # SMB1 message signature 0xFF 'SMB'. An SMBv1-disabled host answers SMB2
+    # (0xFE 'SMB' = fe534d42) or not at all.
+    pattern: "ff534d42"
+    case_insensitive: true
+    condition: "smb.connected == true"
+    on_match:
+      finding:
+        title: "SMBv1 enabled (legacy protocol exposed)"
+        description: "The server replied to an SMBv1 NEGOTIATE with an SMB1 message, confirming SMBv1 is enabled."
+        remediation: "Disable SMBv1 (keep only SMB2/SMB3); it is the protocol family exploited by EternalBlue (MS17-010). Firewall port 445."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "SMB1 NEGOTIATE response (hex): {{smb.response_hex}}"

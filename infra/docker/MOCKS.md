@@ -403,6 +403,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## smartermail-mock
 - smartermail/CVE-2026-23760
 
+## smb-mock
+- general/smbv1-enabled
+
 ## smtp-mock
 - general/smtp-open-relay
 
