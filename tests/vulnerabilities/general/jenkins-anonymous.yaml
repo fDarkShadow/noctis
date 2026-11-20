@@ -1,0 +1,41 @@
+# Flag a Jenkins instance that allows anonymous read access to its API.
+# GET /api/json returns the Jenkins model (_class hudson.model.Hudson, job list)
+# when anonymous users have Overall/Read; a secured instance returns 403.
+uid: 9e3c7a16-4d82-4b05-a1f0-6c2b8e54d7a9
+name: "Jenkins anonymous read access"
+description: |
+  The Jenkins API returned the instance model to an unauthenticated request,
+  exposing jobs, nodes and build data (and often enabling further abuse).
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [jenkins, anonymous, exposure, ci, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.jenkins.io/doc/book/security/securing-jenkins/"
+steps:
+  - id: jenkins-api
+    action: http_request
+    method: GET
+    path: "/api/json"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: jk
+  - id: check-api
+    action: match
+    source: jk.body
+    pattern: "hudson.model.Hudson"
+    condition: "jk.status == 200"
+    on_match:
+      finding:
+        title: "Jenkins anonymous read access"
+        description: "GET /api/json returned the Jenkins model without credentials — anonymous read is enabled."
+        remediation: "Enable security, remove Overall/Read from Anonymous, use matrix/role auth, and firewall the Jenkins port."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "GET /api/json (HTTP {{jk.status}}): {{jk.body}}"

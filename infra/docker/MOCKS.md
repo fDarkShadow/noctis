@@ -244,6 +244,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - jenkins-cli/CVE-2024-23897
 
 ## jenkins-mock
+- general/jenkins-anonymous
 - jenkins/CVE-2017-1000353
 
 ## jira-mock
