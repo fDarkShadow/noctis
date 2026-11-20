@@ -49,6 +49,17 @@ cargo build --release
 Then submit a scan over the REST API — see the
 [README](https://github.com/fDarkShadow/noctis#quick-start) for the full example.
 
+### Or run the container (GHCR)
+
+Prebuilt `linux/amd64` + `linux/arm64` images are published to the GitHub Container Registry:
+
+```sh
+docker run --rm -v ./tests:/feeds -p 8080:8080 \
+  ghcr.io/fdarkshadow/noctis:latest serve --host 0.0.0.0 --port 8080
+```
+
+Tags: `latest` and `X.Y.Z` (releases), `edge` (latest `main`).
+
 ## Links
 
 - [Source & documentation](https://github.com/fDarkShadow/noctis)

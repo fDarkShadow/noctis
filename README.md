@@ -118,6 +118,35 @@ Findings response:
 
 ---
 
+## Run with Docker
+
+Prebuilt images are published to the **GitHub Container Registry (GHCR)** as a minimal
+`scratch` image (a static musl binary — no shell, a few MB), for **`linux/amd64`** and
+**`linux/arm64`**.
+
+```sh
+# Pull the latest release
+docker pull ghcr.io/fdarkshadow/noctis:latest
+
+# Run the daemon — mount your feeds at /feeds
+docker run --rm -v ./tests:/feeds -p 8080:8080 \
+  ghcr.io/fdarkshadow/noctis serve --host 0.0.0.0 --port 8080
+```
+
+**Tags:**
+
+| Tag | Points to |
+|-----|-----------|
+| `latest` | the most recent release |
+| `X.Y.Z` / `X.Y` | a specific released version |
+| `edge` | the latest commit on `main` |
+
+Images are published automatically: `:edge` on every push to `main`, and the versioned
+`:X.Y.Z` / `:latest` tags when a `vX.Y.Z` release is tagged. See all tags on the
+[package page](https://github.com/fDarkShadow/noctis/pkgs/container/noctis).
+
+---
+
 ## Requirements
 
 | Dependency | Version | Purpose |
@@ -140,8 +169,8 @@ noctis -vv serve ...   # DEBUG
 # OOB for blind detections (Log4Shell, SSRF)
 noctis serve --oob --oob-host <public-ip> --oob-port 9090
 
-# Docker
-docker run -v ./tests:/feeds -p 8080:8080 noctis:ci serve --host 0.0.0.0 --port 8080
+# Docker (see "Run with Docker" above)
+docker run -v ./tests:/feeds -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest serve --host 0.0.0.0 --port 8080
 ```
 
 ```sh
