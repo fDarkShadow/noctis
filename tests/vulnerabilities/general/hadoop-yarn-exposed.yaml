@@ -1,0 +1,43 @@
+# Flag a Hadoop YARN ResourceManager REST API exposed without authentication.
+# An unauthenticated YARN RM allows anyone to submit applications, which run
+# arbitrary commands on the cluster nodes (a widely-exploited RCE). GET
+# /ws/v1/cluster/info returns the cluster info JSON when unauthenticated.
+uid: 8e2c6a94-1d73-4b05-9f02-6c3b1e84a057
+name: "Hadoop YARN ResourceManager exposed without authentication"
+description: |
+  The YARN ResourceManager REST API answered an unauthenticated request. An
+  exposed RM allows unauthenticated application submission — remote code
+  execution on the cluster nodes.
+cves: []
+category: exposure
+severity: critical
+confidence_base: 0.50
+tags: [hadoop, yarn, unauthenticated, exposure, rce, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SecureMode.html"
+steps:
+  - id: yarn-info
+    action: http_request
+    method: GET
+    path: "/ws/v1/cluster/info"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: yarn
+  - id: check-info
+    action: match
+    source: yarn.body
+    pattern: "\"clusterInfo\""
+    condition: "yarn.status == 200"
+    on_match:
+      finding:
+        title: "Hadoop YARN ResourceManager exposed without authentication"
+        description: "GET /ws/v1/cluster/info returned cluster info without credentials; the RM permits unauthenticated application submission (RCE)."
+        remediation: "Enable Kerberos security and YARN ACLs, restrict the RM REST port to trusted hosts, and firewall it."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "GET /ws/v1/cluster/info (HTTP {{yarn.status}}): {{yarn.body}}"

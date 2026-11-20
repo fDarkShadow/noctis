@@ -1,0 +1,10 @@
+---
+- name: "hadoop-yarn-exposed — Hadoop YARN ResourceManager exposed without authentication"
+  hosts: hadoop_yarn_exposed
+  gather_facts: false
+  vars:
+    cve_id: "hadoop-yarn-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/hadoop-yarn-exposed.yaml"
+  roles:
+    - common_docker
