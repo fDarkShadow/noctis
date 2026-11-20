@@ -1,0 +1,10 @@
+---
+- name: "etcd-unauth — etcd exposed without authentication"
+  hosts: etcd_unauth
+  gather_facts: false
+  vars:
+    cve_id: "etcd-unauth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/etcd-unauth.yaml"
+  roles:
+    - common_docker
