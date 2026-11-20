@@ -1,0 +1,50 @@
+# Flag an rsync daemon that allows anonymous module listing.
+#
+# The rsync daemon greets with "@RSYNCD: <ver>". After the client echoes a
+# version and sends an empty line, a permissive daemon enumerates its modules
+# and ends with "@RSYNCD: EXIT". A locked-down daemon returns "@ERROR: ..." or
+# requires authentication. Anonymous module listing leaks share names/comments
+# and usually means the modules themselves are reachable without auth.
+uid: 5b9d3e71-2a86-4c04-9f1e-7d08c25a6b39
+name: "rsync daemon allows anonymous module listing"
+description: |
+  The rsync daemon enumerated its modules to an unauthenticated client,
+  exposing share names and comments (and typically anonymously-accessible data).
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.45
+tags: [rsync, anonymous, exposure, misconfig]
+services: [rsync]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://download.samba.org/pub/rsync/rsyncd.conf.5"
+
+steps:
+  - id: rsync-list
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: true
+    line_ending: "\n"
+    timeout_secs: 10
+    commands:
+      - "@RSYNCD: 31.0"
+      - ""
+    store_as: rsync
+
+  - id: check-listing
+    action: match
+    source: rsync.transcript
+    # A completed module-list dialogue ends with "@RSYNCD: EXIT"; a daemon that
+    # refuses anonymous listing returns "@ERROR: ..." instead.
+    pattern: "@RSYNCD: EXIT"
+    condition: "rsync.connected == true"
+    on_match:
+      finding:
+        title: "rsync daemon allows anonymous module listing"
+        description: "The rsync daemon completed an anonymous module-list request, exposing its module names/comments."
+        remediation: "Require authentication (auth users / secrets file), set 'list = false', restrict 'hosts allow', and firewall port 873."
+        confidence_delta: 0.30
+        qod: 70
+        evidence: "rsync module listing: {{rsync.transcript}}"

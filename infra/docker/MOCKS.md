@@ -376,6 +376,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - roundcube/CVE-2023-43770
 - roundcube/CVE-2025-49113
 
+## rsync-mock
+- general/rsync-anonymous-list
+
 ## sap-netweaver-mock
 - sap-netweaver/CVE-2025-31324
 
