@@ -1,0 +1,43 @@
+# Flag a HashiCorp Consul HTTP API reachable without ACLs.
+# With ACLs disabled (or default-allow), the catalog and KV store are readable
+# by anyone — the KV store frequently holds application secrets. GET
+# /v1/catalog/nodes returns the node list; an ACL-protected agent returns 403.
+uid: 7d3c9a56-2e84-4b05-a1f0-6c2b8e74d913
+name: "Consul HTTP API exposed without ACLs"
+description: |
+  The Consul HTTP API returned the node catalog to an unauthenticated request,
+  indicating ACLs are disabled or default-allow — the catalog and KV secrets
+  are readable by anyone who can reach the agent.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [consul, acl, unauthenticated, exposure, misconfig]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://developer.hashicorp.com/consul/docs/security/acl"
+steps:
+  - id: consul-nodes
+    action: http_request
+    method: GET
+    path: "/v1/catalog/nodes"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    store_as: consul
+  - id: check-nodes
+    action: match
+    source: consul.body
+    pattern: "\"Node\""
+    condition: "consul.status == 200"
+    on_match:
+      finding:
+        title: "Consul HTTP API exposed without ACLs"
+        description: "GET /v1/catalog/nodes returned the node catalog without a token — Consul ACLs are disabled or default-allow."
+        remediation: "Enable ACLs with default_policy=deny, require tokens, enable TLS, bind the HTTP API to localhost, and firewall port 8500."
+        confidence_delta: 0.35
+        qod: 75
+        evidence: "GET /v1/catalog/nodes (HTTP {{consul.status}}): {{consul.body}}"

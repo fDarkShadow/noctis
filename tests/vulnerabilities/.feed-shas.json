@@ -49,6 +49,7 @@
   "fortios-ssl-vpn/CVE-2024-21762.yaml": "deb34f5e67c66edd847d7f811db574a89fb1a0adf43ad2bd6f08d81c6c119011",
   "fortiweb/CVE-2025-25257.yaml": "0eaa3aedb9638c2dcb462e2230aad47a619969492ec7bc21d50bbb8b3ec1ebbc",
   "general/cassandra-no-auth.yaml": "ef93169a30c1bdd8fbc3e41013632b4cb1185582ae332a625f2c95ee469c8184",
+  "general/consul-no-acl.yaml": "4c3c9a897a6e5e3b4abeba24d68e0cda9c28ad1152b1da0fed5093740b362b7c",
   "general/couchdb-unauth.yaml": "20f288a1b2601fba7eb1f57ccc71e94603b71f2dd478d386c9d675ec755f87c0",
   "general/dns-open-resolver.yaml": "403e3e42722f99784d627946a4004d0011e6482ac0c88fe8e1c17aacff80e00c",
   "general/docker-api-exposed.yaml": "1af53bb1d041e0fb14e478b729903b298c4189a71c91c1b8058d128a8aab4553",

@@ -1,0 +1,10 @@
+---
+- name: "consul-no-acl — Consul HTTP API exposed without ACLs"
+  hosts: consul_no_acl
+  gather_facts: false
+  vars:
+    cve_id: "consul-no-acl"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/consul-no-acl.yaml"
+  roles:
+    - common_docker
