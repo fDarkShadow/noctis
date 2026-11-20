@@ -14,6 +14,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-stable-orange" alt="Rust"></a>
   <a href="https://github.com/fDarkShadow/noctis/pkgs/container/noctis"><img src="https://ghcr-badge.egpl.dev/fdarkShadow/noctis/size?tag=latest&label=image" alt="Docker image"></a>
+  <a href="https://buymeacoffee.com/fdarkshadow"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 </p>
 
 <p align="center">
@@ -23,7 +24,8 @@
   <a href="#rest-api">REST API</a> ·
   <a href="#writing-feeds">Writing feeds</a> ·
   <a href="#available-feeds">Feeds</a> ·
-  <a href="#contributing">Contributing</a>
+  <a href="#contributing">Contributing</a> ·
+  <a href="#support">Support</a>
 </p>
 
 ---
@@ -48,6 +50,7 @@
 - [Performance](#performance)
 - [Requirements](#requirements)
 - [Contributing](#contributing)
+- [Support](#support)
 - [License](#license)
 
 ---
@@ -465,6 +468,17 @@ template, inventory structure, pitfalls, and reference feeds to copy from).
 
 Please also read our [Code of Conduct](CODE_OF_CONDUCT.md). To report a security issue in noctis
 itself, follow [SECURITY.md](SECURITY.md) — **do not open a public issue**.
+
+---
+
+## Support
+
+noctis is free and open source. If it saves you time — or you'd just like to see more
+detections land — you can support the work:
+
+<a href="https://buymeacoffee.com/fdarkshadow"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black&style=for-the-badge" alt="Buy me a coffee"></a>
+
+Every coffee goes toward new feeds, engine work, and keeping the project maintained. Thank you! ☕
 
 ---
 
