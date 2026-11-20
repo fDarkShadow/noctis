@@ -1,0 +1,41 @@
+# Flag a finger service (79) that discloses local user information to anyone.
+# The finger daemon is a classic information-disclosure exposure: it reveals
+# usernames, home directories, shells and login times with no authentication.
+uid: 9d4b7e28-5c31-4a06-b2f9-6e1c8a37d540
+name: "finger service exposes user information"
+description: |
+  The finger service returned local account details (logins, home directories)
+  to an unauthenticated client — useful reconnaissance for an attacker.
+cves: []
+category: exposure
+severity: low
+confidence_base: 0.45
+tags: [finger, info-disclosure, exposure, legacy, misconfig]
+services: [finger]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.rfc-editor.org/rfc/rfc1288"
+steps:
+  - id: finger-query
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    line_ending: "\r\n"
+    timeout_secs: 10
+    commands:
+      - ""
+    store_as: finger
+  - id: check-userinfo
+    action: match
+    source: finger.transcript
+    pattern: "(?i)Directory:|Login:|Last login"
+    condition: "finger.connected == true"
+    on_match:
+      finding:
+        title: "finger service exposes user information"
+        description: "The finger service returned local user details without authentication."
+        remediation: "Disable the finger daemon (it is obsolete); firewall port 79."
+        confidence_delta: 0.25
+        qod: 70
+        evidence: "finger output: {{finger.transcript}}"

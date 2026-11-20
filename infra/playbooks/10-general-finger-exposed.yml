@@ -1,0 +1,10 @@
+---
+- name: "finger-exposed — finger service exposes user information"
+  hosts: finger_exposed
+  gather_facts: false
+  vars:
+    cve_id: "finger-exposed"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/finger-exposed.yaml"
+  roles:
+    - common_docker
