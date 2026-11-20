@@ -1,0 +1,10 @@
+---
+- name: "vnc-no-auth — VNC server allows connections without authentication"
+  hosts: vnc_no_auth
+  gather_facts: false
+  vars:
+    cve_id: "vnc-no-auth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/vnc-no-auth.yaml"
+  roles:
+    - common_docker
