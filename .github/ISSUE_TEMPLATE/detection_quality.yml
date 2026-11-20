@@ -1,0 +1,53 @@
+name: Detection quality (false positive / false negative)
+description: A feed fired when it should not have, or missed a vulnerable/exposed target
+labels: ["type:bug", "status:available"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - False positive (finding reported on a non-vulnerable / patched target)
+        - False negative (no finding on a vulnerable / exposed target)
+    validations:
+      required: true
+
+  - type: input
+    id: feed
+    attributes:
+      label: Feed
+      description: Path or uid of the feed involved.
+      placeholder: "tests/vulnerabilities/general/redis-unauthenticated.yaml"
+    validations:
+      required: true
+
+  - type: input
+    id: target
+    attributes:
+      label: Target product / service & version
+      description: What was scanned and how it was configured.
+      placeholder: "Redis 7.2 with requirepass set"
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: What happened vs. what you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: The finding JSON and/or the raw service response that did (or should have) triggered it.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: noctis version / commit
+      placeholder: "git rev-parse --short HEAD"
+    validations:
+      required: true
