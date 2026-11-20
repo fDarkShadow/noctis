@@ -1,6 +1,6 @@
 /target
 openvas
-.claude/settings*
+.claude/settings.local.json
 .claude/projects/
 # scripts/  (now tracked)
 .sofa/
