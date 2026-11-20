@@ -24,7 +24,7 @@ noctis/
 │   │   ├── context.rs      # Context — vars, findings, target_host/port
 │   │   ├── step.rs         # Dispatch by action
 │   │   ├── finding.rs      # handle_outcome(), build_finding()
-│   │   └── actions/        # http, connect (tcp/tls/ssh), logic, oob
+│   │   └── actions/        # http, connect (tcp/tls/ssh/ssh_exec/snmp/dialogue/syn), udp, logic (match/script/set_var/sleep), oob
 │   ├── model/              # Structs deserialized from YAML
 │   │   ├── test_def.rs     # TestDef — metadata + steps + services
 │   │   ├── step.rs         # Step — all fields of a step
@@ -207,6 +207,74 @@ resp.banner          string | null   ← SSH version string (e.g. "SSH-2.0-OpenS
 resp.auth_methods    [string]        ← ["publickey", "password", …]
 resp.connected       bool
 ```
+
+### `tcp_dialogue` — result fields
+Line protocols (FTP/SMTP/Telnet/POP3/IMAP/Redis) via `commands: [...]` + `read_banner`,
+**or** a single binary frame via `send_hex: "<hex>"` (its reply in `response_hex`).
+```
+resp.connected     bool
+resp.banner        string | null   ← greeting, when read_banner is true
+resp.responses     [string]        ← one text reply per command / frame
+resp.transcript    string          ← full text transcript
+resp.response_hex  string | null   ← raw reply bytes as hex — use for binary protocols
+```
+
+### `udp_probe` — result fields
+Datagram send/recv (DNS, NTP, memcached). `send_hex` takes precedence over `send`.
+```
+resp.responded     bool
+resp.response      string | null   ← reply as (lossy) text
+resp.response_hex  string | null   ← reply as hex
+resp.length        int
+```
+
+### `snmp_get` — result fields (SNMP v2c)
+```
+resp.responded     bool
+resp.community     string | null   ← community string that answered
+resp.version       string
+resp.varbinds      [ {oid, value} ]
+```
+
+### `ssh_exec` — result fields
+```
+resp.connected     bool
+resp.authenticated bool
+resp.auth_user     string | null   ← credential that authenticated
+resp.exec_output   string | null   ← command stdout, when a command ran
+resp.exit_status   int | null
+resp.auth_methods  [string]
+```
+
+### `tls_check` — result fields
+```
+resp.connected         bool
+resp.protocol_version  string | null  ← e.g. "TLSv1.2"
+resp.cipher_suite      string | null
+resp.cert_valid        bool
+resp.cert_subject      string | null  (also cert_issuer, cert_expiry)
+resp.cert_sans         [string]
+```
+
+### `tcp_syn` — result fields (raw SYN half-open; needs CAP_NET_RAW, **not run in CI**)
+```
+resp.state     string          ← "open" | "closed" | "filtered"
+resp.flags     string | null
+resp.src_port  int
+```
+
+### `sleep` — pause between steps
+`action: sleep` with `duration_ms: <n>` (async in the runner, capped at 60000). No stored result.
+Use it for write-then-read propagation gaps. (`var_name`/`var_value` belong to `set_var`, not here.)
+
+### Expression builtins (callable from `script` / `condition:`)
+- **string / regex / byte**: `ereg`, `eregmatch`, `egrep`, `ereg_replace`, `substr`, `strlen`,
+  `strstr`, `stridx`, `str_replace`, `hexstr`, `hex`, `ord`, `split`, `tolower`, `toupper`,
+  `chomp`, `crap`, `int`
+- **crypto / encoding**: `md5`, `sha1`, `sha256`, `sha512`, `hmac_sha256`, `base64_encode`,
+  `base64_decode`
+- **binary pack / unpack**: pack `p8`/`p16be`/`p16le`/`p32be`/`p32le`/`p64be`/`p64le`, unpack
+  `u8`/`u16be`/`u16le`/`u32be`/`u32le`/`u64be`/`u64le`, plus `rand_int`, `rand_str`, `rand_hex`
 
 ## Test infrastructure (infra/)
 

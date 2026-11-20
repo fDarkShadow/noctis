@@ -33,10 +33,10 @@ cargo build --release
 # binary at ./target/release/noctis
 ```
 
-On Debian/Ubuntu, the build needs `pkg-config` and OpenSSL headers:
+On Debian/Ubuntu, the build needs `pkg-config` and the libssh2 headers:
 
 ```sh
-sudo apt-get install -y pkg-config libssl-dev
+sudo apt-get install -y pkg-config libssh2-1-dev
 ```
 
 ## Run the daemon
