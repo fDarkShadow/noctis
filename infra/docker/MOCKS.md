@@ -510,3 +510,6 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## zimbra-xxe-mock
 - zimbra-xxe/CVE-2019-9621
+
+## zookeeper-mock
+- general/zookeeper-4lw-exposed

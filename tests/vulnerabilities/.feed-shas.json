@@ -69,6 +69,7 @@
   "general/telnet-exposed.yaml": "70f0207fa591b1eedb3727eb2ffd5129a69298bfe4b6f242beec7ad6e538d127",
   "general/tls-weak-config.yaml": "b50b9c4c513c0ffb560ce2ab5cfb3c3899c72e5a5943b0b200d5926b758a7bc9",
   "general/vnc-no-auth.yaml": "56d2c6d3cf62dfe6f071543c9e2dc424a0e66e9a87405aaf43b144683659eed9",
+  "general/zookeeper-4lw-exposed.yaml": "75d4276844060cda1b6b89fcae4af6bb8585b5484bd5a0d14469fd5a353f8335",
   "geoserver/CVE-2024-36401.yaml": "8f565e947ea12d0c016756ad263e996bdd524da0f3cf61d67cca434955a62328",
   "gitlab-ci/CVE-2021-22175.yaml": "c385a0d39e0acd80929ea35db07ca0bf5ae3e3f6d5a6953340012233dd2667b9",
   "gitlab-password-reset/CVE-2023-7028.yaml": "a07bfe133be4510ca98e6ae5226f5bfc339e8860659f0b2371c898d9bea5c5b8",
