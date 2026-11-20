@@ -1,0 +1,48 @@
+# Flag an LDAP server that accepts an anonymous bind.
+#
+# Sends a BER-encoded LDAPv3 anonymous simple bindRequest (empty DN, empty
+# password) as a binary tcp_dialogue frame and reads the bindResponse. A
+# resultCode of success (0) inside the [APPLICATION 1] bindResponse means the
+# directory is queryable without credentials; inappropriateAuthentication (48)
+# or unwillingToPerform (53) means anonymous bind is refused.
+uid: 8a3f6d52-1c47-4e9b-b0a8-5d2e9c71f604
+name: "LDAP allows anonymous bind"
+description: |
+  The LDAP server accepted an anonymous simple bind, allowing unauthenticated
+  clients to query directory contents (users, groups, structure).
+cves: []
+category: exposure
+severity: medium
+confidence_base: 0.45
+tags: [ldap, anonymous, unauthenticated, exposure, misconfig]
+services: [ldap]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://www.rfc-editor.org/rfc/rfc4511#section-4.2"
+
+steps:
+  - id: ldap-anon-bind
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # LDAPv3 anonymous simple bindRequest (messageID 1, empty DN, empty password).
+    send_hex: "300c020101600702010304008000"
+    store_as: ldap
+
+  - id: check-bind-success
+    action: match
+    source: ldap.response_hex
+    # [APPLICATION 1] bindResponse (0x61) whose resultCode ENUMERATED is success:
+    # 0a 01 00. inappropriateAuthentication would be 0a 01 30.
+    pattern: "61..0a0100"
+    condition: "ldap.connected == true"
+    on_match:
+      finding:
+        title: "LDAP allows anonymous bind"
+        description: "An anonymous LDAPv3 simple bind returned resultCode success — the directory is queryable without credentials."
+        remediation: "Disable anonymous bind (require authentication) and restrict directory read access; firewall port 389/636."
+        confidence_delta: 0.30
+        qod: 70
+        evidence: "bindResponse (hex): {{ldap.response_hex}}"

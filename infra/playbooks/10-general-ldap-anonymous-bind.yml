@@ -1,0 +1,10 @@
+---
+- name: "ldap-anonymous-bind — LDAP allows anonymous bind"
+  hosts: ldap_anonymous_bind
+  gather_facts: false
+  vars:
+    cve_id: "ldap-anonymous-bind"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/ldap-anonymous-bind.yaml"
+  roles:
+    - common_docker
