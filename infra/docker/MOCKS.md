@@ -267,6 +267,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## memcached-mock
 - general/memcached-udp-exposed
 
+## memcached-tcp-mock
+- general/memcached-tcp-exposed
+
 ## metabase-mock
 - metabase/CVE-2021-41277
 
