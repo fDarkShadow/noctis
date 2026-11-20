@@ -1,7 +1,40 @@
 title: noctis
 description: >-
   A Rust black-box vulnerability scanner driven by self-contained YAML feeds —
-  detects CVEs and misconfigurations with evidence-graded findings.
-theme: jekyll-theme-cayman
-show_downloads: true
+  evidence-graded CVE and misconfiguration detection for live services.
+
+# Docs theme (multi-page, sidebar nav, built-in search).
+remote_theme: just-the-docs/just-the-docs
+
+# Project Pages are served from a subpath.
+url: https://fdarkshadow.github.io
+baseurl: /noctis
+
+color_scheme: dark
+search_enabled: true
+heading_anchors: true
+
+# Header logo (shown in the top-left of every page).
+logo: "/assets/images/noctis-logo.png"
+
+# Top-right link
+aux_links:
+  "GitHub ↗":
+    - "https://github.com/fDarkShadow/noctis"
+aux_links_new_tab: true
+
+# "Edit this page" footer links
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/fDarkShadow/noctis"
+gh_edit_branch: "main"
+gh_edit_view_mode: "tree"
+
+footer_content: >-
+  noctis — released under the MIT License. Built with Jekyll and just-the-docs.
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
 # GitHub Pages serves this folder (Settings → Pages → Source: main /docs).
