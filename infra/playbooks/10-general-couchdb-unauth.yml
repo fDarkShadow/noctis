@@ -1,0 +1,10 @@
+---
+- name: "couchdb-unauth — CouchDB exposed without authentication (admin party)"
+  hosts: couchdb_unauth
+  gather_facts: false
+  vars:
+    cve_id: "couchdb-unauth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/couchdb-unauth.yaml"
+  roles:
+    - common_docker
