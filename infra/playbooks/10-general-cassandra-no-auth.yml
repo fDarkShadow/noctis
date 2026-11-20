@@ -1,0 +1,10 @@
+---
+- name: "cassandra-no-auth — Cassandra CQL accessible without authentication"
+  hosts: cassandra_no_auth
+  gather_facts: false
+  vars:
+    cve_id: "cassandra-no-auth"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/cassandra-no-auth.yaml"
+  roles:
+    - common_docker

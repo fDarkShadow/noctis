@@ -1,0 +1,42 @@
+# Flag a Cassandra CQL endpoint that accepts connections without authentication.
+# Sends a CQL native-protocol STARTUP frame as a binary tcp_dialogue frame. A
+# node without auth replies READY (opcode 0x02); a node with
+# authenticator=PasswordAuthenticator replies AUTHENTICATE (opcode 0x03).
+uid: 3d7a9c54-6e18-4b02-a0f7-1c5b2e84d963
+name: "Cassandra CQL accessible without authentication"
+description: |
+  The Cassandra CQL endpoint answered STARTUP with READY, accepting the session
+  without credentials — the keyspaces/data are reachable unauthenticated.
+cves: []
+category: exposure
+severity: high
+confidence_base: 0.45
+tags: [cassandra, cql, unauthenticated, exposure, misconfig]
+services: [cassandra]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://cassandra.apache.org/doc/latest/cassandra/operating/security.html"
+steps:
+  - id: cql-startup
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    # CQL v4 STARTUP {CQL_VERSION: 3.0.0}.
+    send_hex: "0400000001000000160001000b43514c5f56455253494f4e0005332e302e30"
+    store_as: cql
+  - id: check-ready
+    action: match
+    source: cql.response_hex
+    # READY response: version 0x84, flags 00, stream 0000, opcode 02.
+    pattern: "^8400000002"
+    condition: "cql.connected == true"
+    on_match:
+      finding:
+        title: "Cassandra CQL accessible without authentication"
+        description: "The CQL endpoint replied READY to STARTUP, accepting a session without credentials."
+        remediation: "Set authenticator: PasswordAuthenticator (and authorizer), require client TLS, and firewall port 9042."
+        confidence_delta: 0.35
+        qod: 70
+        evidence: "CQL response (hex): {{cql.response_hex}}"
