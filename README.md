@@ -71,28 +71,42 @@ noctis takes a different path:
 If you've used **Nuclei** or **OpenVAS**, noctis sits between them — data-driven feeds like the
 former, evidence-graded findings like the latter.
 
-| | Version-based scanners | Template scanners | **noctis** |
+The table below is deliberately broad-strokes — each tool spans a range, and this is about
+*positioning*, not a benchmark:
+
+| Dimension | Version-based<br>(e.g. Nessus / OpenVAS) | Template-based<br>(e.g. Nuclei) | **noctis** |
 |---|---|---|---|
-| Detection logic | code / CPE match | templates | **YAML feeds** |
-| Evidence-graded findings | partial | varies | **yes (QoD)** |
-| Blind / OOB detection | rarely | varies | **built-in callback server** |
-| Non-HTTP protocols | varies | limited | **TCP / UDP / TLS / SSH / SNMP** |
-| Raw-TCP payloads (no URL normalisation) | rarely | varies | **yes** |
-| Runtime | varies | Go | **Rust (single binary)** |
+| **Primary detection signal** | version / CPE inference | template request → matcher | **observed vulnerable behaviour** |
+| **How a check is written** | compiled plugin / NASL | YAML template | **YAML feed (plain data)** |
+| **Auditable in code review** | hard (compiled / large DSL) | easy (YAML) | **easy (YAML, one file per vuln)** |
+| **Finding confidence** | QoD (OpenVAS) | match = hit | **QoD 0–100 per finding** |
+| **False-positive posture** | higher (version guessing) | low–medium | **low — a step must prove it** |
+| **Blind / out-of-band** | limited | yes (interactsh) | **built-in callback server** |
+| **Protocol reach** | broad | HTTP + TCP / DNS / SSL / … | **HTTP, raw TCP / UDP, TLS, SSH, SNMP** |
+| **Raw byte payloads** (encoded paths) | varies | yes (network templates) | **yes — verbatim, auto-TLS** |
+| **Per-check scope** | one plugin | one template | **0..N CVEs + multi-step chains per feed** |
+| **Shared state between checks** | knowledge base / cache | none | **none — every feed is self-contained** |
+| **Runtime & integration** | scanner appliance / agent | Go binary | **Rust static binary + REST API** |
+| **License** | OpenVAS GPL · Nessus proprietary | MIT | **MIT** |
+
+**Where noctis shines:** evidence-graded findings you can trust in a pipeline, checks that read
+like data in a pull request, and first-class non-HTTP coverage. **Where the others still win
+today:** raw plugin/template count — mature scanners ship tens of thousands of checks; noctis's
+feed set is smaller and growing.
 
 ---
 
 ## How it works
 
-```
-         POST /scans                 ┌───────────────────────────────┐
-  host + discovered services  ─────▶ │  noctis engine                │
-  (port + service name)             │   match feeds ⇄ services       │
-                                     │   run steps (build confidence) │
-         GET /scans/{id}/findings    │   grade with QoD               │
-  evidence-graded findings   ◀────── └───────────────────────────────┘
-                                             ▲
-                                     YAML feeds (tests/vulnerabilities/)
+```mermaid
+flowchart LR
+    I["POST /scans<br/>host + discovered services<br/>(port + service name)"] --> E
+    subgraph E["noctis engine"]
+        direction TB
+        M["match feeds to services"] --> R["run steps<br/>build confidence"] --> Q["grade with QoD"]
+    end
+    D[("YAML feeds<br/>tests/vulnerabilities/")] -.-> E
+    E --> O["GET /scans/:id/findings<br/>evidence-graded findings"]
 ```
 
 You give noctis a host and the services discovered on it (e.g. from an nmap scan: a port + a
