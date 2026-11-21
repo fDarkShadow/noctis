@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Feed tree integrity: sha256 lockfile + uid uniqueness.
+"""Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes.
 
 Run via `task feeds-check` (from infra/). Pass --write to regenerate the lockfile
 after an intentional feed edit — do that as part of the same commit, never separately.
@@ -58,6 +58,44 @@ def check_uid_uniqueness(paths: list[str]) -> list[str]:
     return errors
 
 
+def check_includes(paths: list[str]) -> list[str]:
+    """Every `includes:` entry must point to an existing file.
+
+    The engine resolves includes relative to the including feed's directory and
+    *skips the whole feed* (with only a log warning) when one is missing — so a
+    broken path silently disables the check. Catch it here instead.
+    """
+    errors = []
+    for path in paths:
+        with open(path) as f:
+            lines = f.read().splitlines()
+        entries: list[str] = []
+        in_block = False
+        for line in lines:
+            inline = re.match(r"^includes:\s*\[(.*)\]\s*(#.*)?$", line)
+            if inline:
+                entries += [e.strip().strip("'\"") for e in inline.group(1).split(",") if e.strip()]
+                continue
+            if re.match(r"^includes:\s*(#.*)?$", line):
+                in_block = True
+                continue
+            if in_block:
+                item = re.match(r"^\s+-\s+['\"]?([^'\"#]+?)['\"]?\s*(#.*)?$", line)
+                if item:
+                    entries.append(item.group(1))
+                elif line.strip() and not line.lstrip().startswith("#"):
+                    in_block = False
+        rel = os.path.relpath(path, REPO_ROOT)
+        for inc in entries:
+            target = os.path.normpath(os.path.join(os.path.dirname(path), inc))
+            if not os.path.isfile(target):
+                errors.append(
+                    f"{rel}: include `{inc}` not found (resolves to "
+                    f"{os.path.relpath(target, REPO_ROOT)}) — includes are relative to the feed file"
+                )
+    return errors
+
+
 def main() -> int:
     write = "--write" in sys.argv
 
@@ -81,6 +119,7 @@ def main() -> int:
             errors.append(f"{rel}: in lockfile but file no longer exists")
 
     errors.extend(check_uid_uniqueness(feed_paths()))
+    errors.extend(check_includes(feed_paths()))
 
     if errors:
         print(f"feeds-check: {len(errors)} problem(s):", file=sys.stderr)
@@ -88,7 +127,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids.")
+    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve.")
     return 0
 
 

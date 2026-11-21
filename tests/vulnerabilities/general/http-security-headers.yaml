@@ -16,7 +16,7 @@ references:
   - "https://owasp.org/www-project-secure-headers/"
 
 includes:
-  - ../common/http_base.yaml
+  - ../../common/http_base.yaml
 
 vars:
   http_path: "/"
