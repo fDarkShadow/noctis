@@ -2,14 +2,8 @@
 title: Usage & REST API
 nav_order: 3
 ---
-
+{% raw %}
 # Usage & REST API
-{: .no_toc }
-
-1. TOC
-{:toc}
-
----
 
 ## CLI
 
@@ -69,8 +63,9 @@ configured, OOB steps are skipped.
 ### Findings
 
 Each finding carries the CVE id(s) (possibly empty for a misconfiguration), a severity, a
-confidence in `[0,1]`, a [QoD score]({% link writing-feeds.md %}#confidence--qod), and evidence.
+confidence in `[0,1]`, a [QoD score](writing-feeds.html#confidence--qod), and evidence.
 
 {: .note }
 > Confidence is `confidence_base + confidence_delta`, clamped to `[0, 1]`. The QoD reflects *how*
-> the detection was proven — see [Writing feeds]({% link writing-feeds.md %}).
+> the detection was proven — see [Writing feeds](writing-feeds.html).
+{% endraw %}

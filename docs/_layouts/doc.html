@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+{% include head.html %}
+</head>
+<body class="doc-page">
+{% include nav.html %}
+{%- assign docs = site.pages | where_exp: "p", "p.nav_order" | sort: "nav_order" -%}
+{%- assign idx = 0 -%}
+{%- for p in docs -%}{%- if p.url == page.url -%}{%- assign idx = forloop.index0 -%}{%- endif -%}{%- endfor -%}
+{%- assign prev_i = idx | minus: 1 -%}
+{%- assign next_i = idx | plus: 1 -%}
+<div class="docs">
+  <main class="doc-main" id="content">
+    <details class="toc-inline">
+      <summary>On this page</summary>
+      <nav class="toc-list" aria-label="On this page (inline)"></nav>
+    </details>
+    <article class="prose">
+{{ content }}
+    </article>
+
+    <nav class="pager" aria-label="Previous and next page">
+      {%- if idx > 0 -%}
+      {%- assign prev = docs[prev_i] -%}
+      <a class="prev" href="{{ prev.url | relative_url }}"><span>Previous</span>{% if prev.layout == 'landing' %}Overview{% else %}{{ prev.title }}{% endif %}</a>
+      {%- else -%}<span></span>{%- endif -%}
+      {%- assign next = docs[next_i] -%}
+      {%- if next -%}
+      <a class="next" href="{{ next.url | relative_url }}"><span>Next</span>{{ next.title }}</a>
+      {%- endif -%}
+    </nav>
+    <p class="edit"><a href="https://github.com/fDarkShadow/noctis/edit/main/docs/{{ page.path }}">Edit this page on GitHub</a></p>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-title">On this page</div>
+    <nav class="toc-list" aria-label="On this page"></nav>
+  </aside>
+</div>
+{% include footer.html %}
+</body>
+</html>

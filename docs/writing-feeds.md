@@ -2,17 +2,11 @@
 title: Writing feeds
 nav_order: 4
 ---
-
+{% raw %}
 # Writing feeds
-{: .no_toc }
 
 A feed is a YAML file describing a vulnerability or misconfiguration and the sequence of steps
 that prove it. Feeds live under `tests/vulnerabilities/<product>/<id>.yaml`.
-
-1. TOC
-{:toc}
-
----
 
 ## Structure
 
@@ -125,4 +119,5 @@ npx ajv-cli validate -s schemas/feed.schema.json \
 > The full authoring reference — mock template, inventory structure, pitfalls, and reference
 > feeds to copy from — lives in
 > [`CLAUDE.md`](https://github.com/fDarkShadow/noctis/blob/main/CLAUDE.md). See also
-> [Contributing]({% link contributing.md %}).
+> [Contributing](contributing.html).
+{% endraw %}
