@@ -468,4 +468,8 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
 - **`cves: []` empty is valid and normal** — don't invent a placeholder CVE ID for a misconfiguration/heuristic check. `category:` is the classifier for 0-CVE feeds, not `cves`.
 - **`ScanFilters.exclude_cve` matches on overlap, not equality** — a test is excluded if *any* entry in its `cves:` list appears in the exclusion list, so excluding one CVE of a multi-CVE chain feed excludes the whole feed.
 - **Shared mocks silently break other CVEs** — `infra/docker/<product>-mock/` is sometimes reused by more than one CVE (check `infra/docker/MOCKS.md`). Overwriting an existing endpoint/response format instead of adding a new branch breaks the *other* CVE's test without any error appearing in your own — it only surfaces if that CVE happens to be re-run (e.g. in `task test-all`). Always add, never replace; re-test every other consumer listed in `MOCKS.md`.
+- **`includes:` paths are relative to the including feed file**, not to `tests/` — a feed in
+  `tests/vulnerabilities/<product>/` reaches `tests/common/` with `../../common/<file>.yaml`. A missing
+  include makes the engine skip the *whole* feed with only a log warning; `task feeds-check` now
+  fails on any include that doesn't resolve.
 - **`task feeds-check` fails on a feed you edited** — that's by design: any content change to a file already in `tests/vulnerabilities/.feed-shas.json` must be accompanied by `task feeds-check -- --write` in the same commit, so an unreviewed/accidental edit to an existing feed shows up in the diff instead of silently merging.
