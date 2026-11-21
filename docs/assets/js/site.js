@@ -80,9 +80,6 @@
     }
   }
 
-  // 4. (the docs menu is collapsed on small screens by an inline script in doc.html,
-  //     before first paint, so it never shifts the layout)
-
   // 5. search — fetch the doc pages on first use, then filter client-side
   var input = document.getElementById('doc-search');
   var out = document.getElementById('search-results');
@@ -91,14 +88,15 @@
     var loading = null;
     function load() {
       if (loading) return loading;
-      var links = Array.prototype.slice.call(document.querySelectorAll('.side-menu a'));
-      loading = Promise.all(links.map(function (a) {
-        return fetch(a.href).then(function (r) { return r.text(); }).then(function (html) {
+      var pages = [];
+      try { pages = JSON.parse(document.getElementById('doc-index').textContent); } catch (e) { pages = []; }
+      loading = Promise.all(pages.map(function (pg) {
+        return fetch(pg.url).then(function (r) { return r.text(); }).then(function (html) {
           var doc = new DOMParser().parseFromString(html, 'text/html');
           var body = doc.querySelector('.prose') || doc.querySelector('main');
-          return { title: a.textContent.trim(), url: a.href, text: body ? body.textContent.replace(/\s+/g, ' ') : '' };
+          return { title: pg.title, url: pg.url, text: body ? body.textContent.replace(/\s+/g, ' ') : '' };
         }).catch(function () { return null; });
-      })).then(function (pages) { index = pages.filter(Boolean); return index; });
+      })).then(function (res) { index = res.filter(Boolean); return index; });
       return loading;
     }
     function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -125,8 +123,20 @@
       var q = input.value.trim();
       (index ? Promise.resolve() : load()).then(function () { render(q); });
     });
+    var hs = document.querySelector('.hsearch');
+    var tog = document.querySelector('.hsearch-toggle');
+    function setOpen(open) {
+      if (!hs) return;
+      hs.classList.toggle('open', open);
+      if (tog) tog.setAttribute('aria-expanded', String(open));
+      if (open) input.focus();
+    }
+    if (tog) tog.addEventListener('click', function () { setOpen(!hs.classList.contains('open')); });
+    document.addEventListener('click', function (e) {
+      if (hs && !hs.contains(e.target)) { out.hidden = true; setOpen(false); }
+    });
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { input.value = ''; render(''); }
+      if (e.key === 'Escape') { input.value = ''; render(''); setOpen(false); }
       if (e.key === 'Enter') { var first = out.querySelector('a'); if (first) location.href = first.href; }
     });
   }

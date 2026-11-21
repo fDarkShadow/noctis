@@ -11,25 +11,6 @@
 {%- assign prev_i = idx | minus: 1 -%}
 {%- assign next_i = idx | plus: 1 -%}
 <div class="docs">
-  <aside class="sidebar">
-    <div class="search" role="search">
-      <label class="sr-only" for="doc-search">Search the documentation</label>
-      <input id="doc-search" type="search" placeholder="Search docs…" autocomplete="off">
-      <div id="search-results" class="search-results" hidden></div>
-    </div>
-    <details class="side-menu" open>
-      <summary>Documentation</summary>
-      <nav aria-label="Documentation">
-        <ul>
-          {%- for p in docs %}
-          <li><a href="{{ p.url | relative_url }}"{% if p.url == page.url %} aria-current="page"{% endif %}>{% if p.layout == 'landing' %}Overview{% else %}{{ p.title }}{% endif %}</a></li>
-          {%- endfor %}
-        </ul>
-      </nav>
-    </details>
-    <script>if (window.matchMedia('(max-width: 900px)').matches) document.querySelector('.side-menu').removeAttribute('open');</script>
-  </aside>
-
   <main class="doc-main" id="content">
     <details class="toc-inline">
       <summary>On this page</summary>
