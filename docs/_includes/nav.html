@@ -1,0 +1,21 @@
+<a class="skip" href="#content">Skip to content</a>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="{{ '/' | relative_url }}" aria-label="noctis home">
+      <svg width="26" height="26" viewBox="0 0 92 92" aria-hidden="true">
+        <defs>
+          <linearGradient id="ng" x1="8" y1="8" x2="84" y2="84" gradientUnits="userSpaceOnUse"><stop stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>
+          <mask id="nm"><rect width="92" height="92" fill="#000"/><circle cx="46" cy="46" r="40" fill="#fff"/><circle cx="63" cy="33" r="35" fill="#000"/></mask>
+        </defs>
+        <circle cx="46" cy="46" r="40" fill="url(#ng)" mask="url(#nm)"/>
+      </svg>
+      noctis
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="{{ '/getting-started.html' | relative_url }}"{% if page.layout == 'doc' %} class="current"{% endif %}>Docs</a>
+      <a class="hide-sm" href="{{ '/writing-feeds.html' | relative_url }}">Writing feeds</a>
+      <a class="hide-sm" href="https://buymeacoffee.com/fdarkshadow">Sponsor</a>
+      <a class="pill" href="https://github.com/fDarkShadow/noctis">★ GitHub</a>
+    </nav>
+  </div>
+</header>

@@ -2,7 +2,7 @@
 title: Contributing
 nav_order: 6
 ---
-
+{% raw %}
 # Contributing
 
 Contributions are welcome — new detection feeds, engine capabilities, mocks, and docs.
@@ -32,3 +32,4 @@ or an engine capability. The deep authoring reference lives in
 - [Code of Conduct](https://github.com/fDarkShadow/noctis/blob/main/CODE_OF_CONDUCT.md)
 - [Security policy](https://github.com/fDarkShadow/noctis/blob/main/SECURITY.md) — report
   vulnerabilities privately; do not open a public issue.
+{% endraw %}

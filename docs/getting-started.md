@@ -2,21 +2,15 @@
 title: Getting started
 nav_order: 2
 ---
-
+{% raw %}
 # Getting started
-{: .no_toc }
-
-1. TOC
-{:toc}
-
----
 
 ## Install
 
 ### Docker (recommended)
 
 Prebuilt images are published to the GitHub Container Registry for `linux/amd64` and
-`linux/arm64`. See [Docker]({% link docker.md %}) for the full tag scheme.
+`linux/arm64`. See [Docker](docker.html) for the full tag scheme.
 
 ```sh
 docker pull ghcr.io/fdarkshadow/noctis:latest
@@ -96,5 +90,6 @@ curl -s http://localhost:8080/scans/<id>/findings | jq .
 
 ## Next steps
 
-- [Usage & REST API]({% link usage.md %}) — all endpoints and CLI options.
-- [Writing feeds]({% link writing-feeds.md %}) — author your own detections.
+- [Usage & REST API](usage.html) — all endpoints and CLI options.
+- [Writing feeds](writing-feeds.html) — author your own detections.
+{% endraw %}

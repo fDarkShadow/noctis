@@ -2,14 +2,8 @@
 title: Docker
 nav_order: 5
 ---
-
+{% raw %}
 # Docker
-{: .no_toc }
-
-1. TOC
-{:toc}
-
----
 
 ## Images
 
@@ -57,5 +51,7 @@ The `Dockerfile` is a multi-stage build (cargo-chef dependency caching → stati
 `scratch` runtime), producing a tiny image with no OS and no shell.
 
 {: .note }
-> arm64 release images are built under QEMU emulation, so release builds take longer than
-> amd64-only ones.
+> Release images are built in parallel on native `amd64` and `arm64` runners (no emulation),
+> then merged into a single multi-arch manifest. A release only proceeds if the tag matches
+> the version in `Cargo.toml`.
+{% endraw %}
