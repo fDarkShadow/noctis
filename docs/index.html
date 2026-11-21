@@ -241,9 +241,9 @@ description: "noctis — an open-source Rust black-box vulnerability scanner. Ev
       <div class="term">
         <div class="term-bar"><i></i><i></i><i></i><span>docker</span></div>
 <pre><span class="c-p">$</span> <span class="c-cmd">docker run --rm -p 8080:8080 \</span>
-<span class="c-cmd">    -v ./tests:/feeds \</span>
-<span class="c-cmd">    ghcr.io/fdarkshadow/noctis:latest \</span>
-<span class="c-cmd">    serve --host 0.0.0.0 --port 8080</span></pre>
+<span class="c-cmd">    ghcr.io/fdarkshadow/noctis:latest</span>
+<span class="c-cm"># 180+ feeds bundled at /feeds —</span>
+<span class="c-cm"># mount -v ./my-feeds:/feeds to use your own</span></pre>
       </div>
       <div class="term">
         <div class="term-bar"><i></i><i></i><i></i><span>from source</span></div>
