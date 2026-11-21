@@ -41,9 +41,8 @@ noctis runs as a REST service. Feeds live in `tests/` and are read at scan time.
 # From source
 ./target/release/noctis serve --host 0.0.0.0 --port 8080
 
-# Docker (mount your feeds at /feeds)
-docker run --rm -v ./tests:/feeds -p 8080:8080 \
-  ghcr.io/fdarkshadow/noctis:latest serve --host 0.0.0.0 --port 8080
+# Docker — the detection feeds are bundled in the image at /feeds
+docker run --rm -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest
 ```
 
 ## Submit your first scan
@@ -63,6 +62,8 @@ curl -s -X POST http://localhost:8080/scans \
     "concurrency": 10
   }' | jq .
 ```
+
+With the Docker image, use the bundled feeds instead: `"tests": ["/feeds/vulnerabilities/"]`.
 
 The response contains a scan `id`. Poll it for findings:
 

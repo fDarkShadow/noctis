@@ -28,12 +28,31 @@ tags when a `vX.Y.Z` release is tagged. Browse all tags on the
 
 ## Run
 
-Feeds are read at runtime, so mount them at `/feeds`:
+The image **bundles the full detection feed set** at `/feeds` (the repository's `tests/` tree),
+and its default command is `serve` on `0.0.0.0:8080`:
 
 ```sh
-docker run --rm -v ./tests:/feeds -p 8080:8080 \
-  ghcr.io/fdarkshadow/noctis:latest serve --host 0.0.0.0 --port 8080
+docker run --rm -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest
 ```
+
+Point scans at the bundled feeds with `"tests": ["/feeds/vulnerabilities/"]` — or the relative
+`"vulnerabilities/"`, since the working directory is `/feeds`.
+
+### Use your own feeds
+
+Mount a directory over `/feeds` to replace the bundled set, or under it to add to it:
+
+```sh
+# Replace the bundled feeds
+docker run --rm -p 8080:8080 -v ./my-feeds:/feeds ghcr.io/fdarkshadow/noctis:latest
+
+# Keep the bundled feeds and add your own next to them
+docker run --rm -p 8080:8080 -v ./extra-feeds:/feeds/custom ghcr.io/fdarkshadow/noctis:latest
+```
+
+`includes:` are resolved relative to each feed file, so keep a feed and the files it includes
+together. The bundled feeds are a snapshot taken when the image was built: `:edge` follows
+`main`, and a release tag carries the feed set of that release.
 
 The image `ENTRYPOINT` is the `noctis` binary, so append any CLI arguments directly:
 

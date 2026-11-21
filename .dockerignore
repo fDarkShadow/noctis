@@ -9,3 +9,6 @@ schemas/
 *.md
 .gitignore
 .dockerignore
+
+# feed integrity lockfile — CI metadata, not a feed
+tests/vulnerabilities/.feed-shas.json

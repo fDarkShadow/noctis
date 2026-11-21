@@ -30,9 +30,18 @@ COPY --from=builder /etc/passwd             /etc/passwd
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /build/target/release/noctis /usr/local/bin/noctis
 
+# Detection feeds are bundled at /feeds (same tree as the repo's tests/, so
+# `includes:` resolve). Last layer on purpose: a feed-only change rebuilds just
+# this layer. To use your own feeds, mount over it:
+#   docker run -v ./my-feeds:/feeds ...          (replace the bundled set)
+#   docker run -v ./extra:/feeds/custom ...      (add to the bundled set)
+COPY tests /feeds
+WORKDIR /feeds
+
 USER noctis
 EXPOSE 8080
 
-# Feeds are mounted at runtime: docker run -v ./tests:/feeds noctis serve ...
+# Scan requests can then use "tests": ["/feeds/vulnerabilities/"]
+# (or the relative "vulnerabilities/", resolved against WORKDIR).
 ENTRYPOINT ["/usr/local/bin/noctis"]
 CMD ["serve"]

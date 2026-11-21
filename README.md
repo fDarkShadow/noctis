@@ -196,14 +196,32 @@ A findings response:
 Prebuilt images are published to the **GitHub Container Registry (GHCR)** as a minimal `scratch`
 image — a static musl binary, no shell, a few MB — for **`linux/amd64`** and **`linux/arm64`**.
 
-```sh
-# Pull the latest release
-docker pull ghcr.io/fdarkshadow/noctis:latest
+The image **ships with the full detection feed set** at `/feeds`, so it works out of the box:
 
-# Run the daemon — mount your feeds at /feeds
-docker run --rm -v ./tests:/feeds -p 8080:8080 \
-  ghcr.io/fdarkshadow/noctis serve --host 0.0.0.0 --port 8080
+```sh
+# Run the daemon (serves on 0.0.0.0:8080 by default)
+docker run --rm -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest
+
+# Scan with the bundled feeds
+curl -s -X POST http://localhost:8080/scans -H "Content-Type: application/json" -d '{
+  "host": "10.0.0.1",
+  "services": [{"port": 80, "service": "http"}],
+  "tests": ["/feeds/vulnerabilities/"]
+}'
 ```
+
+**Use your own feeds** by mounting over `/feeds`:
+
+```sh
+# Replace the bundled feeds with your own tree
+docker run --rm -p 8080:8080 -v ./my-feeds:/feeds ghcr.io/fdarkshadow/noctis:latest
+
+# Keep the bundled feeds and add yours alongside them
+docker run --rm -p 8080:8080 -v ./extra-feeds:/feeds/custom ghcr.io/fdarkshadow/noctis:latest
+```
+
+The bundled feeds are a snapshot taken when the image was built: `:edge` follows `main`, and a
+release tag carries the feed set of that release.
 
 | Tag | Points to |
 |-----|-----------|
