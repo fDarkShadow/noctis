@@ -1,29 +1,40 @@
-# ── Stage 1: dependency plan (cargo-chef) ────────────────────────────────────
-FROM docker.io/library/rust:1.96-alpine AS chef
+# Toolchain and dependency versions are pinned by this base image tag and by
+# Cargo.lock only — no third-party build tooling is installed or compiled.
+
+# ── Stage 1: toolchain + static system libraries ─────────────────────────────
+FROM docker.io/library/rust:1.96-alpine AS base
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static zlib-dev zlib-static libssh2-dev libssh2-static pkgconfig ca-certificates \
-    && cargo install cargo-chef --locked
+    && adduser -D -u 1000 -s /sbin/nologin noctis
+ENV PKG_CONFIG_ALL_STATIC=1 OPENSSL_STATIC=1
 WORKDIR /build
 
-FROM chef AS planner
-# Copy only manifests — source changes must NOT invalidate the dep-cook layer
+# ── Stage 2: version-masked manifests ────────────────────────────────────────
+# The dependency layer below is keyed on these files. Masking our own package
+# version means a release bump (0.1.0 → 0.2.0) does not invalidate it.
+FROM base AS manifests
 COPY Cargo.toml Cargo.lock ./
-RUN cargo chef prepare --recipe-path recipe.json
+RUN awk '!done && /^version = /{print "version = \"0.0.0\""; done=1; next} {print}' Cargo.toml > t && mv t Cargo.toml \
+    && awk 'prev == "name = \"noctis\"" && /^version = /{$0 = "version = \"0.0.0\""} {print; prev = $0}' Cargo.lock > t && mv t Cargo.lock
 
-# ── Stage 2: build — fully static (musl + OPENSSL_STATIC) ────────────────────
-FROM chef AS builder
+# ── Stage 3: build — fully static (musl + OPENSSL_STATIC) ────────────────────
+FROM base AS builder
 
-# Create the runtime user so we can copy /etc/passwd to the scratch image
-RUN adduser -D -u 1000 -s /sbin/nologin noctis
+# Dependencies only, against an empty main.rs. Cached until a dependency
+# changes in Cargo.toml / Cargo.lock, so a source-only change never recompiles
+# them.
+COPY --from=manifests /build/Cargo.toml /build/Cargo.lock ./
+RUN mkdir src && echo 'fn main() {}' > src/main.rs \
+    && cargo build --release --locked \
+    && rm -rf src
 
-COPY --from=planner /build/recipe.json recipe.json
-RUN PKG_CONFIG_ALL_STATIC=1 OPENSSL_STATIC=1 \
-    cargo chef cook --release --locked --recipe-path recipe.json
+# Real manifests and sources: only the noctis crate itself is compiled.
+# `touch` because COPY keeps the files' original mtimes, which can be older than
+# the stub build above — cargo would otherwise keep the stub binary.
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+RUN touch src/main.rs && cargo build --release --locked
 
-COPY . .
-RUN PKG_CONFIG_ALL_STATIC=1 OPENSSL_STATIC=1 \
-    cargo build --release --locked
-
-# ── Stage 3: runtime — scratch, zero runtime deps, no shell ──────────────────
+# ── Stage 4: runtime — scratch, zero runtime deps, no shell ──────────────────
 FROM scratch
 
 COPY --from=builder /etc/passwd             /etc/passwd
