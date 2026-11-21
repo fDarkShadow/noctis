@@ -484,6 +484,10 @@ setup, design principles, and the step-by-step workflow for adding a detection f
 capability. **[CLAUDE.md](CLAUDE.md)** is the deep authoring reference (conventions, mock
 template, inventory structure, pitfalls, and reference feeds to copy from).
 
+**Questions, ideas, or something you built with noctis?** Head to
+[GitHub Discussions](https://github.com/fDarkShadow/noctis/discussions) — Q&A, Ideas, and
+Show and tell. Issues are for bugs, detection-quality reports, and new feed requests.
+
 Please also read our [Code of Conduct](CODE_OF_CONDUCT.md). To report a security issue in noctis
 itself, follow [SECURITY.md](SECURITY.md) — **do not open a public issue**.
 

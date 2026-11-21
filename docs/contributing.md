@@ -12,6 +12,10 @@ which covers the dev setup, design principles, and the step-by-step workflow for
 or an engine capability. The deep authoring reference lives in
 **[CLAUDE.md](https://github.com/fDarkShadow/noctis/blob/main/CLAUDE.md)**.
 
+Questions, ideas and things you built go to
+[GitHub Discussions](https://github.com/fDarkShadow/noctis/discussions) (Q&A, Ideas, Show and tell);
+issues are for bugs, detection-quality reports and new feed requests.
+
 ## Design principles
 
 - **Feeds are self-contained** — no shared knowledge base or cross-test state.

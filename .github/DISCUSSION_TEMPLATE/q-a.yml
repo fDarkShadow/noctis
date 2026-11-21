@@ -1,0 +1,43 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for asking! Please check the [documentation](https://fdarkshadow.github.io/noctis/) and search existing discussions first.
+
+        - **Something is broken?** Open a [bug report](https://github.com/fDarkShadow/noctis/issues/new?template=bug.yml) instead.
+        - **A feed fired when it shouldn't (or missed a vulnerable target)?** Use the [detection quality](https://github.com/fDarkShadow/noctis/issues/new?template=detection_quality.yml) template.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Running noctis (binary / Docker)
+        - REST API & scan requests
+        - Writing or debugging a feed
+        - Test infrastructure (mocks, Ansible)
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: The outcome you're after, not only the command you ran.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Scan request, feed YAML, logs or output. Redact real hosts, IPs and credentials.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: noctis version
+      description: Output of `noctis --version`, the image tag (e.g. `0.2.0`, `edge`), or a commit SHA.
+      placeholder: "0.2.0"

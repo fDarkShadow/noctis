@@ -1,0 +1,43 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas is for open-ended proposals that benefit from discussion before they become work.
+
+        - **Want a specific CVE or misconfiguration covered?** Use the [new feed](https://github.com/fDarkShadow/noctis/issues/new?template=vulnerability.yml) issue template — it goes straight into the backlog.
+        - **Already have a concrete, scoped change in mind?** A [feature request](https://github.com/fDarkShadow/noctis/issues/new?template=feature.yml) is the faster path.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Engine (actions, protocols, scripting builtins)
+        - Feeds & coverage
+        - REST API & integrations
+        - Docker & deployment
+        - Docs & website
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Who hits it, and what do they do today instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What do you propose?
+      description: Rough is fine — a sketch of the YAML, API shape or behaviour you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
