@@ -3,9 +3,12 @@
 blank_issues_enabled: false
 
 contact_links:
-  - name: 💬 Question or discussion
-    url: https://github.com/fDarkShadow/noctis/discussions
-    about: Ask a question or discuss an idea here — please don't open an issue for questions.
+  - name: 🙏 Ask a question
+    url: https://github.com/fDarkShadow/noctis/discussions/categories/q-a
+    about: Usage questions belong in Discussions (Q&A) — please don't open an issue for questions.
+  - name: 💡 Share an idea
+    url: https://github.com/fDarkShadow/noctis/discussions/categories/ideas
+    about: Open-ended proposals to discuss before they become a feature request.
   - name: 🔒 Report a security vulnerability in noctis
     url: https://github.com/fDarkShadow/noctis/security/policy
     about: Do not open a public issue — follow the security policy for private disclosure.

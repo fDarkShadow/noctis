@@ -1,0 +1,35 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Built something with noctis? A custom feed, a CI pipeline gate, a dashboard on top of the REST API, a deployment setup — share it here.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What did you build?
+      description: What it does and why you built it.
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Link
+      description: Repository, gist, blog post or demo (optional).
+      placeholder: "https://"
+
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Feed or config snippet
+      description: Optional — the interesting part of your feed, pipeline or config.
+      render: yaml
+
+  - type: checkboxes
+    id: redacted
+    attributes:
+      label: Before posting
+      options:
+        - label: I removed anything that identifies a real target or credential (hostnames, IPs, tokens, internal URLs).
+          required: true
