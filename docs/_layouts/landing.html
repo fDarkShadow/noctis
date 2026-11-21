@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% seo %}
+  <meta name="theme-color" content="#080b12">
+  <link rel="icon" type="image/png" href="{{ '/assets/images/noctis-favicon.png' | relative_url }}">
+  <link rel="apple-touch-icon" href="{{ '/assets/images/noctis-favicon.png' | relative_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/landing.css' | relative_url }}">
+</head>
+<body>
+{%- assign p_start = site.pages | where: "path", "getting-started.md" | first -%}
+{%- assign p_usage = site.pages | where: "path", "usage.md" | first -%}
+{%- assign p_feeds = site.pages | where: "path", "writing-feeds.md" | first -%}
+{%- assign p_docker = site.pages | where: "path", "docker.md" | first -%}
+{%- assign p_contrib = site.pages | where: "path", "contributing.md" | first -%}
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="{{ '/' | relative_url }}" aria-label="noctis home">
+      <svg width="26" height="26" viewBox="0 0 92 92" aria-hidden="true">
+        <defs>
+          <linearGradient id="ng" x1="8" y1="8" x2="84" y2="84" gradientUnits="userSpaceOnUse"><stop stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>
+          <mask id="nm"><rect width="92" height="92" fill="#000"/><circle cx="46" cy="46" r="40" fill="#fff"/><circle cx="63" cy="33" r="35" fill="#000"/></mask>
+        </defs>
+        <circle cx="46" cy="46" r="40" fill="url(#ng)" mask="url(#nm)"/>
+      </svg>
+      noctis
+    </a>
+    <nav class="nav-links">
+      <a href="{{ p_start.url | relative_url }}">Docs</a>
+      <a class="hide-sm" href="{{ p_feeds.url | relative_url }}">Writing feeds</a>
+      <a class="hide-sm" href="https://buymeacoffee.com/fdarkshadow">Sponsor</a>
+      <a class="pill" href="https://github.com/fDarkShadow/noctis">★ GitHub</a>
+    </nav>
+  </div>
+</header>
+
+{{ content }}
+
+<footer>
+  <div class="wrap">
+    <div>noctis — MIT licensed · built in Rust</div>
+    <nav>
+      <a href="{{ p_start.url | relative_url }}">Getting started</a>
+      <a href="{{ p_usage.url | relative_url }}">REST API</a>
+      <a href="{{ p_feeds.url | relative_url }}">Writing feeds</a>
+      <a href="{{ p_docker.url | relative_url }}">Docker</a>
+      <a href="{{ p_contrib.url | relative_url }}">Contributing</a>
+      <a href="https://github.com/fDarkShadow/noctis/security/policy">Security</a>
+      <a href="https://buymeacoffee.com/fdarkshadow">☕ Buy me a coffee</a>
+    </nav>
+  </div>
+</footer>
+<script>
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-copy');
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () {
+        var o = b.textContent; b.textContent = 'Copied'; setTimeout(function () { b.textContent = o; }, 1400);
+      });
+    });
+  });
+</script>
+</body>
+</html>
