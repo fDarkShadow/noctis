@@ -1,0 +1,272 @@
+---
+title: Home
+layout: landing
+nav_order: 1
+permalink: /
+description: "noctis — an open-source Rust black-box vulnerability scanner. Every check is a readable YAML feed that has to observe the bug before it reports it, and every finding is graded by evidence (QoD)."
+---
+{%- assign p_start = site.pages | where: "path", "getting-started.md" | first -%}
+{%- assign p_feeds = site.pages | where: "path", "writing-feeds.md" | first -%}
+{%- assign p_docker = site.pages | where: "path", "docker.md" | first -%}
+
+<!-- ── hero ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <a class="badge-new" href="https://github.com/fDarkShadow/noctis/releases"><b>v0.1</b> First release — multi-arch image on GHCR →</a>
+      <h1>Find vulnerabilities by <span class="grad">proof</span>, not by guessing.</h1>
+      <p class="sub">noctis is an open-source black-box scanner written in Rust. Every check is a readable
+        YAML feed that has to <em>observe</em> the vulnerable behaviour before it reports — and every
+        finding is graded by how strong the evidence is.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="{{ p_start.url | relative_url }}">Get started →</a>
+        <a class="btn" href="https://github.com/fDarkShadow/noctis">★ Star on GitHub</a>
+      </div>
+      <div class="copy">
+        <span class="cmd"><span class="p">$</span> docker pull ghcr.io/fdarkshadow/noctis</span>
+        <button type="button" data-copy="docker pull ghcr.io/fdarkshadow/noctis">Copy</button>
+      </div>
+    </div>
+
+    <div class="term" aria-label="Example scan">
+      <div class="term-bar"><i></i><i></i><i></i><span>noctis — scan</span></div>
+<pre><span class="c-p">$</span> <span class="c-cmd">curl -X POST :8080/scans -d @scan.json</span>
+{ <span class="c-k">"id"</span>: <span class="c-s">"7f3c2a"</span>, <span class="c-k">"status"</span>: <span class="c-s">"running"</span> }
+
+<span class="c-p">$</span> <span class="c-cmd">curl :8080/scans/7f3c2a/findings</span>
+[
+  {
+    <span class="c-k">"cve_ids"</span>:    [<span class="c-s">"CVE-2021-41773"</span>],
+    <span class="c-k">"severity"</span>:   <span class="c-crit">"critical"</span>,
+    <span class="c-k">"qod"</span>:        <span class="c-n">75</span>,
+    <span class="c-k">"confidence"</span>: <span class="c-n">0.95</span>,
+    <span class="c-k">"evidence"</span>:   <span class="c-s">"LFI confirmed — /etc/passwd readable"</span>
+  }
+]
+<span class="c-cm"># one finding, with the proof that raised it</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ── stats ────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><b class="grad">180+</b><span>detection feeds</span></div>
+    <div class="stat"><b class="grad">14</b><span>probe &amp; logic actions</span></div>
+    <div class="stat"><b class="grad">6</b><span>protocols — HTTP to SNMP</span></div>
+    <div class="stat"><b class="grad">1</b><span>static binary, no agent</span></div>
+  </div>
+</div>
+
+<!-- ── how it works ─────────────────────────────────────── -->
+<section id="how">
+  <div class="wrap">
+    <span class="eyebrow">How it works</span>
+    <h2>From a list of open ports to <span class="grad">proven</span> findings.</h2>
+    <p class="lead">Feed noctis what you already know about a host — it decides which checks apply, runs
+      them against the live service, and only reports what it could actually demonstrate.</p>
+    <div class="steps">
+      <div class="step">
+        <h3>Describe the target</h3>
+        <p>POST a host and its discovered services — a port and a service name, straight from nmap or
+          your inventory.</p>
+      </div>
+      <div class="step">
+        <h3>Match &amp; probe</h3>
+        <p>Every feed whose <code style="font-size:13px">services:</code> match is scheduled and its steps
+          run against the live service — HTTP, raw TCP, UDP, TLS, SSH or SNMP.</p>
+      </div>
+      <div class="step">
+        <h3>Prove &amp; grade</h3>
+        <p>A finding is raised only when a step observes the bug, then graded with an OpenVAS-style
+          Quality-of-Detection score.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── features ─────────────────────────────────────────── -->
+<section id="features" style="padding-top:0">
+  <div class="wrap">
+    <span class="eyebrow">Why noctis</span>
+    <h2>Signal you can gate a pipeline on.</h2>
+    <p class="lead">Banner-matching scanners drown you in "maybe". noctis is built around evidence, readable
+      checks, and protocols beyond the web.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Evidence, not guesses</h3>
+        <p>Each finding carries a QoD score — 50 for a banner, 75 for a functional proof, 97 for an
+          out-of-band callback or confirmed RCE.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M9 13h6M9 17h4"/></svg></div>
+        <h3>Detection as data</h3>
+        <p>Checks are YAML feeds, not compiled plugins. Read them, review them in a pull request, write
+          your own — no recompile.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg></div>
+        <h3>Beyond HTTP</h3>
+        <p>Line &amp; binary TCP dialogues, UDP, TLS, SSH and SNMP — find the exposed Redis, MongoDB or
+          SNMP community, not just the web bug.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13.5 6l-3 12"/></svg></div>
+        <h3>Byte-exact payloads</h3>
+        <p><code>tcp_connect</code> sends requests verbatim, so encoded path-traversal payloads survive —
+          no URL normalisation silently "fixing" your exploit.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg></div>
+        <h3>Blind bugs, caught</h3>
+        <p>A built-in out-of-band callback server confirms Log4Shell, SSRF and XXE that never echo back
+          in the response.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div>
+        <h3>Built for pipelines</h3>
+        <p>A REST API with webhooks, a multi-arch static image a few MB in size, and findings you can
+          fail a build on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── showcase ─────────────────────────────────────────── -->
+<section class="showcase" id="feed">
+  <div class="wrap split">
+    <div class="term" aria-label="Example feed">
+      <div class="term-bar"><i></i><i></i><i></i><span>tests/vulnerabilities/apache-cve/CVE-2021-41773.yaml</span></div>
+{% raw %}<pre><span class="c-k">name</span>: <span class="c-s">"Apache httpd 2.4.49 path traversal"</span>
+<span class="c-k">cves</span>: [<span class="c-s">CVE-2021-41773</span>]
+<span class="c-k">severity</span>: <span class="c-crit">critical</span>
+<span class="c-k">services</span>: [<span class="c-s">http</span>, <span class="c-s">https</span>]
+<span class="c-k">confidence_base</span>: <span class="c-n">0.30</span>
+
+<span class="c-k">steps</span>:
+  - <span class="c-k">id</span>: <span class="c-s">probe</span>
+    <span class="c-k">action</span>: <span class="c-v">tcp_connect</span>      <span class="c-cm"># bytes sent verbatim</span>
+    <span class="c-k">port</span>: <span class="c-s">"{{port}}"</span>
+    <span class="c-k">send</span>: <span class="c-s">"GET /icons/.%2e/.%2e/etc/passwd HTTP/1.0\r\n\r\n"</span>
+    <span class="c-k">store_as</span>: <span class="c-s">resp</span>
+
+  - <span class="c-k">id</span>: <span class="c-s">prove</span>
+    <span class="c-k">action</span>: <span class="c-v">match</span>
+    <span class="c-k">source</span>: <span class="c-s">resp.banner</span>
+    <span class="c-k">pattern</span>: <span class="c-s">"root:[x*!]:0:0"</span>
+    <span class="c-k">on_match</span>:
+      <span class="c-k">finding</span>:
+        <span class="c-k">confidence_delta</span>: <span class="c-n">0.65</span>
+        <span class="c-k">qod</span>: <span class="c-n">75</span>
+        <span class="c-k">evidence</span>: <span class="c-s">"LFI confirmed — /etc/passwd readable"</span></pre>{% endraw %}
+    </div>
+    <div>
+      <span class="eyebrow">Feeds</span>
+      <h2>A detection is a file you can <span class="grad">read</span>.</h2>
+      <p class="lead" style="margin-bottom:0">No DSL to learn, no plugin to compile. A feed declares which
+        services it targets and the steps that prove the bug.</p>
+      <ul class="notes">
+        <li><b>0, 1 or many CVEs</b> per feed — misconfiguration checks and multi-CVE chains are first-class.</li>
+        <li><b>Self-contained</b> — no shared knowledge base between checks, so results are reproducible.</li>
+        <li><b>Scriptable</b> when you need it — Rhai with regex, crypto and binary pack/unpack builtins.</li>
+        <li><b>Tested both ways</b> — every feed ships a vulnerable and a patched mock, asserting a true
+          positive <em>and</em> a true negative.</li>
+      </ul>
+      <p style="margin-top:26px"><a class="btn" href="{{ p_feeds.url | relative_url }}">Write your first feed →</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── comparison ───────────────────────────────────────── -->
+<section id="compare">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">Positioning</span>
+      <h2>Between Nuclei and OpenVAS.</h2>
+      <p class="lead">Data-driven checks like the former, evidence-graded findings like the latter —
+        in a single Rust binary.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="cmp">
+        <thead><tr><th></th><th>Version-based<br>(Nessus / OpenVAS)</th><th>Template-based<br>(Nuclei)</th><th class="us">noctis</th></tr></thead>
+        <tbody>
+          <tr><td>Primary signal</td><td>version / CPE inference</td><td>request → matcher</td><td class="us">observed vulnerable behaviour</td></tr>
+          <tr><td>How a check is written</td><td>compiled plugin / NASL</td><td>YAML template</td><td class="us">YAML feed</td></tr>
+          <tr><td>Finding confidence</td><td>QoD (OpenVAS)</td><td class="meh">match = hit</td><td class="us">QoD 0–100 per finding</td></tr>
+          <tr><td>Blind / out-of-band</td><td class="meh">limited</td><td>yes (interactsh)</td><td class="us">built-in callback server</td></tr>
+          <tr><td>Protocols</td><td>broad</td><td>HTTP + TCP / DNS / SSL</td><td class="us">HTTP, TCP, UDP, TLS, SSH, SNMP</td></tr>
+          <tr><td>Shared state between checks</td><td class="meh">knowledge base</td><td>none</td><td class="us">none — each feed standalone</td></tr>
+          <tr><td>Runtime</td><td>appliance / agent</td><td>Go binary</td><td class="us">Rust static binary + REST API</td></tr>
+          <tr><td>Catalogue size today</td><td>tens of thousands</td><td>thousands</td><td class="us">180+ and growing</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── coverage ─────────────────────────────────────────── -->
+<section id="coverage" style="padding-top:0">
+  <div class="wrap center">
+    <span class="eyebrow">Coverage</span>
+    <h2>From headline CVEs to forgotten services.</h2>
+    <p class="lead">Feeds grouped by product, each verified against a vulnerable and a patched mock.</p>
+    <div class="chips-label">Products</div>
+    <div class="chips">
+      <span class="chip">Apache</span><span class="chip">Confluence</span><span class="chip">F5 BIG-IP</span>
+      <span class="chip">Fortinet</span><span class="chip">Ivanti</span><span class="chip">Citrix NetScaler</span>
+      <span class="chip">VMware</span><span class="chip">Cisco</span><span class="chip">GitLab</span>
+      <span class="chip">Jenkins</span><span class="chip">ColdFusion</span><span class="chip">CrushFTP</span>
+      <span class="chip">Palo Alto</span><span class="chip">TeamCity</span><span class="chip">Struts</span>
+      <span class="chip">…</span>
+    </div>
+    <div class="chips-label">Exposure &amp; misconfiguration</div>
+    <div class="chips">
+      <span class="chip hl">Redis</span><span class="chip hl">MongoDB</span><span class="chip hl">Elasticsearch</span>
+      <span class="chip hl">Docker API</span><span class="chip hl">Kubernetes</span><span class="chip hl">etcd</span>
+      <span class="chip hl">SNMP</span><span class="chip hl">Telnet</span><span class="chip hl">VNC</span>
+      <span class="chip hl">LDAP</span><span class="chip hl">SMBv1</span><span class="chip hl">weak TLS</span>
+      <span class="chip hl">…</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── quick start ──────────────────────────────────────── -->
+<section id="start" class="showcase">
+  <div class="wrap">
+    <span class="eyebrow">Quick start</span>
+    <h2>Running in under a minute.</h2>
+    <p class="lead">Pull the image or build from source, then submit your first scan over the REST API.</p>
+    <div class="qs">
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>docker</span></div>
+<pre><span class="c-p">$</span> <span class="c-cmd">docker run --rm -p 8080:8080 \</span>
+<span class="c-cmd">    -v ./tests:/feeds \</span>
+<span class="c-cmd">    ghcr.io/fdarkshadow/noctis:latest \</span>
+<span class="c-cmd">    serve --host 0.0.0.0 --port 8080</span></pre>
+      </div>
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>from source</span></div>
+<pre><span class="c-p">$</span> <span class="c-cmd">git clone https://github.com/fDarkShadow/noctis</span>
+<span class="c-p">$</span> <span class="c-cmd">cd noctis &amp;&amp; cargo build --release</span>
+<span class="c-p">$</span> <span class="c-cmd">./target/release/noctis serve --port 8080</span></pre>
+      </div>
+    </div>
+    <p style="margin-top:28px"><a class="btn" href="{{ p_start.url | relative_url }}">Read the getting-started guide →</a>
+      &nbsp; <a class="btn" href="{{ p_docker.url | relative_url }}">Docker details</a></p>
+  </div>
+</section>
+
+<!-- ── final CTA ────────────────────────────────────────── -->
+<section class="final">
+  <div class="wrap">
+    <h2>Ship <span class="grad">evidence</span>, not noise.</h2>
+    <p class="lead">noctis is free and open source. Star it, try it on your own services, or write the feed
+      for the CVE you care about.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="{{ p_start.url | relative_url }}">Get started →</a>
+      <a class="btn" href="https://github.com/fDarkShadow/noctis">★ Star on GitHub</a>
+      <a class="btn" href="https://buymeacoffee.com/fdarkshadow">☕ Buy me a coffee</a>
+    </div>
+  </div>
+</section>
