@@ -198,6 +198,7 @@ table.cmp { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 
   border-top: 1px solid var(--line);
 }
 .final h2 { font-size: clamp(30px, 4.4vw, 46px); }
+.final .lead { margin-left: auto; margin-right: auto; }
 .final .cta { justify-content: center; margin-top: 30px; }
 footer { border-top: 1px solid var(--line); padding: 36px 0 46px; color: var(--dim); font-size: 14px; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: center; justify-content: space-between; }
