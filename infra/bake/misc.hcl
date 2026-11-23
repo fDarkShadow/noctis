@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "oracle-ebs-mock" {
+  name       = "oracle-ebs-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/oracle-ebs-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/oracle-ebs-mock:${variant}"]
+}
