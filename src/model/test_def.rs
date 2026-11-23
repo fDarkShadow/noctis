@@ -40,7 +40,7 @@ pub struct TestDef {
     #[serde(default)]
     pub includes: Vec<String>,
     #[serde(default)]
-    pub vars: IndexMap<String, serde_yaml::Value>,
+    pub vars: IndexMap<String, serde_json::Value>,
 
     pub steps: Vec<Step>,
 }

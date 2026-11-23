@@ -119,7 +119,7 @@ pub struct Step {
     #[serde(default)]
     pub var_name: Option<String>,
     #[serde(default)]
-    pub var_value: Option<serde_yaml::Value>,
+    pub var_value: Option<serde_json::Value>,
 
     // ── Common ────────────────────────────────────────────────────────────
     #[serde(default = "default_timeout")]
@@ -138,7 +138,7 @@ fn default_oob_timeout() -> u64 {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct LoopConfig {
     #[serde(default)]
-    pub over: Option<Vec<serde_yaml::Value>>,
+    pub over: Option<Vec<serde_json::Value>>,
     #[serde(default)]
     pub count: Option<u64>,
     pub var: String,
@@ -151,7 +151,7 @@ pub struct StepOutcome {
     #[serde(default)]
     pub finding: Option<FindingSpec>,
     #[serde(default)]
-    pub set_vars: Option<IndexMap<String, serde_yaml::Value>>,
+    pub set_vars: Option<IndexMap<String, serde_json::Value>>,
     #[serde(default)]
     pub stop: bool,
     #[serde(default)]

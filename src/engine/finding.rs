@@ -294,7 +294,7 @@ mod tests {
         let mut set_vars = IndexMap::new();
         set_vars.insert(
             "foo".to_string(),
-            serde_yaml::Value::String("bar".to_string()),
+            serde_json::Value::String("bar".to_string()),
         );
         let out = StepOutcome {
             finding: None,

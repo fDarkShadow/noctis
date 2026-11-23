@@ -78,11 +78,9 @@ impl Context {
     }
 
     /// Merge YAML static vars into the context (already-set keys are kept).
-    pub fn seed_vars(&mut self, yaml_vars: &indexmap::IndexMap<String, serde_yaml::Value>) {
+    pub fn seed_vars(&mut self, yaml_vars: &indexmap::IndexMap<String, Value>) {
         for (k, v) in yaml_vars {
-            self.vars
-                .entry(k.clone())
-                .or_insert_with(|| yaml_to_json(v));
+            self.vars.entry(k.clone()).or_insert_with(|| v.clone());
         }
     }
 
@@ -100,13 +98,5 @@ impl Context {
             Some(p) => format!("{}:{}", self.target_host, p),
             None => self.target_host.clone(),
         }
-    }
-}
-
-fn yaml_to_json(v: &serde_yaml::Value) -> Value {
-    // Round-trip via JSON string — reliable for all types
-    match serde_json::to_value(v) {
-        Ok(j) => j,
-        Err(_) => Value::String(format!("{v:?}")),
     }
 }

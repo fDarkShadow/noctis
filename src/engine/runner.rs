@@ -81,9 +81,7 @@ async fn run_loop_group(
     ctx: &mut Context,
 ) -> Result<bool> {
     let items: Vec<Value> = if let Some(list) = &cfg.over {
-        list.iter()
-            .map(|v| serde_json::to_value(v).unwrap_or(Value::Null))
-            .collect()
+        list.clone()
     } else if let Some(count) = cfg.count {
         (0..count).map(|i| Value::Number(i.into())).collect()
     } else {

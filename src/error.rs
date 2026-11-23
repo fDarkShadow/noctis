@@ -8,7 +8,7 @@ pub enum NoctisError {
     #[error("YAML parse error in {file}: {source}")]
     Yaml {
         file: String,
-        source: serde_yaml::Error,
+        source: Box<serde_saphyr::Error>,
     },
 
     #[error("Include cycle detected: {0}")]
