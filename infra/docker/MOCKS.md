@@ -397,6 +397,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## prometheus-mock
 - general/prometheus-exposed
 
+## ptzoptics-mock
+- ptzoptics/CVE-2024-8956
+
 ## pulse-secure-mock
 - pulse-secure/CVE-2019-11510
 
