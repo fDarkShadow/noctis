@@ -23,6 +23,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## apache-mod-proxy-mock
 - apache-mod-proxy/CVE-2021-40438
 
+## articlefr-mock
+- articlefr/CVE-2014-5097
+
 ## aviatrix-mock
 - aviatrix/CVE-2024-50603
 
