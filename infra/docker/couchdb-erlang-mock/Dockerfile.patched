@@ -1,0 +1,5 @@
+FROM python:3.11-slim
+COPY server.py /app/server.py
+ENV ERL_COOKIE=S3cret-Unique-Cookie-Not-Default
+EXPOSE 9100
+CMD ["python3", "/app/server.py"]
