@@ -224,6 +224,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## hfs-mock
 - hfs/CVE-2024-23692
 
+## home-assistant-mock
+- home-assistant/CVE-2023-27482
+
 ## hugegraph-mock
 - hugegraph/CVE-2024-27348
 
