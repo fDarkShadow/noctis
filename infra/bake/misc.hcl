@@ -215,3 +215,10 @@ target "twonky-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/twonky-mock:${variant}"]
 }
+target "eyesofnetwork-mock" {
+  name       = "eyesofnetwork-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/eyesofnetwork-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/eyesofnetwork-mock:${variant}"]
+}
