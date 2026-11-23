@@ -394,6 +394,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## panos-ztp-mock
 - panos-ztp/CVE-2024-0012
 
+## papercut-mock
+- papercut/CVE-2023-27351
+
 ## pentaho-43939-mock
 - pentaho/CVE-2022-43939
 
