@@ -98,6 +98,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## consul-mock
 - general/consul-no-acl
 
+## couchdb-erlang-mock
+- couchdb/CVE-2022-24706
+
 ## couchdb-mock
 - general/couchdb-unauth
 
@@ -124,6 +127,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## cyberpanel-mock
 - cyberpanel/CVE-2024-51567
+
+## dahua-mock
+- dahua/CVE-2021-33044
 
 ## dns-mock
 - general/dns-open-resolver
@@ -181,6 +187,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## fortiweb-25257-mock
 - fortiweb/CVE-2025-25257
+
+## fritzbox-mock
+- fritzbox/CVE-2024-54767
 
 ## ftp-mock
 - general/ftp-anonymous
@@ -343,6 +352,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ntp-mock
 - general/ntp-monlist
 
+## nuuo-mock
+- nuuo/CVE-2018-1150
+
 ## ofbiz-32113-mock
 - ofbiz/CVE-2024-32113
 
@@ -399,6 +411,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## prometheus-mock
 - general/prometheus-exposed
+
+## ptzoptics-mock
+- ptzoptics/CVE-2024-8956
 
 ## pulse-secure-mock
 - pulse-secure/CVE-2019-11510
@@ -508,6 +523,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
+
+## twonky-mock
+- twonky/CVE-2025-13315
+
+## vbulletin-widget-mock
+- vbulletin-widget/CVE-2020-17496
 
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
