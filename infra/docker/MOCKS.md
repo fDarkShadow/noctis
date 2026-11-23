@@ -488,6 +488,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## superset-mock
 - superset/CVE-2023-27524
 
+## tbk-dvr-mock
+- tbk-dvr/CVE-2024-3721
+
 ## teamcity-27199-mock
 - teamcity/CVE-2024-27199
 
