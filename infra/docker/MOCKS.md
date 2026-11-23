@@ -98,6 +98,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## consul-mock
 - general/consul-no-acl
 
+## couchdb-erlang-mock
+- couchdb/CVE-2022-24706
+
 ## couchdb-mock
 - general/couchdb-unauth
 
@@ -178,6 +181,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## fortiweb-25257-mock
 - fortiweb/CVE-2025-25257
+
+## fritzbox-mock
+- fritzbox/CVE-2024-54767
 
 ## ftp-mock
 - general/ftp-anonymous
@@ -508,6 +514,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
+
+## twonky-mock
+- twonky/CVE-2025-13315
+
+## vbulletin-widget-mock
+- vbulletin-widget/CVE-2020-17496
 
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
