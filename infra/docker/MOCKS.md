@@ -134,16 +134,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cyberpanel-mock
 - cyberpanel/CVE-2024-51567
 
-<<<<<<< HEAD
-## deluxebb-mock
-- deluxebb/CVE-2009-1033
-=======
 ## dahua-mock
 - dahua/CVE-2021-33044
 
+## deluxebb-mock
+- deluxebb/CVE-2009-1033
+
 ## dlink-dwr-mock
 - dlink-dwr/CVE-2018-19300
->>>>>>> 3e8558e7ef706219fcd28e5bcfb90a0d2964bde7
 
 ## dns-mock
 - general/dns-open-resolver
