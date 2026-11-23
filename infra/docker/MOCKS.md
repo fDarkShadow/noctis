@@ -71,6 +71,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cleo-mock
 - cleo/CVE-2024-50623
 
+## cohu-camera-mock
+- cohu/CVE-2017-8860
+
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
 
