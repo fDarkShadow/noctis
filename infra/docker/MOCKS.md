@@ -620,6 +620,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## yii2-mock
 - yii2/CVE-2024-58136
 
+## zerocms-mock
+- zerocms/CVE-2014-4034
+
 ## zimbra-mock
 - zimbra/CVE-2024-45519
 
