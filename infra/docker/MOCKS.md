@@ -506,6 +506,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
 
+## unraid-mock
+- unraid/CVE-2020-5847
+
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
 

@@ -229,3 +229,11 @@ target "zimbra-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zimbra-mock:${variant}"]
 }
+
+target "unraid-mock" {
+  name       = "unraid-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/unraid-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/unraid-mock:${variant}"]
+}
