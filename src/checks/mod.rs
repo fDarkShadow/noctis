@@ -1,5 +1,6 @@
 pub mod dialogue;
 pub mod http;
+pub mod raw_socket;
 pub mod snmp;
 pub mod ssh;
 pub mod synscan;

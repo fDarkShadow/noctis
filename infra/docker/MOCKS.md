@@ -98,6 +98,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## consul-mock
 - general/consul-no-acl
 
+## couchdb-erlang-mock
+- couchdb/CVE-2022-24706
+
 ## couchdb-mock
 - general/couchdb-unauth
 
