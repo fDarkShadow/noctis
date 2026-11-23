@@ -509,6 +509,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## splunk-pg-mock
 - splunk-pg/CVE-2026-20253
 
+## spring-cloud-function-mock
+- spring-cloud-function/CVE-2022-22963
+
 ## spring4shell-mock
 - spring4shell/CVE-2022-22965
 
