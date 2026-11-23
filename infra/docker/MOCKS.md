@@ -608,6 +608,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## whd-mock
 - whd/CVE-2024-28986
 
+## wing-ftp-mock
+- wing-ftp/CVE-2015-4107
+
 ## workspace-one-mock
 - workspace-one/CVE-2022-22954
 
