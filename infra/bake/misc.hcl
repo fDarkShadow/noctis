@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "barracuda-mock" {
+  name       = "barracuda-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/barracuda-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/barracuda-mock:${variant}"]
+}

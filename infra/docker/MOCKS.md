@@ -29,6 +29,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## barracuda-esg-mock
 - barracuda-esg/CVE-2023-2868
 
+## barracuda-mock
+- barracuda/CVE-2010-20109
+
 ## beyondtrust-mock
 - beyondtrust/CVE-2024-12356
 
