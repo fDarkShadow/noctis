@@ -41,10 +41,16 @@ pub fn eval_script(
             message: e.to_string(),
         })?;
 
+    // Write back only the variables the script actually changed. An untouched
+    // var keeps its original JSON value, so nested stored results (e.g. a
+    // `store_as` object read later as `{{vnc.response_hex}}`) survive (#393).
     for (key, val) in vars.iter_mut() {
         let rhai_name = key.replace('.', "_");
         if let Some(dyn_val) = scope.get_value::<Dynamic>(&rhai_name) {
-            *val = dynamic_to_json(dyn_val);
+            let new_val = dynamic_to_json(dyn_val);
+            if new_val != dynamic_to_json(json_to_dynamic(val)) {
+                *val = new_val;
+            }
         }
     }
 
@@ -100,6 +106,14 @@ pub(crate) fn dynamic_to_json(d: Dynamic) -> serde_json::Value {
         serde_json::json!(f)
     } else if let Some(s) = d.clone().try_cast::<String>() {
         serde_json::Value::String(s)
+    } else if let Some(arr) = d.clone().try_cast::<rhai::Array>() {
+        serde_json::Value::Array(arr.into_iter().map(dynamic_to_json).collect())
+    } else if let Some(map) = d.clone().try_cast::<rhai::Map>() {
+        serde_json::Value::Object(
+            map.into_iter()
+                .map(|(k, v)| (k.to_string(), dynamic_to_json(v)))
+                .collect(),
+        )
     } else {
         serde_json::Value::String(d.to_string())
     }
@@ -229,9 +243,41 @@ mod tests {
 
     #[test]
     fn array_roundtrip() {
-        let d = json_to_dynamic(&json!([1i64, 2i64, 3i64]));
-        // Arrays become rhai::Array — dynamic_to_json falls through to to_string
-        // We just verify it doesn't panic
-        let _ = dynamic_to_json(d);
+        let v = json!([1i64, "a", [true, null]]);
+        assert_eq!(dynamic_to_json(json_to_dynamic(&v)), v);
+    }
+
+    #[test]
+    fn object_roundtrip() {
+        let v = json!({"connected": true, "responses": ["x"], "nested": {"n": 1i64}});
+        assert_eq!(dynamic_to_json(json_to_dynamic(&v)), v);
+    }
+
+    // ── #393: script must not clobber stored-result objects ──────────────
+
+    #[test]
+    fn script_preserves_untouched_stored_object() {
+        let stored = json!({
+            "connected": true,
+            "response_hex": "524642",
+            "responses": ["RFB 003.008"],
+            "banner": null,
+            "port": 18446744073709551615u64
+        });
+        let mut vars = v(&[("vnc", stored.clone()), ("x", json!(1i64))]);
+        eval_script("let y = 42; y", &mut vars, "s").unwrap();
+        assert_eq!(vars["vnc"], stored);
+        assert_eq!(
+            crate::expr::interpolate("{{vnc.response_hex}}", &vars).unwrap(),
+            "524642"
+        );
+        assert!(eval_condition("vnc.connected == true", &vars).unwrap());
+    }
+
+    #[test]
+    fn script_mutated_object_written_back_as_object() {
+        let mut vars = v(&[("r", json!({"a": 1i64}))]);
+        eval_script("r.b = 2; r", &mut vars, "s").unwrap();
+        assert_eq!(vars["r"], json!({"a": 1i64, "b": 2i64}));
     }
 }
