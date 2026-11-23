@@ -222,3 +222,10 @@ target "eyesofnetwork-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/eyesofnetwork-mock:${variant}"]
 }
+target "unraid-mock" {
+  name       = "unraid-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/unraid-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/unraid-mock:${variant}"]
+}

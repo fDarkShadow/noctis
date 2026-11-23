@@ -533,6 +533,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## twonky-mock
 - twonky/CVE-2025-13315
 
+## unraid-mock
+- unraid/CVE-2020-5847
+
 ## vacron-mock
 - vacron/CVE-2025-34043
 
