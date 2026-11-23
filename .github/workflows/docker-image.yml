@@ -14,11 +14,13 @@ on:
 env:
   REGISTRY: ghcr.io
   # Extra OCI metadata on top of what docker/metadata-action derives from the
-  # repo (title, source, url, licenses, version, revision, created). GHCR shows
+  # repo (title, source, url, licenses, version, revision, created). Static
+  # labels for local builds live in the Dockerfile; keep the two consistent. GHCR shows
   # `description` (max 512 chars) at the top of the package page.
   OCI_EXTRA: |
     org.opencontainers.image.description=noctis — black-box vulnerability scanner with a REST API. Detects CVEs and misconfigurations on live targets from YAML feeds (bundled at /feeds). Run: docker run --rm -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest, then POST /scans. Mount -v ./my-feeds:/feeds to use your own feeds. Static musl binary on scratch, linux/amd64 + linux/arm64.
     org.opencontainers.image.documentation=https://fdarkshadow.github.io/noctis/
+    org.opencontainers.image.vendor=fDarkShadow
 
 jobs:
   # Build each architecture on its own native runner, in parallel, and push the

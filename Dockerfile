@@ -52,6 +52,19 @@ WORKDIR /feeds
 USER noctis
 EXPOSE 8080
 
+# OCI metadata that holds for any build, local ones included
+# (`docker build -t noctis .`). CI (.github/workflows/docker-image.yml) sets the
+# same keys plus version/revision/created, and repeats them as index annotations
+# for the GHCR package page; on identical keys the CI value wins. Metadata only:
+# no layer, and kept last so it never invalidates the build cache above.
+LABEL org.opencontainers.image.title="noctis" \
+      org.opencontainers.image.description="Black-box vulnerability scanner with a REST API, driven by YAML feeds (bundled at /feeds)." \
+      org.opencontainers.image.source="https://github.com/fDarkShadow/noctis" \
+      org.opencontainers.image.url="https://github.com/fDarkShadow/noctis" \
+      org.opencontainers.image.documentation="https://fdarkshadow.github.io/noctis/" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.vendor="fDarkShadow"
+
 # Scan requests can then use "tests": ["/feeds/vulnerabilities/"]
 # (or the relative "vulnerabilities/", resolved against WORKDIR).
 ENTRYPOINT ["/usr/local/bin/noctis"]
