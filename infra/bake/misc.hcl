@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "splunk-mock" {
+  name       = "splunk-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/splunk-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/splunk-mock:${variant}"]
+}

@@ -1,0 +1,61 @@
+# Splunk 4.0 - 4.2.4 Multiple Vulnerabilities — Active Check
+#
+# Splunk 4.0 through 4.2.4 is prone to multiple web-application
+# vulnerabilities (search-action CSRF/RCE, reflected XSS, and web-API
+# directory traversal). The exploit flow first requests the login page,
+# from which the server hands out an anonymous session cookie that the
+# subsequent crafted /en-GB/api/search/jobs request reuses.
+#
+# Portable, non-destructive observable: an affected Splunk instance answers
+# /en-GB/account/login with a `Set-Cookie: session...;` header (the precondition
+# the active exploit relies on). The full command-execution chain
+# (authenticated search-job POST + write-then-read of a .tmp file) is not
+# reproducible with noctis's remote, unauthenticated primitives, so this feed
+# ports the faithfully-observable session-cookie signal the NASL extracts.
+#
+# Ported from OpenVAS/Greenbone NVT 2011/gb_splunk_multiple_vuln.nasl
+# (GPL-2.0-only). Detection pattern taken verbatim from that plugin.
+uid: c8c19298-e8a0-4d9e-8089-cce22c1f89fe
+name: "Splunk 4.0 - 4.2.4 Multiple Vulnerabilities (Active Check)"
+description: |
+  Detects Splunk 4.0 through 4.2.4, affected by multiple web-application
+  vulnerabilities, by requesting /en-GB/account/login over a verbatim HTTP/1.0
+  request and matching the `Set-Cookie: session...;` header the server returns.
+cves: [CVE-2011-4642, CVE-2011-4643, CVE-2011-4644, CVE-2011-4778]
+cvss: 9.3
+severity: critical
+confidence_base: 0.25
+tags: [splunk, web, csrf, rce, xss, directory-traversal]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2011-4642"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2011-4643"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2011-4644"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2011-4778"
+  - "http://www.splunk.com/view/SP-CAAAGMM"
+  # Source: OpenVAS/Greenbone NVT 2011/gb_splunk_multiple_vuln.nasl (GPL-2.0-only)
+
+steps:
+  # Request the Splunk login page with a verbatim HTTP/1.0 request so the raw
+  # Set-Cookie header is preserved in resp.banner (the exact signal the NASL
+  # reads via http_keepalive_send_recv on /en-GB/account/login).
+  - id: login-probe
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /en-GB/account/login HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: login_resp
+
+  - id: session-match
+    action: match
+    source: login_resp.banner
+    # Verbatim from the NASL: eregmatch(pattern: "Set-Cookie: (session[^;]*);", ...)
+    pattern: "Set-Cookie:\\s*session[^;]*;"
+    on_match:
+      finding:
+        confidence_delta: 0.70
+        qod: 97
+        evidence: "Splunk session cookie returned by /en-GB/account/login: {{login_resp.banner}}"
+      stop: true

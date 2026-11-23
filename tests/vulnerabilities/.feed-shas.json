@@ -179,6 +179,7 @@
   "sonicwall-sma1000/CVE-2025-23006.yaml": "05ddfae2f30c02f4a0a66b237b58a05bc228c21e5f8df0d8e786f54adf7259ce",
   "sonicwall-sslvpn/CVE-2024-53704.yaml": "d7c70c2b571a6efb1084fb355b192586bb3ab5555a6c04dbc1d2dc549b26dfb4",
   "splunk-pg/CVE-2026-20253.yaml": "15c847f13ae8788f839c744b333645ff8abe51a58b90dd2fdcaf4df00434694d",
+  "splunk/splunk-multiple-vuln.yaml": "e6adf9bdb9d5258ec5bfa5aa7ef22531ce5d6332f451d1948f693f2dc3e7299d",
   "spring-cloud-function/CVE-2022-22963.yaml": "ddeb53626910f70ef97798cfc6cd9186e20f3cdf8520b8651960235281253903",
   "spring4shell/CVE-2022-22965.yaml": "1542a3f6d93f1fe40bc1b26ee98ed1427281feb9ece8344e8ab5d6cdd2a4870c",
   "ssh-terrapin/CVE-2023-48795.yaml": "265c67c7b84ee04b790d117504be5d543c0b7cbe90ef9d368fe49c71d9e66b4e",
