@@ -1,6 +1,27 @@
 # Changelog
 
 All notable changes to noctis are documented here.
+## [0.2.1] — 2026-11-23
+
+### CI/CD
+
+- **docker:** Drop cargo-chef, cache dependencies with a stub main.rs (#434)
+- Multi-arch :edge via a reusable image workflow shared with the release (#435)
+- **image:** Publish OCI metadata so the GHCR package page renders docs (#451)
+
+### Documentation
+
+- Set up GitHub Discussions (category forms + routing) (#436)
+
+### Refactoring
+
+- **loader:** Replace deprecated serde_yaml with serde-saphyr (#449)
+- **time:** Replace unmaintained chrono with jiff (#450)
+
+### Security
+
+- **deps:** Fix RUSTSEC-2026-0592 (url), fold in dependabot bumps, document audit exceptions (#446)
+
 ## [0.2.0] — 2026-11-21
 
 ### Bug fixes
