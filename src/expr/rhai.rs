@@ -195,6 +195,32 @@ mod tests {
         assert!(eval_script("let @@@ = 1;", &mut vars, "s").is_err());
     }
 
+    #[test]
+    fn script_reads_nested_result_map_property() {
+        // A stored step result is a nested object; the script reaches into it as
+        // a Rhai map property (how feeds consume `tcp_send`/`http_request` output).
+        let mut vars = v(&[("resp", json!({"response_hex": "0102030405"}))]);
+        let out = eval_script("substr(resp.response_hex, 2, 5)", &mut vars, "s").unwrap();
+        assert_eq!(out, json!("0203"));
+    }
+
+    #[test]
+    fn script_cve_2022_24706_challenge_digest() {
+        // Regression for the CVE-2022-24706 feed: parse the big-endian u32
+        // challenge at byte offset 9 (hex offset 18) of the Erlang 'n' reply,
+        // then build the challenge-reply frame from MD5("monster"+challenge).
+        let reply_hex = "00166e000500000000010203046e6f63746973406d6f636b";
+        let mut vars = v(&[("name_reply", json!({"response_hex": reply_hex}))]);
+        let code = r#"
+            let challenge = u32be(substr(name_reply.response_hex, 18, 25));
+            let digest = md5("monster" + challenge.to_string());
+            "00157200000000" + digest
+        "#;
+        let out = eval_script(code, &mut vars, "s").unwrap();
+        // challenge 0x01020304 = 16909060; MD5("monster16909060") is fixed.
+        assert_eq!(out, json!("00157200000000b4ae6978053f3042dd26b037a0851ba4"));
+    }
+
     // ── json_to_dynamic / dynamic_to_json ─────────────────────────────────
 
     #[test]
