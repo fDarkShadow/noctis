@@ -21,12 +21,18 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
+  # First match wins. A commit whose *subject line* names an advisory is a
+  # security fix whatever its type (e.g. `chore(deps): fix RUSTSEC-…`).
+  # `message` also sees the body, hence the single-line anchor.
+  { message = "^[^\\n]*(RUSTSEC-[0-9]{4}-[0-9]+|GHSA-[0-9a-z]{4}-)", group = "Security" },
   { message = "^feat", group = "Features" },
   { message = "^fix", group = "Bug fixes" },
   { message = "^ci", group = "CI/CD" },
   { message = "^docs", group = "Documentation" },
   { message = "^refactor", group = "Refactoring" },
   { message = "^test", group = "Tests" },
+  # Dependency updates matter to users of a security tool; other chores don't.
+  { message = "^chore\\(deps\\)", group = "Dependencies" },
   { message = "^chore", skip = true },
   { body = ".*security", group = "Security" },
 ]
