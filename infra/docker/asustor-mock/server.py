@@ -4,7 +4,8 @@
 Vuln mode: a GET to /portal/apis/aggrecate_js.cgi whose `script` parameter
 carries a `"&<cmd>&"` shell break-out "executes" the injected command (here
 `ls -l`) and reflects its directory-listing output (drwx... root root).
-Patched mode: the handler rejects the injection (404) → no finding.
+Patched mode: the handler returns benign JS (200 `var launcher={};`) with no
+command output reflected → no finding.
 
 The injection payload is URL-encoded (%22/%26/%20) and arrives via raw
 tcp_connect, so the handler inspects self.path verbatim (it is NOT decoded).
