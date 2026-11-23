@@ -61,3 +61,11 @@ target "workspace-one-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/workspace-one-mock:${variant}"]
 }
+
+target "nuuo-mock" {
+  name       = "nuuo-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/nuuo-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/nuuo-mock:${variant}"]
+}

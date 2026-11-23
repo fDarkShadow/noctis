@@ -340,6 +340,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ntp-mock
 - general/ntp-monlist
 
+## nuuo-mock
+- nuuo/CVE-2018-1150
+
 ## ofbiz-32113-mock
 - ofbiz/CVE-2024-32113
 
