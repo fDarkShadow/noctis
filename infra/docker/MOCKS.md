@@ -448,6 +448,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## qnap-qts-mock
 - qnap-qts/CVE-2023-47218
 
+## rconfig-mock
+- rconfig/CVE-2019-16662
+
 ## redis-mock
 - general/redis-unauthenticated
 
