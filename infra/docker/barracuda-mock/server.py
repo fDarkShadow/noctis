@@ -22,9 +22,9 @@ VULN_MODE = os.environ.get("BARRACUDA_MODE", "patched") == "vuln"
 # look for (system_password / system_netmask / system_default_domain).
 CONFIG_SNAPSHOT = (
     "system_hostname=barracuda\n"
+    "system_password=$1$aBcDeFgH$0123456789abcdefABCDEF.\n"
     "system_default_domain=example.com\n"
     "system_netmask=255.255.255.0\n"
-    "system_password=$1$aBcDeFgH$0123456789abcdefABCDEF.\n"
 )
 
 # The traversal payload as the appliance receives it (path + query), for both
