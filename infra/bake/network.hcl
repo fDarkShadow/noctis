@@ -5,7 +5,6 @@ target "checkpoint-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/checkpoint-mock:${variant}"]
 }
-
 target "cisco-wsma-mock" {
   name       = "cisco-wsma-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -13,7 +12,6 @@ target "cisco-wsma-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cisco-wsma-mock:${variant}"]
 }
-
 target "expedition-mock" {
   name       = "expedition-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -21,7 +19,6 @@ target "expedition-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/expedition-mock:${variant}"]
 }
-
 target "netscaler-mock" {
   name       = "netscaler-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -29,7 +26,6 @@ target "netscaler-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/netscaler-mock:${variant}"]
 }
-
 target "panos-mock" {
   name       = "panos-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -37,7 +33,6 @@ target "panos-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/panos-mock:${variant}"]
 }
-
 target "panos-ztp-mock" {
   name       = "panos-ztp-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -45,7 +40,6 @@ target "panos-ztp-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/panos-ztp-mock:${variant}"]
 }
-
 target "qlik-sense-mock" {
   name       = "qlik-sense-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -53,11 +47,45 @@ target "qlik-sense-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/qlik-sense-mock:${variant}"]
 }
-
 target "workspace-one-mock" {
   name       = "workspace-one-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/workspace-one-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/workspace-one-mock:${variant}"]
+}
+target "fritzbox-mock" {
+  name       = "fritzbox-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/fritzbox-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/fritzbox-mock:${variant}"]
+}
+target "nuuo-mock" {
+  name       = "nuuo-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/nuuo-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/nuuo-mock:${variant}"]
+}
+target "ptzoptics-mock" {
+  name       = "ptzoptics-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ptzoptics-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ptzoptics-mock:${variant}"]
+}
+target "dahua-mock" {
+  name       = "dahua-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dahua-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dahua-mock:${variant}"]
+}
+target "vacron-mock" {
+  name       = "vacron-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vacron-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vacron-mock:${variant}"]
 }
