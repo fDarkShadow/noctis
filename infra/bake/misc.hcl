@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "refbase-mock" {
+  name       = "refbase-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/refbase-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/refbase-mock:${variant}"]
+}
