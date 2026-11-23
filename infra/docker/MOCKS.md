@@ -328,6 +328,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## mongodb-mock
 - general/mongodb-unauth
 
+## movabletype-mock
+- movabletype/CVE-2021-20837
+
 ## moveit-mock
 - moveit/CVE-2023-34362
 
