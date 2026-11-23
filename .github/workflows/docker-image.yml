@@ -13,6 +13,14 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # Extra OCI metadata on top of what docker/metadata-action derives from the
+  # repo (title, source, url, licenses, version, revision, created). Static
+  # labels for local builds live in the Dockerfile; keep the two consistent. GHCR shows
+  # `description` (max 512 chars) at the top of the package page.
+  OCI_EXTRA: |
+    org.opencontainers.image.description=noctis — black-box vulnerability scanner with a REST API. Detects CVEs and misconfigurations on live targets from YAML feeds (bundled at /feeds). Run: docker run --rm -p 8080:8080 ghcr.io/fdarkshadow/noctis:latest, then POST /scans. Mount -v ./my-feeds:/feeds to use your own feeds. Static musl binary on scratch, linux/amd64 + linux/arm64.
+    org.opencontainers.image.documentation=https://fdarkshadow.github.io/noctis/
+    org.opencontainers.image.vendor=fDarkShadow
 
 jobs:
   # Build each architecture on its own native runner, in parallel, and push the
@@ -48,12 +56,30 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # OCI metadata. GHCR reads it to build the package page: `source` links the
+      # package to this repo (so the page renders the repo README), plus the
+      # description, license and docs link. Labels go on each image config,
+      # annotations on each per-arch manifest; the manifest job repeats them on
+      # the index, which is what GHCR actually displays for a multi-arch image.
+      - name: OCI labels and annotations
+        id: meta
+        uses: docker/metadata-action@v6
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
+        with:
+          images: ${{ env.IMAGE }}
+          tags: ${{ inputs.tags }}
+          labels: ${{ env.OCI_EXTRA }}
+          annotations: ${{ env.OCI_EXTRA }}
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: type=registry,ref=${{ env.IMAGE }}:cache-${{ matrix.arch }}
           cache-to: type=registry,ref=${{ env.IMAGE }}:cache-${{ matrix.arch }},mode=max
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
@@ -100,19 +126,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Resolve Docker tags
+      - name: Resolve Docker tags and index annotations
         id: meta
         uses: docker/metadata-action@v6
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
           images: ${{ env.IMAGE }}
           tags: ${{ inputs.tags }}
+          annotations: ${{ env.OCI_EXTRA }}
 
       - name: Create and push multi-arch manifest list
         working-directory: ${{ runner.temp }}/digests
         run: |
-          docker buildx imagetools create \
-            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.IMAGE }}@sha256:%s ' *)
+          # Annotation values contain spaces: build the argv as an array, never
+          # by word-splitting a string.
+          args=()
+          while IFS= read -r t; do args+=(-t "$t"); done \
+            < <(jq -r '.tags[]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          while IFS= read -r a; do args+=(--annotation "$a"); done \
+            < <(jq -r '.annotations[]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          for d in *; do args+=("${{ env.IMAGE }}@sha256:$d"); done
+          docker buildx imagetools create "${args[@]}"
 
       - name: Inspect manifest (must list linux/amd64 and linux/arm64)
         run: |
@@ -120,4 +155,11 @@ jobs:
           echo "$out"
           for p in linux/amd64 linux/arm64; do
             grep -q "Platform: *$p" <<< "$out" || { echo "::error::manifest is missing $p"; exit 1; }
+          done
+          # GHCR links the package to the repo (and renders its README) from
+          # this index annotation — fail loudly if it ever goes missing.
+          raw="$(docker buildx imagetools inspect --raw ${{ env.IMAGE }}:${{ steps.meta.outputs.version }})"
+          for k in org.opencontainers.image.source org.opencontainers.image.description; do
+            jq -e --arg k "$k" '.annotations[$k] // empty' <<< "$raw" >/dev/null \
+              || { echo "::error::index is missing annotation $k"; exit 1; }
           done
