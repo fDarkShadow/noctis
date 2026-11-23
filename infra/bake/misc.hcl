@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "cotonti-mock" {
+  name       = "cotonti-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cotonti-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cotonti-mock:${variant}"]
+}
