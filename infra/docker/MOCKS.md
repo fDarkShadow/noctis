@@ -527,6 +527,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## twonky-mock
 - twonky/CVE-2025-13315
 
+## vacron-mock
+- vacron/CVE-2025-34043
+
 ## vbulletin-widget-mock
 - vbulletin-widget/CVE-2020-17496
 

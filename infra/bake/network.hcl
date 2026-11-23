@@ -82,3 +82,10 @@ target "dahua-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dahua-mock:${variant}"]
 }
+target "vacron-mock" {
+  name       = "vacron-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vacron-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vacron-mock:${variant}"]
+}

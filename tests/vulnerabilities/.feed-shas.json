@@ -180,6 +180,7 @@
   "telerik-report/CVE-2024-4358.yaml": "bbd9aafd56826d91d7a18c1b9506e29c73779312dabde99c84819c669f6aa0f0",
   "tomcat-put/CVE-2025-24813.yaml": "c7590fe535a7c2690e0c396818611ef9606867e4143e49b6e81cce4aaa0f52cc",
   "twonky/CVE-2025-13315.yaml": "1eccffb4c73c84fe1acd8ecb8634f6f533a1107610bbe81d9a59aae550e6177a",
+  "vacron/CVE-2025-34043.yaml": "f85e1c0d99a5cac59498d348b37e725ebf0fe7b060b8c1424993d9c6b588168b",
   "vbulletin-widget/CVE-2020-17496.yaml": "e08c46d02f6bba80ad55d8495d44ab39f6ff5231c4d17559e464843dfd99a1e7",
   "vcenter-vsan/CVE-2021-21985.yaml": "cdfaf36b94b4fb1b7c325a48d4efa8354d5d4041e5fa4ade035fe74305aa4bfb",
   "veeam/CVE-2024-40711.yaml": "f648c2d1d3eff96482156ab4d07bd17de2722fd2f62263d05cbf5e3e48ed46ba",
