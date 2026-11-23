@@ -125,6 +125,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cyberpanel-mock
 - cyberpanel/CVE-2024-51567
 
+## deluxebb-mock
+- deluxebb/CVE-2009-1033
+
 ## dns-mock
 - general/dns-open-resolver
 
