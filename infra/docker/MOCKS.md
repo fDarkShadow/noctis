@@ -485,6 +485,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## shellshock-mock
 - shellshock/CVE-2014-6271
 
+## siemens-scalance-mock
+- siemens-scalance/CVE-2013-5709
+
 ## simplehelp-mock
 - simplehelp/CVE-2024-57727
 
