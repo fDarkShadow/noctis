@@ -8,8 +8,7 @@ reflected only in vuln mode as a MySQL duplicate-entry error that leaks the
 DB version; patched mode returns a clean RSS page with no error.
 
 The feed sends the payload via a raw HTTP/1.0 request, so the handler inspects
-the raw request path (self.path keeps %xx encoding intact). The NASL also
-probes an optional /cotonti install dir, so a leading /cotonti is accepted.
+the raw request path (self.path keeps %xx encoding intact).
 """
 import os
 import ssl
@@ -19,10 +18,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 VULN_MODE = os.environ.get("COTONTI_MODE", "patched") == "vuln"
 
 FINGERPRINT = (
-    "<!DOCTYPE html><html><head><title>Cotonti</title>"
-    "<meta name=\"generator\" content=\"Cotonti</span> Siena\"></head>"
-    "<body><h1><span>Cotonti</span></h1><p>Stay tuned, more content is coming soon.</p>"
-    "</body></html>"
+    "<!DOCTYPE html>\n<html>\n<head>\n<title>Cotonti</title>\n"
+    "<meta name=\"generator\" content=\"Cotonti</span> Siena\">\n</head>\n"
+    "<body>\n<h1><span>Cotonti</span></h1>\n"
+    "<p>Stay tuned, more content is coming soon.</p>\n"
+    "</body>\n</html>\n"
 )
 
 # MySQL error-based SQLi leak; matches "SQL error 23000: .*Duplicate entry.*group_key"
@@ -48,9 +48,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         raw = self.path
-        # Accept an optional /cotonti install-dir prefix (NASL iterates it).
-        if raw.startswith("/cotonti/"):
-            raw = raw[len("/cotonti"):]
 
         if raw.startswith("/index.php"):
             # Error-based SQLi: e=rss with the injected 'c' payload.
