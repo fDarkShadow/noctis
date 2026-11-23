@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "jobhut-mock" {
+  name       = "jobhut-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/jobhut-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/jobhut-mock:${variant}"]
+}
