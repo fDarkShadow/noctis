@@ -61,3 +61,11 @@ target "workspace-one-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/workspace-one-mock:${variant}"]
 }
+
+target "fritzbox-mock" {
+  name       = "fritzbox-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/fritzbox-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/fritzbox-mock:${variant}"]
+}

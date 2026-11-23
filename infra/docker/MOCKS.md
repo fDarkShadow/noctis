@@ -179,6 +179,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## fortiweb-25257-mock
 - fortiweb/CVE-2025-25257
 
+## fritzbox-mock
+- fritzbox/CVE-2024-54767
+
 ## ftp-mock
 - general/ftp-anonymous
 
