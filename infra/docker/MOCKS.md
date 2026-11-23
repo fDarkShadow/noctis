@@ -530,6 +530,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ssh-terrapin-mock
 - ssh-terrapin/CVE-2023-48795
 
+## struts-1965-mock
+- struts/CVE-2013-1965
+
 ## struts-50164-mock
 - struts/CVE-2023-50164
 
