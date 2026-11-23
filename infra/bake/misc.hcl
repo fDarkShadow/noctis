@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "wincc-mock" {
+  name       = "wincc-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wincc-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wincc-mock:${variant}"]
+}
