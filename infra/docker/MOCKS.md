@@ -460,6 +460,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## regresshion-mock
 - regresshion/CVE-2024-6387
 
+## rips-scanner-mock
+- rips/CVE-2025-34126
+
 ## roundcube-mock
 - roundcube/CVE-2023-43770
 - roundcube/CVE-2025-49113
