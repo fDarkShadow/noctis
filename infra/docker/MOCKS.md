@@ -116,6 +116,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## craftcms-mock
 - craftcms/CVE-2025-32432
 
+## crestron-airmedia-mock
+- crestron-airmedia/CVE-2016-5639
+
 ## crushftp-31161-mock
 - crushftp/CVE-2025-31161
 
