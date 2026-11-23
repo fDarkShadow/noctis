@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "trombinoscope-mock" {
+  name       = "trombinoscope-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/trombinoscope-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/trombinoscope-mock:${variant}"]
+}
