@@ -2,8 +2,13 @@
 """Mock for Apache Axis2 admin console (CVE-2010-0219 — default credentials).
 
 Vuln mode: POST /axis2-admin/login with the default credentials
-(admin / axis2) succeeds and the server issues a JSESSIONID session cookie.
-Patched mode: the default credentials are rejected (403, no session cookie).
+(admin / axis2) succeeds and the admin module page ("Welcome to Axis2 Web
+Admin Module !!") is returned (a JSESSIONID cookie is issued too).
+Patched mode: the default credentials are rejected — the login page is
+re-rendered with "Invalid auth credentials!", but the servlet container STILL
+issues a JSESSIONID cookie (as a real Axis2/Tomcat does). This makes the
+true-negative prove the feed keys on the authenticated page body, not merely
+on the presence of a session cookie.
 """
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -52,15 +57,21 @@ class Handler(BaseHTTPRequestHandler):
             body = self._read_body()
             default_creds = "userName=admin" in body and "password=axis2" in body
             if VULN_MODE and default_creds:
-                # Successful login → authenticated session cookie issued.
+                # Successful login → admin module page (and a session cookie).
                 self._send(
                     200,
                     ADMIN_PAGE,
                     extra_headers={"Set-Cookie": "JSESSIONID=A1B2C3D4E5F6A7B8C9D0E1F2; Path=/axis2"},
                 )
             else:
-                # Default creds rejected: re-show the login form, no session cookie.
-                self._send(403, LOGIN_PAGE)
+                # Default creds rejected: the login page is re-rendered with an
+                # error, but a JSESSIONID cookie is STILL issued (as a real
+                # servlet container does). The feed must not fire on this.
+                self._send(
+                    200,
+                    LOGIN_PAGE.replace("<body>", "<body><p>Invalid auth credentials!</p>"),
+                    extra_headers={"Set-Cookie": "JSESSIONID=F2E1D0C9B8A7F6E5D4C3B2A1; Path=/axis2"},
+                )
         else:
             self._send(404, "Not found")
 
