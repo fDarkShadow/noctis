@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "centreon-mock" {
+  name       = "centreon-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/centreon-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/centreon-mock:${variant}"]
+}

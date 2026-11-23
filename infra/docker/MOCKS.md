@@ -50,6 +50,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cassandra-mock
 - general/cassandra-no-auth
 
+## centreon-mock
+- centreon/CVE-2014-3828
+
 ## centrestack-mock
 - centrestack/CVE-2025-30406
 
