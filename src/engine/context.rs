@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use serde_json::Value;
 
+use crate::checks::raw_socket::Conn;
 use crate::model::finding::Finding;
 use crate::oob::OobServer;
 
@@ -28,6 +29,11 @@ pub struct Context {
 
     /// Shared OOB server (None if OOB disabled)
     pub oob_server: Option<Arc<OobServer>>,
+
+    /// Live TCP/TLS connections kept open across steps, keyed by handle name.
+    /// Populated by `tcp_open`, written/read by `tcp_send`, dropped by
+    /// `tcp_close`. Not serialized and never exposed to the Rhai/template layer.
+    pub connections: HashMap<String, Conn>,
 }
 
 impl Context {
@@ -74,6 +80,7 @@ impl Context {
             findings: Vec::new(),
             oob_token,
             oob_server,
+            connections: HashMap::new(),
         }
     }
 
