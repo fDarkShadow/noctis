@@ -22,7 +22,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         p = self.path
         # Recipe search endpoint — the injectable base_id parameter.
-        if p.startswith("/index.php") and "m=recipes" in p and "a=search" in p:
+        # Served under the web root and the common install dirs the NASL
+        # probes (/phprecipebook, /recipebook, /recipe) so the feed's
+        # install-dir loop can be exercised.
+        if "index.php" in p and "m=recipes" in p and "a=search" in p:
             if VULN_MODE and "union" in p.lower() and "security_users" in p.lower():
                 # Vulnerable: the UNION SELECT reflects the marker column into output.
                 self._send(200,

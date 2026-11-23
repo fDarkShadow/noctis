@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "phprecipebook-mock" {
+  name       = "phprecipebook-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phprecipebook-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phprecipebook-mock:${variant}"]
+}
