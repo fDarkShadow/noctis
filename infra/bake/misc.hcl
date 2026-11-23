@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "wp-symposium-mock" {
+  name       = "wp-symposium-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wp-symposium-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wp-symposium-mock:${variant}"]
+}
