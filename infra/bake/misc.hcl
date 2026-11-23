@@ -229,3 +229,11 @@ target "zimbra-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zimbra-mock:${variant}"]
 }
+
+target "movabletype-mock" {
+  name       = "movabletype-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/movabletype-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/movabletype-mock:${variant}"]
+}
