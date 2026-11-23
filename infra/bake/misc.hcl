@@ -229,3 +229,11 @@ target "zimbra-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zimbra-mock:${variant}"]
 }
+
+target "twonky-mock" {
+  name       = "twonky-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/twonky-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/twonky-mock:${variant}"]
+}
