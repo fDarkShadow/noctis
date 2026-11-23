@@ -394,6 +394,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## owncloud-graphapi-mock
 - owncloud-graphapi/CVE-2023-49103
 
+## pandora-fms-mock
+- pandora-fms/CVE-2010-4278
+
 ## panos-0108-mock
 - panos/CVE-2025-0108
 
