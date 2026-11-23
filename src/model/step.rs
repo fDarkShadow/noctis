@@ -82,6 +82,12 @@ pub struct Step {
     #[serde(default)]
     pub line_ending: Option<String>,
 
+    // ── tcp_open / tcp_send / tcp_close (persistent socket) ───────────────
+    /// Name of the persistent connection this step opens / uses / closes.
+    /// Lets a feed keep several sockets open at once; defaults to `"sock"`.
+    #[serde(default)]
+    pub handle: Option<String>,
+
     /// `sleep` action: how long to pause, in milliseconds (capped in the runner).
     /// Lets a feed wait between steps (e.g. a write-then-read propagation gap).
     #[serde(default)]

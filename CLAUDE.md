@@ -219,6 +219,44 @@ resp.transcript    string          ← full text transcript
 resp.response_hex  string | null   ← raw reply bytes as hex — use for binary protocols
 ```
 
+### `tcp_open` / `tcp_send` / `tcp_close` — persistent multi-round-trip socket
+Keeps **one** TCP/TLS connection open across several steps so a later frame can be
+*computed from* an earlier reply — the building block for binary challenge–response
+protocols (Erlang distribution/epmd, and any custom binary protocol a NASL port needs).
+Mirrors NASL's `open_sock_tcp` / `send` / `recv` / `close`. Prefer `tcp_dialogue` when a
+single up-front frame or a fixed command list is enough; reach for these only when a
+frame depends on a value a previous reply produced.
+
+- **`tcp_open`** — open a socket, kept under `handle:` (default `"sock"`; several sockets
+  may be open at once). TLS: explicit `tls:` wins, else auto from an `https` scheme (same
+  as `tcp_connect`). `read_banner:` (default **false**, unlike `tcp_dialogue`) reads a
+  greeting first. Runs `on_failure` if the connect fails.
+- **`tcp_send`** — write one frame on `handle:` and read one reply. Payload: `send_hex:`
+  (binary, templated then hex-decoded) wins over `send:` (text, templated). Templates
+  resolve **at send time**, so `send_hex: "{{digest}}"` can carry a value a prior `script`
+  step computed. Runs `on_success` when a reply arrived (`responded == true`), else
+  `on_failure` (also when the handle is unknown or the write failed).
+- **`tcp_close`** — drop the socket. Idempotent; closing an unknown handle is not an error.
+
+Between `tcp_send` steps, compute the next frame in a `script` step with the existing
+builtins: `u32be(substr(resp.response_hex, <hexoff>, <hexoff+7>))` parses a big-endian
+u32 at a byte offset (hex offset = byte × 2), and `md5(...)` / `pack` build the reply.
+See `tests/vulnerabilities/couchdb/CVE-2022-24706.yaml` for the full Erlang-cookie flow.
+
+```
+# tcp_open  (store_as)
+resp.connected     bool
+resp.banner        string | null   ← greeting text, when read_banner is true
+resp.banner_hex    string | null   ← greeting bytes as hex
+
+# tcp_send  (store_as)
+resp.sent          bool            ← the handle was open and the frame was written
+resp.responded     bool            ← at least one reply byte arrived
+resp.response      string | null   ← reply as lossy text
+resp.response_hex  string | null   ← reply bytes as hex — use for binary offset parsing
+resp.length        int
+```
+
 ### `udp_probe` — result fields
 Datagram send/recv (DNS, NTP, memcached). `send_hex` takes precedence over `send`.
 ```
