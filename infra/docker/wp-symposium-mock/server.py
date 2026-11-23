@@ -4,8 +4,11 @@
 vuln:    get_album_item.php evaluates the `size` parameter as SQL; the
          `version() ; --` payload returns the MySQL version string with a
          PHPSESSID session cookie.
-patched: WP Symposium 15.8+ — the injected `size` is rejected (empty 200 body,
-         no session cookie, no query result).
+patched: WP Symposium 15.8+ — get_album_item.php still calls session_start()
+         (so a PHPSESSID cookie is set regardless of version) and returns a
+         normal album-item response that contains digits (dimensions, IDs),
+         but the injected `size` is sanitised, so the body is NOT a version()
+         query result. The stricter feed pattern must come out clean here.
 """
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -37,9 +40,17 @@ class Handler(BaseHTTPRequestHandler):
         if path == ENDPOINT:
             size = parse_qs(parts.query).get("size", [""])[0]
             if VULN_MODE and "version()" in size.lower():
+                # SQLi executes: the version() result is returned as the body.
                 self._send(200, "5.5.44-0ubuntu0.14.04.1", cookie=True)
             else:
-                self._send(200, "")
+                # Patched 15.8+: session_start() still sets PHPSESSID, and the
+                # endpoint answers with a normal album-item body that contains
+                # digits but is NOT a MySQL version string.
+                self._send(
+                    200,
+                    "<img src=\"album/thumb.jpg\" width=\"150\" height=\"150\" alt=\"item 4821\">",
+                    cookie=True,
+                )
         elif path in ("/", ""):
             self._send(200, "<html><head><meta name=\"generator\" content=\"WordPress 4.2.4\" /></head><body>Blog</body></html>")
         else:
