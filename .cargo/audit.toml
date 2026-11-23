@@ -1,0 +1,27 @@
+# cargo-audit configuration — read by `cargo audit` (CI job "Dependency audit").
+#
+# Only *transitive* "unmaintained" advisories that noctis cannot fix itself are
+# ignored here. Each entry names the parent crate that pulls it in and what would
+# let us drop the exception. Real vulnerabilities are never listed here: bump or
+# replace the crate instead. Review this list whenever the parent crate releases.
+#
+# Unmaintained crates we *do* control are tracked as issues, not ignored:
+#   - unsafe-libyaml (via serde_yaml, itself deprecated) → replace serde_yaml
+#   - chrono                                             → migrate off chrono
+
+[advisories]
+ignore = [
+    # derivative 2.2.0 — proc-macro, pulled by csnmp 0.6 (SNMP client for
+    # `snmp_get`). Compile-time only. Drop when csnmp moves off derivative or
+    # we replace csnmp.
+    "RUSTSEC-2024-0388",
+
+    # proc-macro-error2 2.0.1 — proc-macro, pulled by validator_derive 0.20
+    # (validator 0.21, API request validation). Compile-time only. Drop when
+    # validator releases without it.
+    "RUSTSEC-2026-0173",
+
+    # smartstring 1.0.1 — pulled by rhai 1.27 (expression/script engine).
+    # Runtime dependency, but no known vulnerability. Drop when rhai removes it.
+    "RUSTSEC-2026-0249",
+]
