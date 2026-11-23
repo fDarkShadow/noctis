@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "zabbix-mock" {
+  name       = "zabbix-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zabbix-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zabbix-mock:${variant}"]
+}
