@@ -339,6 +339,7 @@ fields below (e.g. `resp.status`, `resp.banner`).
 | `http_request` | HTTP/HTTPS request (reqwest) | `resp.status`, `resp.body`, `resp.headers` |
 | `tcp_connect` | Raw TCP + banner grab (auto-TLS on `https`); bytes sent verbatim | `resp.banner`, `resp.connected` |
 | `tcp_dialogue` | Multi-step line **or** binary TCP exchange (FTP/SMTP/Telnet/POP3/IMAP/Redis; `send_hex` → `response_hex`) | `resp.responses`, `resp.response_hex`, `resp.transcript`, `resp.banner` |
+| `tcp_open` / `tcp_send` / `tcp_close` | **Persistent** raw TCP/TLS socket kept across steps — multi-round-trip binary challenge–response where a later frame is computed from an earlier reply (Erlang distribution, epmd, custom binary protocols). Between `tcp_send` steps a `script` step builds the next frame with `unpack`/`md5`/`pack` | `open`→`resp.connected`, `resp.banner_hex`; `send`→`resp.responded`, `resp.response_hex`, `resp.response` |
 | `udp_probe` | UDP datagram send/recv (DNS, NTP, memcached) | `resp.responded`, `resp.response`, `resp.response_hex` |
 | `tcp_syn` | Raw TCP SYN half-open probe (needs `CAP_NET_RAW`) | `resp.state`, `resp.flags` |
 | `tls_check` | TLS version / cipher / certificate inspection | `resp.protocol_version`, `resp.cipher_suite`, `resp.cert_*` |

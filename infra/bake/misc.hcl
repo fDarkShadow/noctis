@@ -5,7 +5,6 @@ target "activemq-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/activemq-mock:${variant}"]
 }
-
 target "cacti-mock" {
   name       = "cacti-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -13,7 +12,6 @@ target "cacti-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cacti-mock:${variant}"]
 }
-
 target "chamilo-mock" {
   name       = "chamilo-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -21,7 +19,6 @@ target "chamilo-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/chamilo-mock:${variant}"]
 }
-
 target "cleo-mock" {
   name       = "cleo-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -29,7 +26,6 @@ target "cleo-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cleo-mock:${variant}"]
 }
-
 target "coldfusion-mock" {
   name       = "coldfusion-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -37,7 +33,6 @@ target "coldfusion-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/coldfusion-mock:${variant}"]
 }
-
 target "craftcms-mock" {
   name       = "craftcms-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -45,7 +40,6 @@ target "craftcms-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/craftcms-mock:${variant}"]
 }
-
 target "crushftp-mock" {
   name       = "crushftp-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -53,7 +47,6 @@ target "crushftp-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/crushftp-mock:${variant}"]
 }
-
 target "drupal-sqli-mock" {
   name       = "drupal-sqli-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -61,7 +54,6 @@ target "drupal-sqli-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/drupal-sqli-mock:${variant}"]
 }
-
 target "exchange-mock" {
   name       = "exchange-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -69,7 +61,6 @@ target "exchange-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/exchange-mock:${variant}"]
 }
-
 target "geoserver-mock" {
   name       = "geoserver-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -77,7 +68,6 @@ target "geoserver-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/geoserver-mock:${variant}"]
 }
-
 target "goanywhere-mock" {
   name       = "goanywhere-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -85,7 +75,6 @@ target "goanywhere-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/goanywhere-mock:${variant}"]
 }
-
 target "grafana-mock" {
   name       = "grafana-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -93,7 +82,6 @@ target "grafana-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/grafana-mock:${variant}"]
 }
-
 target "hfs-mock" {
   name       = "hfs-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -101,7 +89,6 @@ target "hfs-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/hfs-mock:${variant}"]
 }
-
 target "ingress-nginx-mock" {
   name       = "ingress-nginx-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -109,7 +96,6 @@ target "ingress-nginx-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ingress-nginx-mock:${variant}"]
 }
-
 target "log4shell-mock" {
   name       = "log4shell-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -117,7 +103,6 @@ target "log4shell-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/log4shell-mock:${variant}"]
 }
-
 target "manageengine-mock" {
   name       = "manageengine-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -125,7 +110,6 @@ target "manageengine-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/manageengine-mock:${variant}"]
 }
-
 target "minio-mock" {
   name       = "minio-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -133,7 +117,6 @@ target "minio-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/minio-mock:${variant}"]
 }
-
 target "moveit-mock" {
   name       = "moveit-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -141,7 +124,6 @@ target "moveit-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/moveit-mock:${variant}"]
 }
-
 target "nextjs-mock" {
   name       = "nextjs-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -149,7 +131,6 @@ target "nextjs-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/nextjs-mock:${variant}"]
 }
-
 target "owncloud-graphapi-mock" {
   name       = "owncloud-graphapi-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -157,7 +138,6 @@ target "owncloud-graphapi-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/owncloud-graphapi-mock:${variant}"]
 }
-
 target "pulse-secure-mock" {
   name       = "pulse-secure-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -165,7 +145,6 @@ target "pulse-secure-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/pulse-secure-mock:${variant}"]
 }
-
 target "screenconnect-mock" {
   name       = "screenconnect-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -173,7 +152,6 @@ target "screenconnect-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/screenconnect-mock:${variant}"]
 }
-
 target "spring4shell-mock" {
   name       = "spring4shell-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -181,7 +159,6 @@ target "spring4shell-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/spring4shell-mock:${variant}"]
 }
-
 target "struts-mock" {
   name       = "struts-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -189,7 +166,6 @@ target "struts-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/struts-mock:${variant}"]
 }
-
 target "superset-mock" {
   name       = "superset-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -197,7 +173,6 @@ target "superset-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/superset-mock:${variant}"]
 }
-
 target "telerik-report-mock" {
   name       = "telerik-report-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -205,7 +180,6 @@ target "telerik-report-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/telerik-report-mock:${variant}"]
 }
-
 target "tomcat-put-mock" {
   name       = "tomcat-put-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -213,7 +187,6 @@ target "tomcat-put-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/tomcat-put-mock:${variant}"]
 }
-
 target "vcenter-vsan-mock" {
   name       = "vcenter-vsan-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -221,7 +194,6 @@ target "vcenter-vsan-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/vcenter-vsan-mock:${variant}"]
 }
-
 target "zimbra-mock" {
   name       = "zimbra-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -229,7 +201,13 @@ target "zimbra-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zimbra-mock:${variant}"]
 }
-
+target "vbulletin-widget-mock" {
+  name       = "vbulletin-widget-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vbulletin-widget-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vbulletin-widget-mock:${variant}"]
+}
 target "twonky-mock" {
   name       = "twonky-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
