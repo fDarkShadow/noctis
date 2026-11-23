@@ -74,6 +74,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
 
+## coldfusion-48282-mock
+- coldfusion/CVE-2026-48282
+
 ## coldfusion-mock
 - coldfusion/CVE-2024-20767
 
