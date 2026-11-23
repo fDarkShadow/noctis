@@ -229,3 +229,11 @@ target "zimbra-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zimbra-mock:${variant}"]
 }
+
+target "vbulletin-widget-mock" {
+  name       = "vbulletin-widget-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vbulletin-widget-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vbulletin-widget-mock:${variant}"]
+}

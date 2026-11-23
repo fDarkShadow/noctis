@@ -98,6 +98,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## consul-mock
 - general/consul-no-acl
 
+## couchdb-erlang-mock
+- couchdb/CVE-2022-24706
+
 ## couchdb-mock
 - general/couchdb-unauth
 
@@ -508,6 +511,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## unifi-mock
 - unifi/CVE-2026-34910
+
+## vbulletin-widget-mock
+- vbulletin-widget/CVE-2020-17496
 
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
