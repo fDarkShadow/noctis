@@ -1,0 +1,10 @@
+---
+- name: "CUPS < 2.0.3 Multiple Vulnerabilities (CVE-2015-1158, CVE-2015-1159) — reflected XSS active check"
+  hosts: cups_webui_xss
+  gather_facts: false
+  vars:
+    cve_id: "CVE-2015-1158"
+    expected_cves: ["CVE-2015-1158", "CVE-2015-1159"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/cups/cups-webui-xss.yaml"
+  roles:
+    - common_docker
