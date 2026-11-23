@@ -280,6 +280,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## jupyter-mock
 - general/jupyter-no-auth
 
+## kace-mock
+- kace/CVE-2025-32975
+
 ## kentico-mock
 - kentico/CVE-2025-2747
 
