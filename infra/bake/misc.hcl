@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "gravityboardx-mock" {
+  name       = "gravityboardx-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/gravityboardx-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/gravityboardx-mock:${variant}"]
+}
