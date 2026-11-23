@@ -283,6 +283,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## kentico-mock
 - kentico/CVE-2025-2747
 
+## kibana-mock
+- kibana/CVE-2019-7609
+
 ## kubernetes-mock
 - general/kubernetes-anonymous
 
