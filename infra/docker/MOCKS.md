@@ -74,6 +74,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
 
+## coldfusion-48282-mock
+- coldfusion/CVE-2026-48282
+
 ## coldfusion-mock
 - coldfusion/CVE-2024-20767
 
@@ -98,6 +101,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## consul-mock
 - general/consul-no-acl
 
+## couchdb-erlang-mock
+- couchdb/CVE-2022-24706
+
 ## couchdb-mock
 - general/couchdb-unauth
 
@@ -119,11 +125,20 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cslu-mock
 - cslu/CVE-2024-20439
 
+## cucm-mock
+- cucm/CVE-2026-20230
+
 ## cwp-48703-mock
 - cwp/CVE-2025-48703
 
 ## cyberpanel-mock
 - cyberpanel/CVE-2024-51567
+
+## dahua-mock
+- dahua/CVE-2021-33044
+
+## dlink-dwr-mock
+- dlink-dwr/CVE-2018-19300
 
 ## dns-mock
 - general/dns-open-resolver
@@ -158,6 +173,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## expedition-sqli-mock
 - expedition-sqli/CVE-2024-9465
 
+## eyesofnetwork-mock
+- eyesofnetwork/CVE-2020-8656
+
 ## finger-mock
 - general/finger-exposed
 
@@ -178,6 +196,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## fortiweb-25257-mock
 - fortiweb/CVE-2025-25257
+
+## fritzbox-mock
+- fritzbox/CVE-2024-54767
 
 ## ftp-mock
 - general/ftp-anonymous
@@ -208,6 +229,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## hfs-mock
 - hfs/CVE-2024-23692
+
+## home-assistant-mock
+- home-assistant/CVE-2023-27482
 
 ## hugegraph-mock
 - hugegraph/CVE-2024-27348
@@ -249,6 +273,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ivanti-vtm-mock
 - ivanti-vtm/CVE-2024-7593
 
+## jenkins-1000861-mock
+- jenkins/CVE-2018-1000861
+
 ## jenkins-cli-mock
 - jenkins-cli/CVE-2024-23897
 
@@ -265,8 +292,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## jupyter-mock
 - general/jupyter-no-auth
 
+## kace-mock
+- kace/CVE-2025-32975
+
 ## kentico-mock
 - kentico/CVE-2025-2747
+
+## kibana-mock
+- kibana/CVE-2019-7609
 
 ## kubernetes-mock
 - general/kubernetes-anonymous
@@ -316,6 +349,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## mongodb-mock
 - general/mongodb-unauth
 
+## movabletype-mock
+- movabletype/CVE-2021-20837
+
 ## moveit-mock
 - moveit/CVE-2023-34362
 
@@ -343,6 +379,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ntp-mock
 - general/ntp-monlist
 
+## nuuo-mock
+- nuuo/CVE-2018-1150
+
 ## ofbiz-32113-mock
 - ofbiz/CVE-2024-32113
 
@@ -369,6 +408,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## panos-ztp-mock
 - panos-ztp/CVE-2024-0012
+
+## papercut-mock
+- papercut/CVE-2023-27351
 
 ## pentaho-43939-mock
 - pentaho/CVE-2022-43939
@@ -400,6 +442,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## prometheus-mock
 - general/prometheus-exposed
 
+## ptzoptics-mock
+- ptzoptics/CVE-2024-8956
+
 ## pulse-secure-mock
 - pulse-secure/CVE-2019-11510
 
@@ -408,6 +453,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## qnap-qts-mock
 - qnap-qts/CVE-2023-47218
+
+## rconfig-mock
+- rconfig/CVE-2019-16662
 
 ## redis-mock
 - general/redis-unauthenticated
@@ -473,6 +521,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## splunk-pg-mock
 - splunk-pg/CVE-2026-20253
 
+## spring-cloud-function-mock
+- spring-cloud-function/CVE-2022-22963
+
 ## spring4shell-mock
 - spring4shell/CVE-2022-22965
 
@@ -491,6 +542,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## superset-mock
 - superset/CVE-2023-27524
 
+## tbk-dvr-mock
+- tbk-dvr/CVE-2024-3721
+
 ## teamcity-27199-mock
 - teamcity/CVE-2024-27199
 
@@ -508,6 +562,21 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
+
+## twonky-mock
+- twonky/CVE-2025-13315
+
+## unifi-mock
+- unifi/CVE-2026-34910
+
+## unraid-mock
+- unraid/CVE-2020-5847
+
+## vacron-mock
+- vacron/CVE-2025-34043
+
+## vbulletin-widget-mock
+- vbulletin-widget/CVE-2020-17496
 
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
