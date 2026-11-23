@@ -8,6 +8,9 @@ each `infra/docker/<mock>/` image. A mock listed with more than one consumer is
 a **shared mock** — before changing its `server.py`, read every consumer's feed
 and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
+## acti-camera-mock
+- acti/CVE-2017-3184
+
 ## activemq-jolokia-mock
 - activemq-jolokia/CVE-2026-34197
 
@@ -70,6 +73,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## cleo-mock
 - cleo/CVE-2024-50623
+
+## cohu-camera-mock
+- cohu/CVE-2017-8860
 
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
@@ -538,6 +544,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## superset-mock
 - superset/CVE-2023-27524
+
+## tapestry-mock
+- tapestry/CVE-2021-27850
 
 ## tbk-dvr-mock
 - tbk-dvr/CVE-2024-3721
