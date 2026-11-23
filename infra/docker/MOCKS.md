@@ -391,6 +391,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## oim-mock
 - oim/CVE-2025-61757
 
+## opennms-mock
+- opennms/CVE-2015-0975
+
 ## owncloud-graphapi-mock
 - owncloud-graphapi/CVE-2023-49103
 
