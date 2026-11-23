@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use crate::time::UtcTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -71,7 +71,7 @@ pub struct Finding {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub evidence: Option<Evidence>,
     pub target: String,
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: UtcTime,
 }
 
 impl Finding {
@@ -101,7 +101,7 @@ impl Finding {
             qod: qod.clamp(0, 100),
             evidence,
             target: target.into(),
-            timestamp: Utc::now(),
+            timestamp: UtcTime::now(),
         }
     }
 }

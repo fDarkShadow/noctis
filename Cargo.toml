@@ -52,7 +52,7 @@ tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 # Utils
-chrono = { version = "0.4.45", features = ["serde"] }
+jiff = { version = "1.0", default-features = false, features = ["std", "serde"] }
 uuid = { version = "1.23.4", features = ["v4", "serde"] }
 glob = "0.3.4"
 tokio-util = { version = "0.7.18", features = ["io"] }
