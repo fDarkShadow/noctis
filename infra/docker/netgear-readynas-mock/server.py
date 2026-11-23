@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Mock NetGear ReadyNAS RAIDiator FrontView — CVE-2013-2751 / CVE-2013-2752.
 
-Vuln mode:
+Both modes:
   * GET /np_handler/ returns the FrontView handler marker "Empty No Support".
+    This endpoint is only a precondition — a patched ReadyNAS still serves it.
+Vuln mode only:
   * GET /np_handler/np_handler.pl?...addr=...`id`... (the command-injection
     payload) reflects the executed command output (uid=.../gid=...).
-Patched mode: the np_handler endpoints are absent (404) → zero findings.
+Patched mode: np_handler.pl sanitises input — the injected `id` is not executed,
+  so no uid=/gid= output is reflected → zero findings.
 
 Requests arrive verbatim over tcp_connect, so self.path keeps the %xx encoding
 of the injection payload; the vuln branch matches on the raw path.
@@ -38,14 +41,19 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path  # raw, %xx preserved
-        if VULN_MODE and path.startswith("/np_handler/np_handler.pl"):
+        # np_handler.pl — present in both modes. Only a vulnerable RAIDiator
+        # fails to sanitise the input and executes the injected `id`.
+        if path.startswith("/np_handler/np_handler.pl"):
             # Command-injection payload: backtick-wrapped `id` (%60id%60).
-            if "%60id%60" in path or "`id`" in path:
+            if VULN_MODE and ("%60id%60" in path or "`id`" in path):
                 self._send(200, "np_handler result:\n" + CMD_OUTPUT)
             else:
-                self._send(200, "np_handler.pl")
+                # Patched: input sanitised, injection inert — benign handler
+                # response with no command output reflected.
+                self._send(200, "np_handler.pl: invalid request")
             return
-        if VULN_MODE and path == "/np_handler/":
+        # FrontView handler marker — precondition only, served in BOTH modes.
+        if path == "/np_handler/":
             self._send(200, "np_handler: Empty No Support")
             return
         self._send(404, "Not Found")
