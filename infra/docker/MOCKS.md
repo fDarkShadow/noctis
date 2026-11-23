@@ -137,6 +137,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## elasticsearch-mock
 - general/elasticsearch-unauth
 
+## elearning-server-mock
+- elearning-server/CVE-2012-2923
+
 ## epmm-mock
 - epmm/CVE-2025-4427
 
