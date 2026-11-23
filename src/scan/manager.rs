@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use chrono::Utc;
+use crate::time::UtcTime;
 use tokio::sync::{RwLock, Semaphore};
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
@@ -54,7 +54,7 @@ impl ScanManager {
                 let mut s = state.write().await;
                 s.status = ScanStatus::Failed;
                 s.error = Some(e.to_string());
-                s.completed_at = Some(Utc::now());
+                s.completed_at = Some(UtcTime::now());
                 let wh = s.webhook_url.clone();
                 let summary = ScanSummary::from(&*s);
                 drop(s);
@@ -117,7 +117,7 @@ impl ScanManager {
         let mut s = state.write().await;
         if matches!(s.status, ScanStatus::Pending | ScanStatus::Running) {
             s.status = ScanStatus::Cancelled;
-            s.completed_at = Some(Utc::now());
+            s.completed_at = Some(UtcTime::now());
             true
         } else {
             false
@@ -169,7 +169,7 @@ impl ScanManager {
         {
             let mut s = state.write().await;
             s.status = ScanStatus::Running;
-            s.started_at = Some(Utc::now());
+            s.started_at = Some(UtcTime::now());
             s.total_tests = total;
         }
 
@@ -248,7 +248,7 @@ impl ScanManager {
             if s.status != ScanStatus::Cancelled {
                 s.status = ScanStatus::Completed;
             }
-            s.completed_at = Some(Utc::now());
+            s.completed_at = Some(UtcTime::now());
             let wh = s.webhook_url.clone();
             (ScanSummary::from(&*s), wh)
         };

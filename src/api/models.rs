@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use crate::time::UtcTime;
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -50,6 +50,6 @@ impl ApiError {
 #[derive(Serialize)]
 pub struct WebhookEvent<'a, T: Serialize> {
     pub event: &'a str,
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: UtcTime,
     pub data: &'a T,
 }

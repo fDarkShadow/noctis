@@ -7,7 +7,7 @@ use super::models::WebhookEvent;
 pub async fn send<T: Serialize>(client: &reqwest::Client, url: &str, event: &str, data: &T) {
     let payload = WebhookEvent {
         event,
-        timestamp: chrono::Utc::now(),
+        timestamp: crate::time::UtcTime::now(),
         data,
     };
 

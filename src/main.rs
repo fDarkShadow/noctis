@@ -8,6 +8,7 @@ mod loader;
 mod model;
 mod oob;
 mod scan;
+mod time;
 
 use std::net::SocketAddr;
 use std::sync::Arc;

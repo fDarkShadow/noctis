@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use crate::time::UtcTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -21,9 +21,9 @@ pub struct ScanState {
     pub id: Uuid,
     pub status: ScanStatus,
     pub target: String,
-    pub created_at: DateTime<Utc>,
-    pub started_at: Option<DateTime<Utc>>,
-    pub completed_at: Option<DateTime<Utc>>,
+    pub created_at: UtcTime,
+    pub started_at: Option<UtcTime>,
+    pub completed_at: Option<UtcTime>,
     pub total_tests: usize,
     pub completed_tests: usize,
     pub findings: Vec<Finding>,
@@ -40,7 +40,7 @@ impl ScanState {
             id,
             status: ScanStatus::Pending,
             target,
-            created_at: Utc::now(),
+            created_at: UtcTime::now(),
             started_at: None,
             completed_at: None,
             total_tests: 0,
@@ -53,8 +53,8 @@ impl ScanState {
 
     pub fn elapsed_ms(&self) -> Option<u64> {
         let start = self.started_at?;
-        let end = self.completed_at.unwrap_or_else(Utc::now);
-        Some((end - start).num_milliseconds().max(0) as u64)
+        let end = self.completed_at.unwrap_or_else(UtcTime::now);
+        Some(end.millis_since(start).max(0) as u64)
     }
 }
 
@@ -65,9 +65,9 @@ pub struct ScanSummary {
     pub id: Uuid,
     pub status: ScanStatus,
     pub target: String,
-    pub created_at: DateTime<Utc>,
-    pub started_at: Option<DateTime<Utc>>,
-    pub completed_at: Option<DateTime<Utc>>,
+    pub created_at: UtcTime,
+    pub started_at: Option<UtcTime>,
+    pub completed_at: Option<UtcTime>,
     pub elapsed_ms: Option<u64>,
     pub progress: Progress,
     pub findings_count: usize,
@@ -108,7 +108,6 @@ impl From<&ScanState> for ScanSummary {
 mod tests {
     use super::*;
     use crate::scan::request::ScanRequest;
-    use chrono::Duration;
 
     fn req(host: &str, port: u16) -> ScanRequest {
         use crate::scan::request::DiscoveredService;
@@ -148,8 +147,8 @@ mod tests {
     #[test]
     fn elapsed_ms_with_completed() {
         let mut s = ScanState::new(Uuid::new_v4(), &req("host", 80));
-        s.started_at = Some(Utc::now() - Duration::milliseconds(1000));
-        s.completed_at = Some(Utc::now());
+        s.started_at = Some(UtcTime::now().minus_millis(1000));
+        s.completed_at = Some(UtcTime::now());
         let ms = s.elapsed_ms().unwrap();
         assert!(ms >= 990 && ms <= 1100, "expected ~1000ms, got {ms}");
     }
@@ -157,7 +156,7 @@ mod tests {
     #[test]
     fn elapsed_ms_running_uses_now() {
         let mut s = ScanState::new(Uuid::new_v4(), &req("host", 80));
-        s.started_at = Some(Utc::now() - Duration::milliseconds(500));
+        s.started_at = Some(UtcTime::now().minus_millis(500));
         assert!(s.elapsed_ms().unwrap() >= 400);
     }
 
