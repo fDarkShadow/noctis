@@ -137,6 +137,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dahua-mock
 - dahua/CVE-2021-33044
 
+## dlink-dcs-mock
+- dlink-dcs/CVE-2020-25078
+
 ## dlink-dwr-mock
 - dlink-dwr/CVE-2018-19300
 
