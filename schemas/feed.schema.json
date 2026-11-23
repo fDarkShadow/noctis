@@ -81,7 +81,7 @@
         "id": { "type": "string", "description": "Unique identifier within this feed." },
         "action": {
           "type": "string",
-          "enum": ["http_request", "tcp_connect", "tcp_dialogue", "tcp_syn", "udp_probe", "tls_check", "ssh_check", "ssh_exec", "snmp_get", "match", "script", "wait_oob", "set_var", "sleep"]
+          "enum": ["http_request", "tcp_connect", "tcp_dialogue", "tcp_open", "tcp_send", "tcp_close", "tcp_syn", "udp_probe", "tls_check", "ssh_check", "ssh_exec", "snmp_get", "match", "script", "wait_oob", "set_var", "sleep"]
         },
         "condition": {
           "type": "string",
@@ -133,7 +133,7 @@
         },
         "send_hex": {
           "type": "string",
-          "description": "Binary payload as a hex string. udp_probe only; takes precedence over send."
+          "description": "Binary payload as a hex string. udp_probe / tcp_dialogue / tcp_send; takes precedence over send. Supports {{var}} templates."
         },
         "auth_methods": {
           "type": "array",
@@ -159,6 +159,11 @@
           "type": "string",
           "default": "\r\n",
           "description": "tcp_dialogue only — terminator appended to each command."
+        },
+        "handle": {
+          "type": "string",
+          "default": "sock",
+          "description": "tcp_open / tcp_send / tcp_close — name of the persistent socket opened, written and closed across steps. Defaults to \"sock\". Supports {{var}} templates."
         },
         "username": {
           "type": "string",
