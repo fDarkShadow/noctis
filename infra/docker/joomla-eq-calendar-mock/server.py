@@ -2,7 +2,7 @@
 """Mock for CVE-2015-4654 (joomla-eq-calendar) — OpenVAS NASL 2015/gb_joomla_eq_event_calendar_sql_inj_vuln.nasl (GPL-2.0-only)."""
 import os, ssl, threading, urllib.parse, base64, html
 from http.server import BaseHTTPRequestHandler, HTTPServer
-CFG = {'kind': 'sqli', 'gate': 'SQL-INJECTION-TEST', 'url_path': '/index.php/component/eqfullevent', 'witness': "...near 'SQL-INJECTION-TEST': You have an error in your SQL syntax"}
+CFG = {'kind': 'sqli', 'gate': 'SQL-INJECTION-TEST', 'url_path': '/index.php/component/eqfullevent', 'witness': "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '1'SQL-INJECTION-TEST' at line 1"}
 VULN = os.environ.get('JOOMLA_EQ_CALENDAR_MODE', "patched") == "vuln"
 BENIGN = "<html><head><title>OK</title></head><body>Service operational.</body></html>"
 class H(BaseHTTPRequestHandler):
