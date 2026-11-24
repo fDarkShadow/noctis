@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "vbulletin-forumrunner-mock" {
+  name       = "vbulletin-forumrunner-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vbulletin-forumrunner-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vbulletin-forumrunner-mock:${variant}"]
+}
