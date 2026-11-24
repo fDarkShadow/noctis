@@ -1,0 +1,10 @@
+---
+- name: "struts-s2-016-s2-017-ognl-redirect — Apache Struts S2-016/S2-017 prefix injection (CVE-2013-2248/CVE-2013-2251)"
+  hosts: cve_2013_2248
+  gather_facts: false
+  vars:
+    cve_id: "struts-s2-016-s2-017-ognl-redirect"
+    expected_cves: ["CVE-2013-2248", "CVE-2013-2251"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/struts/struts-s2-016-s2-017-ognl-redirect.yaml"
+  roles:
+    - common_docker

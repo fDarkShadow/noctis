@@ -1,0 +1,79 @@
+# ClipBucket 2.6 Multiple Vulnerabilities — CVE-2012-6642 / CVE-2012-6643 / CVE-2012-6644
+#
+# Ported from OpenVAS/Greenbone NVT 2014/gb_clipbucket_mult_vuln.nasl (GPL-2.0-only).
+#
+# Detection: a single quote (%27) appended to the `time` parameter of
+# videos.php reaches the backend SQL query unsanitised; a vulnerable install
+# answers 200 with a MySQL syntax error that echoes the injected marker.
+# Install dirs probed: "/" and "/clipbucket" (from gb_clipbucket_detect.nasl).
+# The payload carries %27, so the request is sent verbatim via tcp_connect.
+# QoD 75 — response analysis (content match).
+uid: 744439a2-3ccd-4240-8012-c571ac7eb9ad
+name: "ClipBucket Multiple Vulnerabilities — videos.php SQL injection (CVE-2012-6642)"
+description: |
+  Sends GET /videos.php?cat=all&seo_cat_name=&sort=most_recent&time=1%27SQL-Injection-Test
+  and reports when the response is a 200 containing a MySQL syntax error that
+  reflects the injected marker, showing the `time` parameter reaches the SQL query.
+cves: [CVE-2012-6642, CVE-2012-6643, CVE-2012-6644]
+cvss: 7.5
+severity: high
+confidence_base: 0.30
+tags: [clipbucket, php, sqli, xss, web]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2012-6642"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2012-6643"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2012-6644"
+  - "http://packetstormsecurity.org/files/108489"
+  - "OpenVAS/Greenbone NVT 2014/gb_clipbucket_mult_vuln.nasl (GPL-2.0-only)"
+
+steps:
+  - id: init
+    action: set_var
+    var_name: sqli_found
+    var_value: false
+
+  # ── Install dir "/" ───────────────────────────────────────────────────────
+  - id: sqli-root
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /videos.php?cat=all&seo_cat_name=&sort=most_recent&time=1%27SQL-Injection-Test HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: root_resp
+
+  - id: sqli-root-match
+    action: match
+    source: root_resp.banner
+    # check_header:TRUE (200) + NASL pattern
+    pattern: "(?s)^HTTP/1\\.[01] 200.*You have an error in your SQL syntax.*SQL-Injection-Test"
+    on_match:
+      finding:
+        confidence_delta: 0.55
+        qod: 75
+        evidence: "SQL error reflecting injected marker at /videos.php: {{root_resp.banner}}"
+      set_vars:
+        sqli_found: true
+      stop: true
+
+  # ── Install dir "/clipbucket" ─────────────────────────────────────────────
+  - id: sqli-subdir
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /clipbucket/videos.php?cat=all&seo_cat_name=&sort=most_recent&time=1%27SQL-Injection-Test HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: sub_resp
+    condition: "sqli_found == false"
+
+  - id: sqli-subdir-match
+    action: match
+    source: sub_resp.banner
+    pattern: "(?s)^HTTP/1\\.[01] 200.*You have an error in your SQL syntax.*SQL-Injection-Test"
+    condition: "sqli_found == false"
+    on_match:
+      finding:
+        confidence_delta: 0.55
+        qod: 75
+        evidence: "SQL error reflecting injected marker at /clipbucket/videos.php: {{sub_resp.banner}}"
+      stop: true
