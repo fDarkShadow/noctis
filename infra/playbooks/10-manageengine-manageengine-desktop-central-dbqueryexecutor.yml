@@ -1,0 +1,10 @@
+---
+- name: "CVE-2018-5337/5338/5339/5341 — ManageEngine Desktop Central unauthenticated DB Query Executor"
+  hosts: manageengine_dc_dbq
+  gather_facts: false
+  vars:
+    cve_id: "manageengine-desktop-central-dbqueryexecutor"
+    expected_cves: ["CVE-2018-5337", "CVE-2018-5338", "CVE-2018-5339", "CVE-2018-5341"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/manageengine/manageengine-desktop-central-dbqueryexecutor.yaml"
+  roles:
+    - common_docker
