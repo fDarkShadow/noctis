@@ -506,6 +506,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## oim-mock
 - oim/CVE-2025-61757
 
+## open-web-analytics-mock
+- open-web-analytics/CVE-2014-1206
+
 ## opennms-mock
 - opennms/CVE-2015-0975
 
