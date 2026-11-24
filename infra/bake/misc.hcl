@@ -54,6 +54,13 @@ target "drupal-sqli-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/drupal-sqli-mock:${variant}"]
 }
+target "ektron-mock" {
+  name       = "ektron-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ektron-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ektron-mock:${variant}"]
+}
 target "exchange-mock" {
   name       = "exchange-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -555,6 +562,64 @@ target "webjump-mock" {
   context    = "../docker/webjump-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/webjump-mock:${variant}"]
+}
+
+target "symantec-epm-mock" {
+  name       = "symantec-epm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/symantec-epm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/symantec-epm-mock:${variant}"]
+}
+target "phplinkadmin-mock" {
+  name       = "phplinkadmin-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phplinkadmin-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phplinkadmin-mock:${variant}"]
+}
+target "gravityboardx-mock" {
+  name       = "gravityboardx-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/gravityboardx-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/gravityboardx-mock:${variant}"]
+}
+target "deluxebb-mock" {
+  name       = "deluxebb-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/deluxebb-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/deluxebb-mock:${variant}"]
+}
+target "jobhut-mock" {
+  name       = "jobhut-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/jobhut-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/jobhut-mock:${variant}"]
+}
+target "ajaxportal-mock" {
+  name       = "ajaxportal-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ajaxportal-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ajaxportal-mock:${variant}"]
+}
+
+target "axis2-mock" {
+  name       = "axis2-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/axis2-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/axis2-mock:${variant}"]
+}
+target "axis2-redirect-mock" {
+  name       = "axis2-redirect-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/axis2-redirect-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/axis2-redirect-mock:${variant}"]
 }
 target "kloxo-mock" {
   name       = "kloxo-mock-${variant}"
