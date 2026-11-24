@@ -628,3 +628,10 @@ target "kloxo-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/kloxo-mock:${variant}"]
 }
+target "leaguemanager-mock" {
+  name       = "leaguemanager-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/leaguemanager-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/leaguemanager-mock:${variant}"]
+}
