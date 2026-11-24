@@ -69,13 +69,15 @@ configured, OOB steps are skipped.
 ```
 
 All three fields are optional, but at least one of `username` / `token` must be set and a
-`password` needs a `username`; an empty value is rejected with `422`. Feeds read them as
+`password` needs a `username`; an empty `username` or `token` is rejected with `422`. Feeds read them as
 `{{cred_username}}`, `{{cred_password}}`, `{{cred_token}}` and test `{{cred_enabled}}`. A feed
 marked `requires_credentials: true` is skipped when no credentials are sent.
 
 {: .note }
-> Credentials are write-only. They never appear in `GET /scans`, webhook payloads, logs or
-> `Debug` output, and password / token values are replaced by `<redacted>` in findings.
+> Credentials are write-only. They never appear in `GET /scans`, webhook payloads or `Debug`
+> output, and password / token values are replaced by `<redacted>` in findings and engine
+> logs, including their percent-encoded forms and the Basic-auth base64 of
+> `username:password`. Other encodings a feed builds itself are not recognised.
 
 ### Findings
 

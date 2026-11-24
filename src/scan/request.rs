@@ -121,16 +121,50 @@ fn validate_credentials(c: &Credentials) -> Result<(), ValidationError> {
 }
 
 impl Credentials {
-    /// Values that must never leak into findings or logs (password, token).
-    /// The username is not treated as a secret for scrubbing purposes.
+    /// Values that must never leak into findings or logs: the password and
+    /// token as given, their percent-encoded forms (as they appear once
+    /// templated into a URL or form body), and the base64 of
+    /// `username:password` (an HTTP Basic `Authorization` header). The
+    /// username itself is not treated as a secret for scrubbing purposes.
     pub fn secrets(&self) -> Vec<String> {
-        [&self.password, &self.token]
-            .into_iter()
-            .flatten()
-            .filter(|s| !s.is_empty())
-            .cloned()
-            .collect()
+        use base64::Engine as _;
+        let mut out: Vec<String> = Vec::new();
+        for raw in [&self.password, &self.token].into_iter().flatten() {
+            if raw.is_empty() {
+                continue;
+            }
+            out.push(raw.clone());
+            for enc in [percent_encode(raw, false), percent_encode(raw, true)] {
+                if enc != *raw {
+                    out.push(enc);
+                }
+            }
+        }
+        if let (Some(u), Some(p)) = (&self.username, &self.password) {
+            if !p.is_empty() {
+                out.push(base64::engine::general_purpose::STANDARD.encode(format!("{u}:{p}")));
+            }
+        }
+        out.sort();
+        out.dedup();
+        out
     }
+}
+
+/// RFC 3986 percent-encoding of everything but unreserved characters;
+/// `plus_space` encodes a space as `+` (application/x-www-form-urlencoded).
+fn percent_encode(s: &str, plus_space: bool) -> String {
+    let mut out = String::with_capacity(s.len());
+    for b in s.bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'.' | b'_' | b'~' => {
+                out.push(b as char)
+            }
+            b' ' if plus_space => out.push('+'),
+            _ => out.push_str(&format!("%{b:02X}")),
+        }
+    }
+    out
 }
 
 impl fmt::Debug for Credentials {
@@ -373,7 +407,26 @@ mod tests {
     fn credentials_validation_error_does_not_echo_values() {
         let r = parse(r#","credentials":{"username":"","password":"s3cr3t-pw"}"#);
         let err = serde_json::to_string(&r.validate().unwrap_err()).unwrap();
-        assert!(!err.contains("s3cr3t-pw"), "{err}");
+        assert!(
+            !err.contains("s3cr3t-pw"),
+            "password echoed in validation error"
+        );
+    }
+
+    #[test]
+    fn credentials_secrets_cover_encoded_forms() {
+        let c = Credentials {
+            username: Some("admin".into()),
+            password: Some("p w\"d".into()),
+            token: None,
+        };
+        let s = c.secrets();
+        assert!(s.contains(&"p w\"d".to_string()));
+        assert!(s.contains(&"p%20w%22d".to_string()));
+        assert!(s.contains(&"p+w%22d".to_string()));
+        // base64("admin:p w\"d") — HTTP Basic auth header value.
+        assert!(s.contains(&"YWRtaW46cCB3ImQ=".to_string()));
+        assert!(!s.contains(&"admin".to_string()));
     }
 
     #[test]
@@ -383,7 +436,7 @@ mod tests {
         );
         let dbg = format!("{r:?}");
         for secret in ["admin-user", "s3cr3t-pw", "tok-xyz"] {
-            assert!(!dbg.contains(secret), "{secret} leaked in Debug: {dbg}");
+            assert!(!dbg.contains(secret), "a credential value leaked in Debug");
         }
         assert!(dbg.contains("<redacted>"));
     }
@@ -392,9 +445,9 @@ mod tests {
     fn credentials_never_serialized() {
         let r = parse(r#","credentials":{"username":"admin-user","password":"s3cr3t-pw"}"#);
         let out = serde_json::to_string(&r).unwrap();
-        assert!(!out.contains("credentials"), "{out}");
-        assert!(!out.contains("s3cr3t-pw"), "{out}");
-        assert!(!out.contains("admin-user"), "{out}");
+        assert!(!out.contains("credentials"), "credentials key serialized");
+        assert!(!out.contains("s3cr3t-pw"), "password serialized");
+        assert!(!out.contains("admin-user"), "username serialized");
     }
 
     #[test]
@@ -404,6 +457,8 @@ mod tests {
             password: Some("p".into()),
             token: Some(String::new()),
         };
-        assert_eq!(c.secrets(), vec!["p".to_string()]);
+        // password + base64("u:p") for Basic auth; empty token and the
+        // username itself are not secrets.
+        assert_eq!(c.secrets(), vec!["dTpw".to_string(), "p".to_string()]);
     }
 }

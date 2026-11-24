@@ -531,9 +531,10 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
   login (it is then skipped, no task, when the request has no `credentials`); for a feed
   with an optional authenticated branch, guard those steps with `condition: "cred_enabled"`
   instead. Only `cred_enabled` is always defined — `{{cred_password}}` in a strict field
-  (path/body/send…) errors when the request had no password. Password/token values are
-  replaced by `<redacted>` in every finding field and in logged URLs; never put them in
-  `evidence:` on purpose. In an inventory, pass them with `noctis_credentials: {username: …,
+  (path/body/send…) errors when the request had no password. Password/token values (literal, percent-encoded,
+  and the Basic-auth base64 of `user:pass`) are replaced by `<redacted>` in every finding
+  field and engine log line; other encodings are not recognised, so never put credentials or
+  derived values in `evidence:`. Very short passwords also mask unrelated matching text. In an inventory, pass them with `noctis_credentials: {username: …,
   password: …}` on the host — the `common_docker` role adds `credentials` to POST /scans and
   `no_log`s those tasks.
 - **`cves: []` empty is valid and normal** — don't invent a placeholder CVE ID for a misconfiguration/heuristic check. `category:` is the classifier for 0-CVE feeds, not `cves`.

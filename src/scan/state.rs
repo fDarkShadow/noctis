@@ -196,7 +196,10 @@ mod tests {
         let dbg = format!("{s:?} {:?}", ScanSummary::from(&s));
         for out in [&state_json, &summary_json, &dbg] {
             for secret in ["admin-user", "s3cr3t-pw", "tok-xyz", "credentials"] {
-                assert!(!out.contains(secret), "{secret} leaked: {out}");
+                assert!(
+                    !out.contains(secret),
+                    "a credential value leaked into state output"
+                );
             }
         }
     }

@@ -108,8 +108,10 @@ steps:
 In a feed that also has unauthenticated steps, leave `requires_credentials` off and guard
 the authenticated ones with `condition: "cred_enabled"` instead (`cred_enabled` is always
 defined; the `cred_*` value vars exist only when supplied). Password and token values are
-replaced by `<redacted>` in every finding field, so echoing a response that contains them
-is safe — but don't put them in evidence on purpose.
+replaced by `<redacted>` in every finding field — as given, percent-encoded, and as the
+Basic-auth base64 of `username:password`. Any other encoding (hashes, JSON escaping, a
+custom `base64_encode` of something else) is not recognised, so never put credentials or
+values derived from them in evidence.
 
 ## Confidence / QoD
 
