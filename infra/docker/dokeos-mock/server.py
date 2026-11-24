@@ -4,8 +4,14 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("DOKEOS_MODE", "patched") == "vuln"
 
-# Marker reflected by the injected UNION SELECT, per the OpenVAS plugin.
+# Marker reflected by the injected UNION SELECT hex-literal column, per the
+# OpenVAS plugin. The hex 0x73716c2d696e6a656374696f6e2d74657374 decodes to
+# "sql-injection-test"; the mock only reflects it when that literal is sent.
 MARKER = "sql-injection-test"
+MARKER_HEX = "73716c2d696e6a656374696f6e2d74657374"
+
+# Dokeos page footer — served in both modes; the feed's secondary check.
+FOOTER = "<p>Powered by www.dokeos.com</p>"
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args): pass
@@ -23,17 +29,17 @@ class Handler(BaseHTTPRequestHandler):
         p = self.path
         # Dokeos index.php — the injectable `language` parameter.
         if p.startswith("/index.php") and "language=" in p:
-            if VULN_MODE and "union" in p.lower():
-                # Vulnerable: the UNION SELECT reflects the marker into output.
+            # Reflect the marker ONLY when the request actually carries the
+            # hex-literal marker column of the UNION SELECT (not self-fulfilling).
+            if VULN_MODE and MARKER_HEX in p.lower():
                 self._send(200,
                     "<html><head><title>Dokeos</title></head><body>"
-                    "<p>%s</p>"
-                    "<p>Powered by www.dokeos.com</p></body></html>" % MARKER)
+                    "<p>%s</p>%s</body></html>" % (MARKER, FOOTER))
             else:
-                # Patched (or benign request): normal page, no reflection.
+                # Patched, or benign/incomplete request: normal Dokeos page.
                 self._send(200,
                     "<html><head><title>Dokeos</title></head><body>"
-                    "<p>Welcome to Dokeos</p></body></html>")
+                    "<p>Welcome to Dokeos</p>%s</body></html>" % FOOTER)
         else:
             self._send(404, "<html><body>404 Not Found</body></html>")
 

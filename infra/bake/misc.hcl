@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "dokeos-mock" {
+  name       = "dokeos-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dokeos-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dokeos-mock:${variant}"]
+}
