@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "backupbuddy-mock" {
+  name       = "backupbuddy-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/backupbuddy-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/backupbuddy-mock:${variant}"]
+}
