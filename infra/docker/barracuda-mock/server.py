@@ -20,11 +20,14 @@ VULN_MODE = os.environ.get("BARRACUDA_MODE", "patched") == "vuln"
 
 # Leaked appliance config snapshot — the fields the NASL pattern/extra_check
 # look for (system_password / system_netmask / system_default_domain).
+# Field order intentionally lists the secondary markers (system_netmask /
+# system_default_domain) BEFORE system_password, so the feed's bidirectional
+# match is exercised against the harder ordering a real appliance may emit.
 CONFIG_SNAPSHOT = (
     "system_hostname=barracuda\n"
-    "system_password=$1$aBcDeFgH$0123456789abcdefABCDEF.\n"
-    "system_default_domain=example.com\n"
     "system_netmask=255.255.255.0\n"
+    "system_default_domain=example.com\n"
+    "system_password=$1$aBcDeFgH$0123456789abcdefABCDEF.\n"
 )
 
 # The traversal payload as the appliance receives it (path + query), for both
