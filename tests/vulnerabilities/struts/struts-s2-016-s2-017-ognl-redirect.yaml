@@ -1,0 +1,128 @@
+# Apache Struts DefaultActionMapper prefix injection (S2-016 / S2-017)
+# — CVE-2013-2248, CVE-2013-2251
+#
+# Apache Struts 2.0.0 through 2.3.15 fails to sanitise the "action:",
+# "redirect:" and "redirectAction:" DefaultActionMapper prefixes before
+# using them, allowing OGNL expression evaluation and arbitrary redirects.
+#
+# Active check (ported faithfully from the OpenVAS/Greenbone NVT below):
+#   1. Fingerprint the Struts2 showcase app
+#      (GET /struts2-showcase/showcase.action must contain
+#       ">Struts2 Showcase<" and ">Welcome!<").
+#   2. Send TWO crafted GETs carrying a "redirect:%{N*5}" OGNL expression
+#      (2*5 and 3*5). A vulnerable instance evaluates the arithmetic and
+#      emits a 302 whose Location reflects the computed value (10, then 15).
+#      BOTH evaluations must reflect before reporting — this rules out an
+#      app that merely redirects to a path happening to end in /10.
+#      A patched instance does not evaluate the expression (no such redirect).
+#
+# The payload is URL-encoded (%3A %25 %7B %7D), so the probes are sent
+# verbatim over tcp_connect in HTTP/1.0 — reqwest would otherwise decode
+# and normalise the escapes before sending. Match is on resp.banner.
+#
+# Source (GPL-2.0-only): OpenVAS/Greenbone NASL
+#   2013/apache/gb_struts_s2-016_s2-017_active.nasl
+uid: a1ce0028-b5af-4675-971c-6f561a6766cf
+name: "Apache Struts DefaultActionMapper prefix injection (S2-016/S2-017)"
+description: |
+  Tests Apache Struts for the DefaultActionMapper prefix injection
+  (S2-016/S2-017). After fingerprinting the Struts2 showcase app, sends two
+  redirect: OGNL expressions %{2*5} and %{3*5} in the showcase action query
+  string; a vulnerable instance evaluates both and returns 302 responses
+  whose Location carries the computed values (10 then 15).
+cves: [CVE-2013-2248, CVE-2013-2251]
+cvss: 9.3
+severity: critical
+confidence_base: 0.30
+tags: [struts, apache, ognl, redirect, injection, s2-016, s2-017]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2013-2248"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2013-2251"
+  - "https://cwiki.apache.org/confluence/display/WW/S2-016"
+  - "https://cwiki.apache.org/confluence/display/WW/S2-017"
+  # Detection ported from OpenVAS/Greenbone NASL (GPL-2.0-only):
+  # 2013/apache/gb_struts_s2-016_s2-017_active.nasl
+
+steps:
+  # Initialise the gating vars so the guarded steps' conditions never evaluate
+  # an undefined variable (which would silently skip them either way).
+  - id: init-showcase-found
+    action: set_var
+    var_name: showcase_found
+    var_value: false
+
+  - id: init-eval-10
+    action: set_var
+    var_name: eval_10
+    var_value: false
+
+  # ── Gate: fingerprint the Struts2 showcase app ───────────────────────────
+  # The NASL only probes hosts whose showcase page is present. Match both
+  # ">Struts2 Showcase<" and ">Welcome!<" (cheap, avoids wasting the OGNL
+  # probes on unrelated apps).
+  - id: showcase-probe
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /struts2-showcase/showcase.action HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: fp_resp
+
+  - id: showcase-fingerprint-match
+    action: match
+    source: fp_resp.banner
+    pattern: "(?s)>Struts2 Showcase<.*>Welcome!<"
+    on_match:
+      set_vars:
+        showcase_found: true
+
+  # ── OGNL prefix-injection probe #1: redirect:%{2*5} ──────────────────────
+  # The escapes (%3A %25 %7B %7D) must survive verbatim, so tcp_connect is
+  # used instead of http_request (reqwest would decode them). Only runs once
+  # the showcase app was fingerprinted.
+  - id: ognl-redirect-probe-10
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /struts2-showcase/showcase.action?redirect%3A%25%7B2*5%7D HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: resp10
+    condition: "showcase_found"
+
+  # Vulnerable Struts evaluates the OGNL arithmetic (2*5 = 10) and returns a
+  # 302 whose Location reflects the computed value. No finding yet — the
+  # second evaluation must also reflect (set a gate var only).
+  - id: ognl-redirect-match-10
+    action: match
+    source: resp10.banner
+    pattern: "(?s)^HTTP/1\\.[01] 302\\b.*[Ll]ocation:[^\\r\\n]*/10\\b"
+    condition: "showcase_found"
+    on_match:
+      set_vars:
+        eval_10: true
+
+  # ── OGNL prefix-injection probe #2: redirect:%{3*5} ──────────────────────
+  # Only runs once the first evaluation (2*5 -> 10) reflected, confirming the
+  # server actually evaluates the OGNL arithmetic rather than coincidentally
+  # redirecting to a path ending in /10.
+  - id: ognl-redirect-probe-15
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /struts2-showcase/showcase.action?redirect%3A%25%7B3*5%7D HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: resp15
+    condition: "eval_10"
+
+  # Both evaluations reflected — report. 3*5 = 15 must appear in the Location.
+  - id: ognl-redirect-match-15
+    action: match
+    source: resp15.banner
+    pattern: "(?s)^HTTP/1\\.[01] 302\\b.*[Ll]ocation:[^\\r\\n]*/15\\b"
+    condition: "eval_10"
+    on_match:
+      finding:
+        confidence_delta: 0.55
+        qod: 75
+        evidence: "Struts evaluated redirect:%{2*5} and redirect:%{3*5} OGNL expressions (302 Location reflects computed values 10 and 15): {{resp15.banner}}"
+      stop: true
