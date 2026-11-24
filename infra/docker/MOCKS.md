@@ -35,6 +35,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## backupbuddy-mock
 - backupbuddy/CVE-2013-2741
 
+## bacula-web-mock
+- bacula-web/CVE-2014-8295
+
 ## barracuda-esg-mock
 - barracuda-esg/CVE-2023-2868
 
@@ -274,6 +277,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## grafana-mock
 - grafana/CVE-2021-43798
+
+## gravityboardx-mock
+- gravityboardx/CVE-2009-1277
 
 ## hadoop-yarn-mock
 - general/hadoop-yarn-exposed
@@ -524,6 +530,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## php-nuke-mock
 - php-nuke/CVE-2001-0320
 
+## phplinkadmin-mock
+- phplinkadmin/CVE-2009-1024
+
 ## phprecipebook-mock
 - phprecipebook/CVE-2009-4883
 
@@ -665,6 +674,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## superset-mock
 - superset/CVE-2023-27524
+
+## symantec-epm-mock
+- symantec-epm/CVE-2013-5014
 
 ## symantec-sepm-mock
 - symantec-sepm/CVE-2014-3437

@@ -556,6 +556,28 @@ target "webjump-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/webjump-mock:${variant}"]
 }
+
+target "symantec-epm-mock" {
+  name       = "symantec-epm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/symantec-epm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/symantec-epm-mock:${variant}"]
+}
+target "phplinkadmin-mock" {
+  name       = "phplinkadmin-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phplinkadmin-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phplinkadmin-mock:${variant}"]
+}
+target "gravityboardx-mock" {
+  name       = "gravityboardx-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/gravityboardx-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/gravityboardx-mock:${variant}"]
+}
 target "deluxebb-mock" {
   name       = "deluxebb-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
