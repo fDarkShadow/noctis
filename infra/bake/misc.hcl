@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "joomla-eq-calendar-mock" {
+  name       = "joomla-eq-calendar-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/joomla-eq-calendar-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/joomla-eq-calendar-mock:${variant}"]
 target "vbulletin-forumrunner-mock" {
   name       = "vbulletin-forumrunner-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
