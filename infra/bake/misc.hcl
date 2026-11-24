@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "navis-webaccess-mock" {
+  name       = "navis-webaccess-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/navis-webaccess-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/navis-webaccess-mock:${variant}"]
 target "peplink-balance-mock" {
   name       = "peplink-balance-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
