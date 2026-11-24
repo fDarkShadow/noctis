@@ -236,6 +236,12 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "awstats-mock" {
+  name       = "awstats-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/awstats-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/awstats-mock:${variant}"]
 target "manageengine-5337-mock" {
   name       = "manageengine-5337-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
