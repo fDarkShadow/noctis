@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "ajaxportal-mock" {
+  name       = "ajaxportal-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ajaxportal-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ajaxportal-mock:${variant}"]
+}
