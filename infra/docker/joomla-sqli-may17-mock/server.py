@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Mock for CVE-2017-8917. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
-vuln and patched behaviours are both realistic so the TN is non-trivial."""
-import os, ssl, threading
+vuln and patched behaviours are both realistic so the TN is non-trivial. The login view issues a
+RANDOM session cookie and CSRF token, and the vuln com_fields handler returns the XPATH error only
+when both come back — so the feed's cookie/token extraction is genuinely exercised. The XPATH
+error quotes are HTML-escaped (&#039;), exactly as real Joomla renders them."""
+import os, secrets, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN = os.environ.get("CVE_2017_8917_MODE", "patched") == "vuln"
+COOKIE_NAME = secrets.token_hex(16)
+COOKIE_VAL = secrets.token_hex(16)
+TOKEN = secrets.token_hex(16)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -38,16 +44,22 @@ class Handler(BaseHTTPRequestHandler):
         body = self._read_body()
         vuln = VULN
         cookie = self.headers.get("Cookie", "")
+        has_session = (COOKIE_NAME + "=" + COOKIE_VAL) in cookie
+        has_token = (TOKEN + "=1") in path
         if (method == 'GET' and path.startswith('/index.php/component/users')):
             self._start(200)
             self._h('Content-Type', 'text/html')
-            self._h('Set-Cookie', 'b0a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5=deadbeefcafe1234; path=/')
-            self._finish('<html><body><form><fieldset><input type="hidden" name="1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d" value="1"></fieldset></form></body></html>\n')
+            self._h('Set-Cookie', COOKIE_NAME + '=' + COOKIE_VAL + '; path=/')
+            self._finish('<html><body><form><fieldset><input type="hidden" name="'
+                         + TOKEN + '" value="1"></fieldset></form></body></html>\n')
             return
-        if (vuln and 'com_fields' in path):
+        # Vulnerable com_fields handler: only errors out when the real session + token are carried,
+        # and escapes the quotes around the computed :255: marker exactly as Joomla does.
+        if (vuln and 'com_fields' in path and has_session and has_token):
             self._start(500)
             self._h('Content-Type', 'text/html')
-            self._finish("<html><title>Home Page</title><body>Home Page<br>1064 - XPATH syntax error: ':255:'</body></html>\n")
+            self._finish("<html><title>Home Page</title><body>Home Page<br>"
+                         "1064 - XPATH syntax error: &#039;:255:&#039;</body></html>\n")
             return
         if ('com_fields' in path):
             self._start(200)
