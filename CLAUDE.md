@@ -89,6 +89,13 @@ pub struct ScanRequest {
     pub tests: Vec<String>,
     pub concurrency: usize,
     // + webhook_url, oob, filters
+    pub credentials: Option<Credentials>,  // write-only — never serialized, Debug-redacted
+}
+
+pub struct Credentials {      // at least one of username/token; password needs username
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub token: Option<String>,
 }
 
 pub struct DiscoveredService {
@@ -104,6 +111,7 @@ uid: <uuid-v4-stable>          # immutable identifier
 cves: []                       # zero, one, or many CVE IDs — see examples below
 services: [http, https]        # ports targeted by nmap service name
 confidence_base: 0.30          # confidence before steps run
+requires_credentials: false    # true → skipped (no task) when the request has no credentials
 ```
 
 `cves` cardinality — a feed is a **vulnerability test**, not a "CVE test":
@@ -132,8 +140,13 @@ e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside
 | `{{oob_host}}` | OOB server host (only when `--oob` is configured) |
 | `{{oob_port}}` | OOB server port |
 | `{{oob_enabled}}` | `true` when OOB is active, `false` otherwise |
+| `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
+| `{{cred_username}}` | `credentials.username` — only set when supplied |
+| `{{cred_password}}` | `credentials.password` — only set when supplied |
+| `{{cred_token}}` | `credentials.token` — only set when supplied |
 
-`{{port}}` and `{{scheme}}` are injected **from the matched service**, before `seed_vars()`.
+`{{port}}` and `{{scheme}}` are injected **from the matched service**, before `seed_vars()`
+(so are the `cred_*` vars — a feed's `vars:` can't shadow them).
 YAML feeds must not redefine `port:` or `scheme:` in their `vars:` section — they would be overwritten.
 
 ### `tcp_connect` and HTTPS
@@ -358,6 +371,9 @@ dedicated mock directory (`<product>-<cve-number>-mock`) instead.
    - Optional `container_env: {VAR: value}` — passed as `-e` to the container. Use it to run
      one mock in another mode instead of creating a second mock directory (see
      `infra/inventories/axis2/CVE-2010-0219/hosts.yml`, `AXIS2_MODE: vuln_redirect`)
+   - Optional `noctis_credentials: {username: …, password: …}` (or `token:`) — for a feed
+     with `requires_credentials: true`; the role adds `credentials` to POST /scans and
+     `no_log`s the submit tasks
    - **No `target_port`** — port is allocated dynamically
    - On every vuln host set `expected_qod` (highest QoD branch the mock exercises) and
      `expected_min_confidence` (`confidence_base + highest_delta - 0.05`). These are asserted
@@ -514,6 +530,16 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
 - **Debian Bullseye EOL** (httpd:2.4.51, python images using bullseye) — `bullseye-security` does not exist at `archive.debian.org`. Drop the security repo entirely: replace `/etc/apt/sources.list` with `echo "deb http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list`.
 - **`action: set_var` uses `var_name:` / `var_value:` fields, NOT a `vars:` map** — using `vars:` silently drops the step (unknown field ignored by serde), `var_name` is None, `run_set_var` returns `MissingField`, the scan runner swallows the error as `vec![]` findings. Always write `var_name: foo` / `var_value: false` on separate lines.
 - **`&&` in Rhai conditions works and short-circuits** — `cond_a == true && resp.status == 200` is safe even if `resp` is undefined: if `cond_a` is false, `resp.status` is never evaluated.
+- **Authenticated feeds** — set `requires_credentials: true` when the whole feed needs a
+  login (it is then skipped, no task, when the request has no `credentials`); for a feed
+  with an optional authenticated branch, guard those steps with `condition: "cred_enabled"`
+  instead. Only `cred_enabled` is always defined — `{{cred_password}}` in a strict field
+  (path/body/send…) errors when the request had no password. Password/token values (literal, lowercase hex,
+  percent-encoded, and the Basic-auth base64 of `user:pass`) are replaced by `<redacted>` in every finding
+  field, engine log line and step error; other encodings are not recognised, so never put credentials or
+  derived values in `evidence:`. Very short passwords also mask unrelated matching text. In an inventory, pass them with `noctis_credentials: {username: …,
+  password: …}` on the host — the `common_docker` role adds `credentials` to POST /scans and
+  `no_log`s those tasks.
 - **`cves: []` empty is valid and normal** — don't invent a placeholder CVE ID for a misconfiguration/heuristic check. `category:` is the classifier for 0-CVE feeds, not `cves`.
 - **`ScanFilters.exclude_cve` matches on overlap, not equality** — a test is excluded if *any* entry in its `cves:` list appears in the exclusion list, so excluding one CVE of a multi-CVE chain feed excludes the whole feed.
 - **Shared mocks silently break other CVEs** — `infra/docker/<product>-mock/` is sometimes reused by more than one CVE (check `infra/docker/MOCKS.md`). Overwriting an existing endpoint/response format instead of adding a new branch breaks the *other* CVE's test without any error appearing in your own — it only surfaces if that CVE happens to be re-run (e.g. in `task test-all`). Always add, never replace; re-test every other consumer listed in `MOCKS.md`.

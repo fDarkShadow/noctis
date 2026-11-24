@@ -37,6 +37,11 @@ pub struct TestDef {
     #[serde(default)]
     pub services: Vec<String>,
 
+    /// Authenticated feed: when `true` and the scan request carries no
+    /// `credentials`, the feed is skipped (no task, no finding, debug log).
+    #[serde(default)]
+    pub requires_credentials: bool,
+
     #[serde(default)]
     pub includes: Vec<String>,
     #[serde(default)]

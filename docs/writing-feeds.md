@@ -83,6 +83,38 @@ Expression helpers available in `match`/`script` include string/regex/byte funct
 | `{{oob_token}}` | UUID unique to this run |
 | `{{oob_url}}` | Full OOB callback URL |
 | `{{oob_enabled}}` | `true` when `--oob` is configured |
+| `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
+| `{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}` | The request's `credentials` fields — each set only when supplied |
+
+## Authenticated feeds
+
+A feed that must log in to the target reads the scan's `credentials` from
+`{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}`. Declare
+`requires_credentials: true` so the feed is skipped cleanly (no task, no finding, a debug
+log) when the request carries no credentials:
+
+```yaml
+requires_credentials: true
+steps:
+  - id: login
+    action: http_request
+    method: POST
+    path: "/admin/login"
+    port: "{{port}}"
+    body: "username={{cred_username}}&password={{cred_password}}"
+    store_as: login
+```
+
+In a feed that also has unauthenticated steps, leave `requires_credentials` off and guard
+the authenticated ones with `condition: "cred_enabled"` instead (`cred_enabled` is always
+defined; the `cred_*` value vars exist only when supplied — referencing
+`{{cred_password}}` in a request that only sent a `token` aborts the test with an
+undefined-variable error, so guard such steps). Password and token values are
+replaced by `<redacted>` in every finding field and log line — as given, lowercase hex,
+percent-encoded, and as the
+Basic-auth base64 of `username:password`. Any other encoding (hashes, JSON escaping, a
+custom `base64_encode` of something else) is not recognised, so never put credentials or
+values derived from them in evidence.
 
 ## Confidence / QoD
 

@@ -63,12 +63,15 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
         step.timeout_secs,
     )?;
 
+    // Never log a credential that a feed templated into the URL.
+    let logged_url = ctx.redact(&url);
+
     match checker.run(method, &url, &headers, body.as_deref()).await {
         Ok(resp) => {
             tracing::debug!(
                 step = %step.id,
                 method,
-                url = %url,
+                url = %logged_url,
                 status = resp.status,
                 duration_ms = resp.duration_ms,
                 "http"
@@ -79,7 +82,14 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
             handle_outcome(&step.on_success, step, def, ctx, None)
         }
         Err(e) => {
-            tracing::warn!(step = %step.id, url = %url, "http error: {e}");
+            // reqwest embeds the request URL (percent-encoded, so possibly not
+            // matching any redaction form) in its error text: drop it and log
+            // the already-redacted `logged_url` instead.
+            let err = match e {
+                crate::error::NoctisError::Http(re) => re.without_url().to_string(),
+                other => other.to_string(),
+            };
+            tracing::warn!(step = %step.id, url = %logged_url, "http error: {}", ctx.redact(&err));
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
     }

@@ -69,7 +69,11 @@
             noctis_oob_server_port if noctis_use_oob else noctis_plain_port
           }}
 
+    # noctis_credentials (optional, per inventory host) → "credentials" in the
+    # request, e.g. {username: admin, password: admin}. Omitted when undefined, so
+    # existing inventories are unchanged. no_log keeps it out of Ansible output.
     - name: "{{ cve_id }} — Build scan request body"
+      no_log: "{{ noctis_credentials is defined }}"
       ansible.builtin.set_fact:
         _scan_body: >-
           {{
@@ -94,6 +98,9 @@
                   }
                 } if noctis_use_oob else {}
             )
+            | combine(
+                { "credentials": noctis_credentials } if noctis_credentials is defined else {}
+            )
           }}
 
     # ── Verify server is alive before submitting ──────────────────────────────
@@ -113,6 +120,7 @@
     # ── Submit scan ───────────────────────────────────────────────────────────
 
     - name: "{{ cve_id }} — POST /scans to {{ _api_url }}"
+      no_log: "{{ noctis_credentials is defined }}"
       ansible.builtin.uri:
         url: "{{ _api_url }}/scans"
         method: POST

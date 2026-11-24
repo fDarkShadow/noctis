@@ -267,7 +267,23 @@ noctis serve --oob --oob-host <public-ip> --oob-port 9090   # enable OOB callbac
 ```
 
 `services` is required (min 1). `concurrency` defaults to `5` (range 1–100). Optional fields
-include `webhook_url`, `oob`, and `filters` (e.g. exclude a CVE).
+include `webhook_url`, `oob`, `filters` (e.g. exclude a CVE), and `credentials`.
+
+**Authenticated scans** — pass `credentials` to let feeds log in to the target:
+
+```json
+"credentials": { "username": "admin", "password": "s3cr3t" }
+```
+
+`username`, `password` and `token` are all optional, but at least one of `username` / `token`
+is required and a `password` needs a `username` (otherwise `422`). Credentials are
+write-only: they never appear in `GET /scans`, webhook payloads or `Debug` output, and the
+password / token values are replaced by `<redacted>` in every finding field and engine log
+line. Masking covers the literal values, their lowercase hex and percent-encoded forms and
+the Basic-auth base64 of `username:password`; any other transformation a feed applies (hashing, JSON
+escaping, a custom encoding) is not recognised, so don't echo such values into evidence. A feed that
+declares `requires_credentials: true` is skipped (no task, no finding) when the request has
+no `credentials`.
 
 ---
 
@@ -328,6 +344,8 @@ Injected into every step; do not redefine `port` or `scheme` in a feed's `vars:`
 | `{{oob_url}}` | Full OOB callback URL |
 | `{{oob_host}}` / `{{oob_port}}` | OOB server host / port |
 | `{{oob_enabled}}` | `true` when `--oob` is configured |
+| `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
+| `{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}` | The request's `credentials` fields — each set only when supplied |
 
 ### Actions
 
