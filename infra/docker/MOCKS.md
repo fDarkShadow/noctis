@@ -263,6 +263,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## gitlab-password-reset-mock
 - gitlab-password-reset/CVE-2023-7028
 
+## gitlist-mock
+- gitlist/CVE-2014-4511
+
 ## goanywhere-mock
 - goanywhere/CVE-2024-0204
 
@@ -283,6 +286,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## imap-mock
 - general/imap-cleartext-auth
+
+## infusionsoft-gravityforms-mock
+- infusionsoft-gravityforms/CVE-2014-6446
 
 ## ingress-nginx-mock
 - ingress-nginx/CVE-2025-1974
@@ -713,6 +719,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## vnc-mock
 - general/vnc-no-auth
+
+## webjump-mock
+- webjump/CVE-2009-4892
 
 ## webmin-mock
 - webmin/CVE-2019-15107
