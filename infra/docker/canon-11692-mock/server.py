@@ -67,7 +67,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/tlogin.cgi":
             data = self._body()
-            if VULN_MODE and "Action=LOGIN" in data:
+            # The auth bypass requires the real login form (login_mode=user), so
+            # the payload genuinely matters — a bare POST does not grant a session.
+            if VULN_MODE and "Action=LOGIN" in data and "login_mode=user" in data:
                 # Auth bypass: admin session granted without a password.
                 self._send(200, LOGIN_PAGE,
                            extra_headers={"Set-Cookie": "CookieID=%s; path=/" % ADMIN_COOKIE})
@@ -82,7 +84,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/frame.cgi?page=DevInfoSetDev":
             cookie = self.headers.get("Cookie", "")
-            if VULN_MODE and ("CookieID=" + ADMIN_COOKIE) in cookie:
+            # The management frame is only served to an administrative session,
+            # which the NASL marks with "Login=11" alongside the bypass CookieID.
+            if (VULN_MODE and ("CookieID=" + ADMIN_COOKIE) in cookie
+                    and "Login=11" in cookie):
                 # Bypass cookie accepted → serve the management frameset.
                 self._send(200, DEVINFO_PAGE)
             else:
