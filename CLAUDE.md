@@ -489,6 +489,7 @@ shared build inputs, not mocks.
 | 0-CVE check, loop over a static list (`cves: []`, `category:`) | `tests/vulnerabilities/general/exposed-paths.yaml` |
 | 0-CVE check, ssh_check + match | `tests/vulnerabilities/general/ssh-weak-auth.yaml` |
 | 0-CVE check, tls_check | `tests/vulnerabilities/general/tls-weak-config.yaml` |
+| Authenticated feed (`requires_credentials` + login, capture cookie, exec) | `tests/vulnerabilities/wing-ftp/CVE-2015-4107.yaml` |
 
 ### Dynamic port allocation
 Mock ports are published on `127.0.0.1` only (`-p 127.0.0.1:<port>:<container_port>/<proto>`),
