@@ -236,3 +236,82 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "wincc-mock" {
+  name       = "wincc-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wincc-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wincc-mock:${variant}"]
+target "oracle-ebs-mock" {
+  name       = "oracle-ebs-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/oracle-ebs-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/oracle-ebs-mock:${variant}"]
+target "elite-bulletin-board-mock" {
+  name       = "elite-bulletin-board-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/elite-bulletin-board-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/elite-bulletin-board-mock:${variant}"]
+target "barracuda-mock" {
+  name       = "barracuda-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/barracuda-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/barracuda-mock:${variant}"]
+target "asustor-mock" {
+  name       = "asustor-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/asustor-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/asustor-mock:${variant}"]
+target "centreon-mock" {
+  name       = "centreon-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/centreon-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/centreon-mock:${variant}"]
+target "awstats-mock" {
+  name       = "awstats-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/awstats-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/awstats-mock:${variant}"]
+target "manageengine-5337-mock" {
+  name       = "manageengine-5337-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/manageengine-5337-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/manageengine-5337-mock:${variant}"]
+target "dolibarr-mock" {
+  name       = "dolibarr-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dolibarr-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dolibarr-mock:${variant}"]
+target "clipbucket-mock" {
+  name       = "clipbucket-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/clipbucket-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/clipbucket-mock:${variant}"]
+target "wp-symposium-mock" {
+  name       = "wp-symposium-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wp-symposium-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wp-symposium-mock:${variant}"]
+target "zabbix-mock" {
+  name       = "zabbix-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zabbix-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zabbix-mock:${variant}"]
+target "phprecipebook-mock" {
+  name       = "phprecipebook-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phprecipebook-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phprecipebook-mock:${variant}"]
+}
