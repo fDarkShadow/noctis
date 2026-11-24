@@ -38,16 +38,21 @@ class Handler(BaseHTTPRequestHandler):
         body = self._read_body()
         vuln = VULN
         cookie = self.headers.get("Cookie", "")
-        if (vuln and method == 'POST' and path == '/jsp/Login.do'):
+        if (vuln and method == 'POST' and path == '/jsp/Login.do' and 'IntegrationUser' in body and 'plugin' in body):
             self._start(302)
-            self._h('Set-Cookie', 'JSESSIONID=ABC123def456; Path=/')
+            self._h('Set-Cookie', 'JSESSIONID=A17FC2E9B4D6; Path=/')
             self._h('Location', '/index.jsp')
             self._finish('')
             return
-        if (vuln and path == '/apiclient/ember/index.jsp'):
+        if (vuln and path == '/apiclient/ember/index.jsp' and 'JSESSIONID=' in cookie):
             self._start(200)
             self._h('Content-Type', 'text/html')
-            self._finish("<html><head><title>OpManager</title></head><body><div id='HomeDashboard'>OpManager</div><a href='/jsp/Logout.do'>Logout.do</a></body></html>\n")
+            self._finish("<html><head><title>OpManager</title></head><body><div id='HomeDashboard'>OpManager Home</div><a href='/jsp/Logout.do'>Logout.do</a></body></html>\n")
+            return
+        if (vuln and path == '/apiclient/ember/index.jsp'):
+            self._start(302)
+            self._h('Location', '/jsp/Login.do')
+            self._finish('')
             return
         if (method == 'POST' and path == '/jsp/Login.do'):
             self._start(200)
