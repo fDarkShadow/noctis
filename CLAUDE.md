@@ -115,16 +115,26 @@ cves: [CVE-2023-46805, CVE-2024-21887]         # a chain tracked by multiple CVE
 `category` (optional, free string) still classifies a feed regardless of `cves` —
 e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside a CVE.
 
-Feeds in `general/` use exactly **three** categories — pick one, don't invent a new one
-(`filters.exclude_category` matches the exact string, so a stray synonym escapes the filter):
+`category` uses a **closed vocabulary**, enforced by `scripts/check_feeds.py` — pick an
+existing value, never a synonym (`filters.exclude_category` matches the exact string, so
+`sql-injection` would escape an `exclude_category: [sqli]` filter):
 
-| category | Use for | Examples |
-|----------|---------|----------|
-| `exposure` | A service or data reachable without authentication, or a feature open to abuse | `redis-unauthenticated`, `docker-api-exposed`, `smtp-open-relay`, `ntp-monlist` |
-| `hardening` | Weak protocol / security posture that grants no access on its own | `tls-weak-config`, `http-security-headers`, `smbv1-enabled`, `ssh-weak-auth`, `telnet-exposed` |
-| `default-credentials` | The feed actively tries logins (intrusive: can lock accounts) | `ssh-default-credentials` |
+| category | Use for |
+|----------|---------|
+| `exposure` | A service or data reachable without authentication, or a feature open to abuse (`redis-unauthenticated`, `smtp-open-relay`, `ntp-monlist`) |
+| `hardening` | Weak protocol / security posture that grants no access on its own (`tls-weak-config`, `http-security-headers`, `smbv1-enabled`, `ssh-weak-auth`) |
+| `default-credentials` | The feed actively tries logins — intrusive, can lock accounts |
+| `auth-bypass` | Authentication or authorization bypass |
+| `rce` | Code / command execution, including command injection and upload-to-RCE |
+| `sqli` | SQL injection |
+| `file-read` | Arbitrary file read: path traversal, LFI, file download/disclosure |
+| `file-write` | Arbitrary file write (kept apart: the probe itself writes on the target) |
+| `xss` | Cross-site scripting |
+| `ssrf` | Server-side request forgery |
 
-Only add a fourth when a scan operator genuinely needs to exclude that group on its own.
+Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`. `category`
+stays optional elsewhere. Add a value (to `CATEGORIES` in `check_feeds.py` and here) only
+when a scan operator genuinely needs to exclude that group on its own.
 
 ### Service → port matching
 - Feed `services: []` → runs on **all** discovered ports

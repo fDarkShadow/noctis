@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes +
 no `{{...}}` template in a step field the engine reads literally + `general/`
-feeds use one of the agreed categories (see CLAUDE.md, "TestDef (YAML)").
+feeds use one of the agreed categories, and every feed's category is in the shared
+vocabulary (see CLAUDE.md, "TestDef (YAML)").
 
 Run via `task feeds-check` (from infra/). Pass --write to regenerate the lockfile
 after an intentional feed edit — do that as part of the same commit, never separately.
@@ -129,23 +130,39 @@ def common_paths() -> list[str]:
 
 # `filters.exclude_category` is an exact-string match, so a synonym escapes it.
 GENERAL_CATEGORIES = {"exposure", "hardening", "default-credentials"}
+# Every `category:` in the tree must be one of these (the field stays optional).
+CATEGORIES = GENERAL_CATEGORIES | {
+    "auth-bypass",
+    "rce",
+    "sqli",
+    "file-read",
+    "file-write",
+    "xss",
+    "ssrf",
+}
 
 
-def check_general_categories(paths: list[str]) -> list[str]:
+def check_categories(paths: list[str]) -> list[str]:
     errors = []
     general = os.path.join(FEEDS_DIR, "general") + os.sep
     for path in paths:
-        if not path.startswith(general):
-            continue
         with open(path) as f:
             m = re.search(r"^category:\s*[\"']?([^\"'\s#]+)", f.read(), re.MULTILINE)
         rel = os.path.relpath(path, FEEDS_DIR)
+        in_general = path.startswith(general)
         if not m:
-            errors.append(f"{rel}: general/ feed has no category")
-        elif m.group(1) not in GENERAL_CATEGORIES:
+            if in_general:
+                errors.append(f"{rel}: general/ feed has no category")
+            continue
+        cat = m.group(1)
+        if in_general and cat not in GENERAL_CATEGORIES:
             errors.append(
-                f"{rel}: category {m.group(1)!r} — general/ feeds use one of "
-                f"{sorted(GENERAL_CATEGORIES)}"
+                f"{rel}: category {cat!r} — general/ feeds use one of {sorted(GENERAL_CATEGORIES)}"
+            )
+        elif cat not in CATEGORIES:
+            errors.append(
+                f"{rel}: unknown category {cat!r} — use one of {sorted(CATEGORIES)} "
+                "(or extend CATEGORIES and CLAUDE.md if a new group is really needed)"
             )
     return errors
 
@@ -175,7 +192,7 @@ def main() -> int:
     errors.extend(check_uid_uniqueness(feed_paths()))
     errors.extend(check_includes(feed_paths()))
     errors.extend(check_literal_fields(feed_paths() + common_paths()))
-    errors.extend(check_general_categories(feed_paths()))
+    errors.extend(check_categories(feed_paths()))
 
     if errors:
         print(f"feeds-check: {len(errors)} problem(s):", file=sys.stderr)
@@ -183,7 +200,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve, no literal-field templates, general/ categories valid.")
+    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve, no literal-field templates, categories valid.")
     return 0
 
 
