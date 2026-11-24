@@ -38,14 +38,21 @@ class Handler(BaseHTTPRequestHandler):
         body = self._read_body()
         vuln = VULN
         cookie = self.headers.get("Cookie", "")
-        if (vuln and ("etc/shadow" in path)):
-            self._start(200)
-            self._finish('root:$1$xyz:0:0:99999:7:::\n')
+        if (path == '/'):
+            self._start(401)
+            self._h('WWW-Authenticate', 'Basic realm="TP-LINK Wireless N Router WR841N"')
+            self._h('Content-Type', 'text/html')
+            self._finish('<html><body>401 Authorization Required - TP-LINK TL-WR841N</body></html>\n')
             return
-        if ("etc/shadow" in path):
+        if (vuln and 'etc/shadow' in path):
+            self._start(200)
+            self._h('Content-Type', 'application/octet-stream')
+            self._finish('root:$1$xyz$abcdef0123456789:0:0:99999:7:::\ndaemon:*:1:1:99999:7:::\n')
+            return
+        if ('etc/shadow' in path):
             self._start(200)
             self._h('Content-Type', 'text/html')
-            self._finish('<html><head><title>TP-LINK TL-WR841N Router LFI Vulnerability</title></head><body><h1>Welcome</h1><p>Please sign in to continue.</p><form method=post action=/login><input name=user><input name=pass type=password></form></body></html>\n')
+            self._finish('<html><head><title>TP-LINK</title></head><body>The page cannot be displayed.</body></html>\n')
             return
         # default
         self._start(404)
