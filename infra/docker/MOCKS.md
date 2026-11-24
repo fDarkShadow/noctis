@@ -53,6 +53,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## bluekeep-mock
 - bluekeep/CVE-2019-0708
 
+## brother-mock
+- brother/CVE-2017-7588
+
 ## cacti-mock
 - cacti/CVE-2022-46169
 
