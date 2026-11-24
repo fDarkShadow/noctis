@@ -541,3 +541,11 @@ target "phprecipebook-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/phprecipebook-mock:${variant}"]
 }
+
+target "infusionsoft-gravityforms-mock" {
+  name       = "infusionsoft-gravityforms-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/infusionsoft-gravityforms-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/infusionsoft-gravityforms-mock:${variant}"]
+}

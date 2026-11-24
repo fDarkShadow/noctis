@@ -287,6 +287,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## imap-mock
 - general/imap-cleartext-auth
 
+## infusionsoft-gravityforms-mock
+- infusionsoft-gravityforms/CVE-2014-6446
+
 ## ingress-nginx-mock
 - ingress-nginx/CVE-2025-1974
 
