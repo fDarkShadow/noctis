@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "phplinkadmin-mock" {
+  name       = "phplinkadmin-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phplinkadmin-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phplinkadmin-mock:${variant}"]
+}
