@@ -346,6 +346,7 @@ target "advantech-mock" {
   context    = "../docker/advantech-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/advantech-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "ajaxportal-mock" {
