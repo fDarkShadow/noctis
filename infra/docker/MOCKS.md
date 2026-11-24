@@ -497,6 +497,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## netgear-readynas-mock
 - netgear-readynas/netgear-readynas-cmd-injection
 
+## netgear-wnr1000-mock
+- netgear-wnr1000/CVE-2013-3316
+
 ## netscaler-5777-mock
 - netscaler/CVE-2025-5777
 

@@ -182,6 +182,7 @@
   "navis-webaccess/CVE-2016-5817.yaml": "ba0c3fde54d29184f84b366862faec6c51c0cb020da53778389eb29839797875",
   "netgear-prosafe/CVE-2013-4775.yaml": "55a40938544125151414b7ef6b976b28833dd1715ca9691096554a671c1e16f1",
   "netgear-readynas/netgear-readynas-cmd-injection.yaml": "08ae9e65ba2cf948d2b220ad7e427d8da4e8af141c5c0418e61be3b8d8baa91e",
+  "netgear-wnr1000/CVE-2013-3316.yaml": "c8b5d94510d1c500f98e68d6d99347dea2bf21bc2944e0c638ffcb2b0d5d900d",
   "netscaler-saml/CVE-2026-3055.yaml": "3ec6faaff2a2330c7020afc225aac8343db91fb4db6108d558ac49665b7f413d",
   "netscaler/CVE-2023-4966.yaml": "1e620228dc4cb97deb6d3f1de2141ec344bf8027201dc0be587f8938f18301b9",
   "netscaler/CVE-2025-5777.yaml": "3a65f89404de94c2adca1f8ff6edaf1b2f074c26cf642757916b66db83da2c49",
