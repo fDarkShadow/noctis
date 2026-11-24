@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "webjump-mock" {
+  name       = "webjump-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/webjump-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/webjump-mock:${variant}"]
+}
