@@ -44,14 +44,17 @@ noctis/
 │   └── common/             # Reusable includes
 ├── scripts/
 │   ├── gen_mocks_manifest.py # generates infra/docker/MOCKS.md (mock → consumer feeds)
-│   └── check_feeds.py        # sha lockfile + uid-uniqueness check — task feeds-check
+│   ├── gen_bake.py           # generates infra/bake/mocks.hcl — task bake-gen
+│   ├── check_feeds.py        # sha lockfile + uid-uniqueness check — task feeds-check
+│   └── feed_stats.py         # feed / CVE counters for README + Pages — task feeds-stats
 └── infra/                  # Reproducible test infrastructure
     ├── Taskfile.yml         # task test ID=CVE-XXXX / task test-all / task mocks-manifest
     ├── playbooks/           # 00-build / 01-start-servers / 10-<product>-<id> / 99-stop-servers
-    ├── bake/                # docker-bake HCL files, one per product family
+    ├── bake/mocks.hcl       # docker-bake targets for every mock (generated — task bake-gen)
     ├── roles/common_docker/ # Generic role: find port → REST POST /scans → assert → teardown
     ├── inventories/         # <product>/<id>/hosts.yml — one directory per vulnerability
     └── docker/              # Vuln/patched Dockerfiles per product; MOCKS.md (generated)
+        └── _base/python-mock/ # noctis/py-mock-base — shared base + mocklib.py for Python mocks
 ```
 
 ## Essential commands
@@ -69,8 +72,11 @@ task test ID=CVE-2021-41773           # TP + TN for one vulnerability
 task test-all                          # all vulnerabilities
 task build                             # build local mock images (podman build)
 task mocks-manifest                    # regenerate infra/docker/MOCKS.md
+task bake-gen                          # regenerate infra/bake/mocks.hcl (-- --check to verify)
 task feeds-check                       # sha lockfile + uid-uniqueness check
 task feeds-check -- --write            # regenerate the lockfile after an intentional feed edit
+task feeds-stats                       # count feeds / CVEs / products
+task feeds-stats -- --write            # refresh the <!-- feed-stats:* --> counters in README.md + docs/
 ```
 
 ## Key data model
@@ -322,13 +328,21 @@ Use it for write-then-read propagation gaps. (`var_name`/`var_value` belong to `
 or a descriptive kebab-case slug when it maps to zero CVEs (misconfiguration/heuristic check)
 or to a chain tracked by several CVE IDs (e.g. `ivanti-connect-secure-auth-bypass-rce`).
 
-`<product>` = the mock's product slug — normally the `infra/docker/<product>-mock/`
-directory name with the `-mock` suffix (and any trailing CVE-number suffix) stripped, e.g.
-`bigip-22986-mock` → `bigip`. Feeds with no dedicated mock (misconfiguration checks) use
-`<product>` = `general`. **Before picking a `<product>`, check `infra/docker/MOCKS.md`** —
-if a mock for this product already exists, decide deliberately whether to reuse it
-(extend, never overwrite existing endpoints — see the shared-mock warning below) or give
-your CVE its own dedicated mock directory instead.
+`<product>` = the **product** the vulnerability affects — one directory per product,
+shared by all of its vulnerabilities, never one per CVE, per bug class or per mock. E.g.
+every Confluence CVE lives in `confluence/` (not `confluence-ssti/`), every Ivanti Connect
+Secure CVE in `ivanti-ics/`, every Apache httpd CVE in `apache-httpd/`. **Run
+`ls tests/vulnerabilities/` first and reuse the existing directory** when the product is
+already there. Only distinct products of the same vendor get distinct directories
+(`ivanti-ics` / `ivanti-epmm` / `ivanti-csa`, `sonicwall-sma` / `sonicwall-sma1000`).
+Feeds with no dedicated mock (misconfiguration checks) use `<product>` = `general`.
+
+The feed directory and the mock directory are independent: a product directory may hold
+feeds backed by several mocks (`bigip/` uses `bigip-mock`, `bigip-22986-mock`,
+`bigip-46747-mock`). **Before creating a mock, check `infra/docker/MOCKS.md`** — if a mock
+for this product already exists, decide deliberately whether to reuse it (extend, never
+overwrite existing endpoints — see the shared-mock warning below) or give your CVE its own
+dedicated mock directory (`<product>-<cve-number>-mock`) instead.
 
 1. **Feed**: `tests/vulnerabilities/<product>/<id>.yaml` with a stable UUID v4 uid and
    `cves: []` set to the matching 0, 1, or N CVE IDs. After adding or editing it, run
@@ -338,6 +352,9 @@ your CVE its own dedicated mock directory instead.
    - Four hosts minimum: `<id>_vuln`, `<id>_vuln_https`, `<id>_patched`, `<id>_patched_https`
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
    - HTTPS hosts: add `container_port: 443` and `target_service: https`
+   - Optional `container_env: {VAR: value}` — passed as `-e` to the container. Use it to run
+     one mock in another mode instead of creating a second mock directory (see
+     `infra/inventories/axis2/CVE-2010-0219/hosts.yml`, `AXIS2_MODE: vuln_redirect`)
    - **No `target_port`** — port is allocated dynamically
    - On every vuln host set `expected_qod` (highest QoD branch the mock exercises) and
      `expected_min_confidence` (`confidence_base + highest_delta - 0.05`). These are asserted
@@ -363,7 +380,7 @@ your CVE its own dedicated mock directory instead.
    (e.g., 75 for response analysis) since OOB steps won't fire there.
 4. **Docker images**: `infra/docker/<product-name>/Dockerfile.vuln` + `Dockerfile.patched`
    - All mocks serve HTTP:80 **and** HTTPS:443 (self-signed cert generated at build time via openssl)
-   - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)
+   - Python mocks: `FROM noctis/py-mock-base:latest` + `serve(Handler, HTTPServer)` from `mocklib` (template below)
    - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
    - EOL base images (e.g. httpd:2.4.49 on Debian Buster): patch apt sources to `archive.debian.org` before installing openssl
    - **If reusing an existing mock directory** (per `infra/docker/MOCKS.md`): only *add*
@@ -375,16 +392,18 @@ your CVE its own dedicated mock directory instead.
    `10-` is mandatory; `task test-all` discovers playbooks from `infra/inventories/*/*/`
    directories, not by filename glob). Set `expected_cves: []` (matching the feed's
    `cves:`) alongside the display `cve_id`/`feed_path` vars.
-6. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
+6. **Bake target**: run `task bake-gen` and commit the regenerated `infra/bake/mocks.hcl`.
+   Never edit it by hand; on a merge conflict in it, just regenerate.
 
-### Python mock template (copy from `infra/docker/bigip-mock/server.py`)
+### Python mock template (copy from `infra/docker/mirth-connect-mock/server.py`)
 
 All Python mocks follow this exact structure — copy it, do not invent a new one:
 
 ```python
 #!/usr/bin/env python3
-import os, ssl, threading
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from mocklib import serve   # provided by noctis/py-mock-base
 
 VULN_MODE = os.environ.get("MYPRODUCT_MODE", "patched") == "vuln"
 
@@ -407,32 +426,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self): self.do_GET()
 
-def _make_https_server(port):
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ctx.load_cert_chain("/certs/server.crt", "/certs/server.key")
-    srv = HTTPServer(("0.0.0.0", port), Handler)
-    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
-    return srv
-
 if __name__ == "__main__":
-    https = _make_https_server(443)
-    threading.Thread(target=https.serve_forever, daemon=True).start()
-    HTTPServer(("0.0.0.0", 80), Handler).serve_forever()
+    serve(Handler, HTTPServer)   # HTTP:80 + HTTPS:443 (cert from the base image)
 ```
 
-Dockerfile.vuln (same pattern for all Python mocks):
+Dockerfile.vuln (same pattern for all Python mocks — python, openssl, the self-signed
+cert in `/certs`, `mocklib.py`, `EXPOSE 80 443` and the `CMD` all come from the base image
+`infra/docker/_base/python-mock/`, which `task build` builds first):
 ```dockerfile
-FROM python:3.11-slim
-RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir /certs \
-    && openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key \
-       -out /certs/server.crt -days 3650 -nodes \
-       -subj "/CN=noctis-mock"
+FROM noctis/py-mock-base:latest
 COPY server.py /app/server.py
 ENV MYPRODUCT_MODE=vuln
-EXPOSE 80 443
-CMD ["python3", "/app/server.py"]
 ```
 
 Dockerfile.patched: identical but `ENV MYPRODUCT_MODE=patched`.
@@ -448,7 +452,9 @@ noctis/<dirname>:vuln     ← from Dockerfile.vuln
 noctis/<dirname>:patched  ← from Dockerfile.patched
 ```
 
-No registration needed — the directory name is the image name.
+No registration needed — the directory name is the image name. Run `task bake-gen` so
+`infra/bake/mocks.hcl` lists it too. Directories starting with `_` (e.g. `_base/`) are
+shared build inputs, not mocks.
 
 ### Reference feeds to copy from
 
@@ -460,7 +466,7 @@ No registration needed — the directory name is the image name.
 | SSH banner version check | `tests/vulnerabilities/regresshion/CVE-2024-6387.yaml` |
 | Version via endpoint + OOB | `tests/vulnerabilities/log4shell/CVE-2021-44228.yaml` |
 | OGNL/template injection | `tests/vulnerabilities/confluence/CVE-2022-26134.yaml` |
-| Multi-step, first half of a 2-CVE chain (`cves: [CVE-2023-46805]`) | `tests/vulnerabilities/ivanti/CVE-2023-46805.yaml` |
+| Multi-step, first half of a 2-CVE chain (`cves: [CVE-2023-46805]`) | `tests/vulnerabilities/ivanti-ics/CVE-2023-46805.yaml` |
 | 0-CVE check, loop over a static list (`cves: []`, `category:`) | `tests/vulnerabilities/general/exposed-paths.yaml` |
 | 0-CVE check, ssh_check + match | `tests/vulnerabilities/general/ssh-weak-auth.yaml` |
 | 0-CVE check, tls_check | `tests/vulnerabilities/general/tls-weak-config.yaml` |
