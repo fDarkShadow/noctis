@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""ClipBucket 2.6 mock — videos.php `time` parameter SQL injection
-(CVE-2012-6642 / CVE-2012-6643 / CVE-2012-6644).
+"""ClipBucket mock — two independent SQL-injection endpoints:
 
-vuln:    a quote in `time` breaks the SQL query → 200 + MySQL syntax error
-         echoing the injected value.
-patched: the parameter is sanitised → normal video listing, no SQL error.
+* videos.php `time` parameter  (CVE-2012-6642 / CVE-2012-6643 / CVE-2012-6644)
+  vuln:    a quote in `time` breaks the SQL query -> 200 + MySQL syntax error
+           echoing the injected value.
+  patched: the parameter is sanitised -> normal video listing, no SQL error.
+
+* view_page.php `pid` parameter (CVE-2012-5849)
+  vuln:    the injected UNION SELECT concat() column reflects the marker into
+           the page (only when the real hex literal is present in the request).
+  patched: normal ClipBucket page, no marker.
 """
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -17,6 +22,15 @@ LISTING = (
     "<h1>Videos</h1><div class='videos'>No videos found</div>"
     "<p>ClipBucket Copyright &copy; 2007 - 2012</p></body></html>"
 )
+
+# Marker reflected by the injected UNION SELECT concat() column (CVE-2012-5849),
+# per the OpenVAS plugin. Hex 0x53514c2d496e6a656374696f6e2d54657374 decodes to
+# "SQL-Injection-Test"; reflected ONLY when that literal is sent (not self-fulfilling).
+MARKER = "SQL-Injection-Test"
+MARKER_HEX = "53514c2d496e6a656374696f6e2d54657374"
+
+# ClipBucket fingerprint — served in both modes (NASL extra_check ">ClipBucket").
+BRAND = ">ClipBucket"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -32,7 +46,26 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         parts = urlsplit(self.path)
-        if parts.path in ("/videos.php", "/clipbucket/videos.php"):
+        path = parts.path
+        # view_page.php — CVE-2012-5849, injectable pid parameter (UNION marker).
+        if path.startswith("/view_page.php"):
+            p = self.path
+            if VULN_MODE and MARKER_HEX in p.lower():
+                # Vulnerable: the concat() column reflects the marker into the page.
+                self._send(200,
+                    "<html><head><title>ClipBucket</title></head><body>"
+                    "<h1%s</h1>"
+                    "<div class='page-title'>%s<br/></div>"
+                    "<a href='login.php'>Login</a></body></html>" % (BRAND, MARKER))
+            else:
+                # Patched, or benign/incomplete request: normal ClipBucket page.
+                self._send(200,
+                    "<html><head><title>ClipBucket</title></head><body>"
+                    "<h1%s</h1>"
+                    "<p>Page not available.</p>"
+                    "<a href='login.php'>Login</a></body></html>" % BRAND)
+        # videos.php — CVE-2012-6642/6643/6644, time parameter SQL error.
+        elif path in ("/videos.php", "/clipbucket/videos.php"):
             time_v = parse_qs(parts.query, keep_blank_values=True).get("time", [""])[0]
             if VULN_MODE and "'" in time_v:
                 body = (
