@@ -428,6 +428,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - general/ntp-monlist
 
 ## nuuo-mock
+- nuuo/CVE-2016-6553
 - nuuo/CVE-2018-1150
 
 ## nuuo-nvrmini2-mock
