@@ -29,6 +29,7 @@
           --name {{ container_name }}
           --network {{ container_network }}
           -p {{ target_port }}:{{ container_port | default(80) }}
+          {% for k, v in (container_env | default({})).items() %}-e {{ (k ~ '=' ~ v) | quote }} {% endfor %}
           {{ docker_image }}
       changed_when: true
       throttle: 1
