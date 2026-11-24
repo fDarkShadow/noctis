@@ -2,11 +2,17 @@
 # Mock for Synology BeeStation (BSM) — Synology-SA-24:21 active check
 # (CVE-2024-50630 / CVE-2024-50631).
 #
-# Vuln mode: POST /webapi/entry.cgi leaks a Synology Drive Server debug/log
-# line embedding the compiled source-file name, matching the OpenVAS pattern
-#   ^[0-9A-Z:-]+ \([0-9]+:[0-9]+\) \[INFO\].+\.(o|cpp)
-# Patched mode: the endpoint returns a benign JSON API error (no leaked line)
-# → zero findings.
+# Both modes serve the Synology webapi realistically: POST /webapi/entry.cgi
+# answers with the normal JSON API reply/error, GET / returns a BSM landing
+# fingerprint. The vulnerability is a CRLF / X-Accel-Redirect injection in the
+# SYNO.API.Auth.RedirectURI handler's redirect_url parameter.
+#
+# Vuln mode: ONLY when the request body carries the injected X-Accel-Redirect
+#   header (the real exploit payload) does nginx serve the internal Drive
+#   worker log (cloud-workerd.log), whose embedded source-file names match the
+#   OpenVAS pattern  (?m)^[0-9A-Z:-]+ \([0-9]+:[0-9]+\) \[INFO\].+\.(o|cpp)
+# Patched mode: the handler strips the CRLF / rejects the injection and always
+#   returns the normal JSON API error (no file served) → zero findings.
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -15,9 +21,19 @@ CERT_DIR = os.environ.get("CERT_DIR", "/certs")
 PORT_HTTP = int(os.environ.get("PORT_HTTP", "80"))
 PORT_HTTPS = int(os.environ.get("PORT_HTTPS", "443"))
 
-# Leaked internal Drive Server debug line (source-file disclosure).
-LEAK = ("2024-10-21 (1234:5678) [INFO] cloud_station/synced_folder/"
-        "share_crypto_worker.cpp:482 crypto share enumeration\n")
+# Served internal Drive worker log (/volume1/@synologydrive/log/cloud-workerd.log).
+# A real log file starts with many lines before the source-file-bearing [INFO]
+# entries — hence the line-anchored (?m) match in the feed.
+LEAK = (
+    "cloud-workerd 1.7.0-20242 starting\n"
+    "config: /var/packages/SynologyDrive/etc/cloud-workerd.conf\n"
+    "2024-10-21T03:14:08-05:00 (2041:2041) [INFO] job-queue-client.cpp.o:218 worker queue initialised\n"
+    "2024-10-21T03:14:08-05:00 (2041:2041) [INFO] session finder authenticated\n"
+    "2024-10-21T03:14:09-05:00 (2041:2047) [INFO] checkpoint-task.cpp.o:530 checkpoint flush ok\n"
+)
+
+# Normal Synology webapi error reply (what a patched box returns for the probe).
+API_ERROR = '{"error":{"code":101},"success":false}'
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -32,22 +48,32 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path.split("?")[0] == "/webapi/entry.cgi":
-            # Drain request body (entry.cgi form params)
             try:
                 length = int(self.headers.get("Content-Length", 0))
-                if length: self.rfile.read(length)
+                raw = self.rfile.read(length) if length else b""
             except Exception:
-                pass
-            if VULN_MODE:
+                raw = b""
+            body = raw.decode("latin-1", "replace")
+            injected = ("redirect_url=" in body) and ("X-Accel-Redirect" in body)
+            # Vulnerable box: the reflected redirect_url carries the CRLF-injected
+            # X-Accel-Redirect, so nginx serves the internal log file instead of
+            # the JSON reply. No injection → normal API reply (so the TP proves
+            # the payload matters, not that the endpoint merely exists).
+            if VULN_MODE and injected:
                 self._send(200, LEAK)
             else:
-                self._send(200, '{"error":{"code":101},"success":false}',
-                           ct="application/json")
+                self._send(200, API_ERROR, ct="application/json")
         else:
             self._send(404, "Not found")
 
     def do_GET(self):
-        self._send(404, "Not found")
+        # Realistic BSM/DSM login fingerprint on both vuln and patched instances.
+        if self.path.split("?")[0] in ("/", "/webman/index.cgi"):
+            self._send(200,
+                       "<html><head><title>Synology BeeStation</title></head>"
+                       "<body>Synology Drive</body></html>", ct="text/html")
+        else:
+            self._send(404, "Not found")
 
 def _make_https_server(port):
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
