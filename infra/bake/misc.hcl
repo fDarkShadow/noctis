@@ -236,6 +236,12 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "netgear-readynas-mock" {
+  name       = "netgear-readynas-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netgear-readynas-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netgear-readynas-mock:${variant}"]
 target "cups-mock" {
   name       = "cups-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
