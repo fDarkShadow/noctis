@@ -1,0 +1,10 @@
+---
+- name: "dolibarr-404-mult-vuln — Dolibarr <= 4.0.4 SQL error via style.css.php lang"
+  hosts: dolibarr_404_mult_vuln
+  gather_facts: false
+  vars:
+    cve_id: "dolibarr-404-mult-vuln"
+    expected_cves: ["CVE-2017-7886", "CVE-2017-7887", "CVE-2017-7888", "CVE-2017-8879"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/dolibarr/dolibarr-404-mult-vuln.yaml"
+  roles:
+    - common_docker
