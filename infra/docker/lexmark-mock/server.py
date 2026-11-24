@@ -2,7 +2,7 @@
 """Mock for CVE-2021-44736 (lexmark) — OpenVAS NASL 2022/lexmark/gb_lexmark_CVE-2021-44736_active.nasl (GPL-2.0-only)."""
 import os, ssl, threading, urllib.parse, base64, html
 from http.server import BaseHTTPRequestHandler, HTTPServer
-CFG = {'kind': 'get', 'gate': None, 'url_path': '/cgi-bin/dynamic/printer/config/secure/memwipe.html', 'witness': 'This operation will clear all settings, solutions, and jobs'}
+CFG = {'kind': 'get', 'gate': None, 'url_path': '/cgi-bin/dynamic/printer/config/secure/memwipe.html', 'witness': 'This operation will clear all settings, solutions, and jobs', 'url_path2': '/webglue/content', 'witness2': 'Erase all printer and network settings'}
 VULN = os.environ.get('LEXMARK_MODE', "patched") == "vuln"
 BENIGN = "<html><head><title>OK</title></head><body>Service operational.</body></html>"
 class H(BaseHTTPRequestHandler):
@@ -24,9 +24,13 @@ class H(BaseHTTPRequestHandler):
             return self._s(200, pre["body"])           # product page, both modes
         k=CFG["kind"]
         if k in ("get","sqli","lfi_b64"):
-            if p!=CFG["url_path"]: return self._s(404,"Not found")
-            if VULN and self._gate(raw, ""): return self._s(200, CFG["witness"])
-            return self._s(200, BENIGN)
+            if p==CFG["url_path"]:
+                if VULN and self._gate(raw, ""): return self._s(200, CFG["witness"])
+                return self._s(200, BENIGN)
+            if CFG.get("url_path2") and p==CFG["url_path2"]:
+                if VULN: return self._s(200, CFG["witness2"])
+                return self._s(200, BENIGN)
+            return self._s(404,"Not found")
         if k=="xss":
             if p!=CFG["url_path"]: return self._s(404,"Not found")
             q=urllib.parse.urlparse(raw).query
