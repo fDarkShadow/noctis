@@ -4,6 +4,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("ARTICLEFR_MODE", "patched") == "vuln"
 
+# ArticleFR fingerprint — served in both modes (NASL probes only an ArticleFR
+# install). The version reflection below is server-computed (version()), not
+# echoed from the URL.
+FINGERPRINT = '<meta name="generator" content="ArticleFR CMS">'
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args): pass
 
@@ -24,13 +29,14 @@ class Handler(BaseHTTPRequestHandler):
                 # Vulnerable: the UNION SELECT reflects version() into the
                 # rating response -> matches scored.*from.([0-9.]+)
                 self._send(200,
-                    "<html><body>"
+                    "<html><head>%s</head><body>"
                     "<div class=\"rating\">Already scored. Result from 5.5.38</div>"
-                    "</body></html>")
+                    "</body></html>" % FINGERPRINT)
             else:
                 # Patched (or benign request): normal rating ack, no reflection.
                 self._send(200,
-                    "<html><body><div class=\"rating\">Thanks for rating.</div></body></html>")
+                    "<html><head>%s</head><body>"
+                    "<div class=\"rating\">Thanks for rating.</div></body></html>" % FINGERPRINT)
         else:
             self._send(404, "<html><body>404 Not Found</body></html>")
 
