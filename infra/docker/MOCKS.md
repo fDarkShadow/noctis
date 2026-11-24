@@ -560,6 +560,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## snmp-mock
 - general/snmp-default-community
 
+## solarwinds-srm-mock
+- solarwinds-srm/CVE-2016-4350
+
 ## sonicwall-sma-mock
 - sonicwall-sma/CVE-2024-38475
 
