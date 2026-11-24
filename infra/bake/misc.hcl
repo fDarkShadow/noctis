@@ -635,3 +635,45 @@ target "leaguemanager-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/leaguemanager-mock:${variant}"]
 }
+target "articlefr-mock" {
+  name       = "articlefr-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/articlefr-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/articlefr-mock:${variant}"]
+}
+target "elearning-server-mock" {
+  name       = "elearning-server-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/elearning-server-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/elearning-server-mock:${variant}"]
+}
+target "trombinoscope-mock" {
+  name       = "trombinoscope-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/trombinoscope-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/trombinoscope-mock:${variant}"]
+}
+target "apprain-mock" {
+  name       = "apprain-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/apprain-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/apprain-mock:${variant}"]
+}
+target "efront-mock" {
+  name       = "efront-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/efront-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/efront-mock:${variant}"]
+}
+target "refbase-mock" {
+  name       = "refbase-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/refbase-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/refbase-mock:${variant}"]
+}

@@ -8,6 +8,9 @@ each `infra/docker/<mock>/` image. A mock listed with more than one consumer is
 a **shared mock** — before changing its `server.py`, read every consumer's feed
 and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
+## acti-camera-mock
+- acti/CVE-2017-3184
+
 ## activemq-jolokia-mock
 - activemq-jolokia/CVE-2026-34197
 
@@ -28,6 +31,15 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## apoll-mock
 - apoll/CVE-2008-6270
+
+## apprain-mock
+- apprain/CVE-2011-5228
+
+## articlefr-mock
+- articlefr/CVE-2014-5097
+
+## astium-mock
+- astium/CVE-2013-10043
 
 ## asustor-mock
 - asustor/CVE-2018-11509
@@ -120,13 +132,20 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - cleo/CVE-2024-50623
 
 ## clipbucket-mock
+- clipbucket/CVE-2012-5849
 - clipbucket/clipbucket-multiple-vulns
+
+## cohu-camera-mock
+- cohu/CVE-2017-8860
 
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
 
 ## coldfusion-48282-mock
 - coldfusion/CVE-2026-48282
+
+## coldfusion-authbypass-mock
+- coldfusion/CVE-2013-0632
 
 ## coldfusion-mock
 - coldfusion/CVE-2024-20767
@@ -170,6 +189,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## craftcms-mock
 - craftcms/CVE-2025-32432
 
+## crestron-airmedia-mock
+- crestron-airmedia/CVE-2016-5639
+
 ## crushftp-31161-mock
 - crushftp/CVE-2025-31161
 
@@ -203,6 +225,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dlink-dcs-mock
 - dlink-dcs/CVE-2020-25078
 
+## dlink-dir3040-mock
+- dlink-dir3040/CVE-2021-21816
+
 ## dlink-dwr-mock
 - dlink-dwr/CVE-2018-19300
 
@@ -218,11 +243,17 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## drupal-sqli-mock
 - drupal-sqli/CVE-2026-9082
 
+## efront-mock
+- efront/CVE-2010-1918
+
 ## ektron-mock
 - ektron/CVE-2012-5357
 
 ## elasticsearch-mock
 - general/elasticsearch-unauth
+
+## elearning-server-mock
+- elearning-server/CVE-2012-2923
 
 ## elite-bulletin-board-mock
 - elite-bulletin-board/CVE-2012-5874
@@ -322,6 +353,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## ingress-nginx-mock
 - ingress-nginx/CVE-2025-1974
+
+## invision-power-board-mock
+- invision-power-board/CVE-2012-5692
 
 ## ivanti-csa-mock
 - ivanti-csa/CVE-2024-8963
@@ -481,6 +515,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## netgear-readynas-mock
 - netgear-readynas/netgear-readynas-cmd-injection
 
+## netgear-routers-mock
+- netgear-routers/CVE-2016-6277
+
+## netgear-wnr1000-mock
+- netgear-wnr1000/CVE-2013-3316
+
 ## netscaler-5777-mock
 - netscaler/CVE-2025-5777
 
@@ -499,6 +539,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## nuuo-mock
 - nuuo/CVE-2016-6553
 - nuuo/CVE-2018-1150
+
+## nuuo-nvrmini2-11523-mock
+- nuuo/CVE-2018-11523
 
 ## nuuo-nvrmini2-mock
 - nuuo-nvrmini2/CVE-2011-5325
@@ -526,6 +569,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## owncloud-graphapi-mock
 - owncloud-graphapi/CVE-2023-49103
+
+## pandora-fms-mock
+- pandora-fms/CVE-2010-4278
+
+## pandora-mock
+- pandora/CVE-2014-125115
 
 ## panos-0108-mock
 - panos/CVE-2025-0108
@@ -610,6 +659,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## redis-mock
 - general/redis-unauthenticated
+
+## refbase-mock
+- refbase/CVE-2015-6007
 
 ## regresshion-mock
 - regresshion/CVE-2024-6387
@@ -717,6 +769,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## symantec-sepm-mock
 - symantec-sepm/CVE-2014-3437
 
+## synology-mock
+- synology/CVE-2024-50630
+
+## tapestry-mock
+- tapestry/CVE-2021-27850
+
 ## tbk-dvr-mock
 - tbk-dvr/CVE-2024-3721
 
@@ -740,6 +798,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
+
+## trombinoscope-mock
+- trombinoscope/CVE-2012-4282
 
 ## twonky-mock
 - twonky/CVE-2025-13315
@@ -800,6 +861,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## wincc-mock
 - wincc/simatic-wincc-input-validation
+
+## wordpress-dirtrav-mock
+- wordpress/CVE-2007-6369
 
 ## workspace-one-mock
 - workspace-one/CVE-2022-22954
