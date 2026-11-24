@@ -222,6 +222,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## deluxebb-mock
 - deluxebb/CVE-2009-1033
 
+## dlink-dir3040-mock
+- dlink-dir3040/CVE-2021-21816
+
 ## dlink-dwr-mock
 - dlink-dwr/CVE-2018-19300
 
