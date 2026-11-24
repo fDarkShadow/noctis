@@ -236,6 +236,13 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "lexmark-mock" {
+  name       = "lexmark-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/lexmark-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/lexmark-mock:${variant}"]
 target "netgear-readynas-mock" {
   name       = "netgear-readynas-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
