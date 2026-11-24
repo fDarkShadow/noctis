@@ -666,6 +666,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## superset-mock
 - superset/CVE-2023-27524
 
+## symantec-epm-mock
+- symantec-epm/CVE-2013-5014
+
 ## symantec-sepm-mock
 - symantec-sepm/CVE-2014-3437
 
