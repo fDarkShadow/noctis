@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Mock for CVE-2021-27850. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
-vuln and patched behaviours are both realistic so the TN is non-trivial."""
+Both modes redirect the asset dir to the hashed class URL; only vuln serves the class at
+<loc>/ (the trailing-slash form the NASL requests), while patched 404s it — a non-trivial TN
+that exercises the real Tapestry fix (redirect stays, class download is refused)."""
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -37,24 +39,22 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path
         body = self._read_body()
         vuln = VULN
-        cookie = self.headers.get("Cookie", "")
-        if (vuln and path == '/assets/app/something/services/AppModule.class/'):
+        # Step 1: the unhashed asset dir redirects to the hashed class URL in BOTH modes, as a
+        # real Tapestry does (the redirect alone does not prove the vulnerability).
+        if path == '/assets/app/something/services/AppModule.class/':
             self._start(302)
             self._h('Location', '/assets/meta/AppModule.class')
             self._h('Content-Type', 'text/html')
             self._finish('<html><body>Found</body></html>\n')
             return
-        if (vuln and path == '/assets/meta/AppModule.class'):
+        # Step 2: the NASL follows <loc> with a trailing slash. Only a vulnerable build serves
+        # the compiled class there; a patched build refuses it.
+        if vuln and path == '/assets/meta/AppModule.class/':
             self._start(200)
             self._h('Content-Type', 'application/java')
-            self._finish('Êþº¾\x00\x00AppModule$InnerClasses SignatureAttribute\n')
+            self._finish('\xca\xfe\xba\xbe\x00\x00AppModule$InnerClasses SignatureAttribute\n')
             return
-        if (path == '/assets/app/something/services/AppModule.class/'):
-            self._start(200)
-            self._h('Content-Type', 'text/html')
-            self._finish('<html><head><title>Apache Tapestry</title></head><body>Welcome</body></html>\n')
-            return
-        if (path == '/assets/meta/AppModule.class'):
+        if path == '/assets/meta/AppModule.class/':
             self._start(404)
             self._h('Content-Type', 'text/plain')
             self._finish('Not found\n')
