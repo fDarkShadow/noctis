@@ -654,6 +654,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## redis-mock
 - general/redis-unauthenticated
 
+## refbase-mock
+- refbase/CVE-2015-6007
+
 ## regresshion-mock
 - regresshion/CVE-2024-6387
 
