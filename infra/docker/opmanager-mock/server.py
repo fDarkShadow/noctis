@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Mock for CVE-2015-7765. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
-vuln and patched behaviours are both realistic so the TN is non-trivial."""
-import os, ssl, threading
+vuln and patched behaviours are both realistic so the TN is non-trivial. The vuln login issues
+a RANDOM JSESSIONID and the dashboard serves content only when that exact session comes back, so
+the feed's cookie-extraction + Cookie-header steps are genuinely exercised (not a shared constant)."""
+import os, secrets, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN = os.environ.get("CVE_2015_7765_MODE", "patched") == "vuln"
+SESSION = secrets.token_hex(8).upper()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -38,13 +41,15 @@ class Handler(BaseHTTPRequestHandler):
         body = self._read_body()
         vuln = VULN
         cookie = self.headers.get("Cookie", "")
-        if (vuln and method == 'POST' and path == '/jsp/Login.do' and 'IntegrationUser' in body and 'plugin' in body):
+        if (vuln and method == 'POST' and path == '/jsp/Login.do'
+                and 'userName=IntegrationUser' in body and 'password=plugin' in body):
             self._start(302)
-            self._h('Set-Cookie', 'JSESSIONID=A17FC2E9B4D6; Path=/')
+            self._h('Set-Cookie', 'JSESSIONID=' + SESSION + '; Path=/')
             self._h('Location', '/index.jsp')
             self._finish('')
             return
-        if (vuln and path == '/apiclient/ember/index.jsp' and 'JSESSIONID=' in cookie):
+        if (vuln and path == '/apiclient/ember/index.jsp'
+                and ('JSESSIONID=' + SESSION) in cookie):
             self._start(200)
             self._h('Content-Type', 'text/html')
             self._finish("<html><head><title>OpManager</title></head><body><div id='HomeDashboard'>OpManager Home</div><a href='/jsp/Logout.do'>Logout.do</a></body></html>\n")
