@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "zerocms-mock" {
+  name       = "zerocms-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zerocms-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zerocms-mock:${variant}"]
+}
