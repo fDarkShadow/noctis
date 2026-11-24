@@ -564,6 +564,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## opennms-mock
 - opennms/CVE-2015-0975
 
+## opmanager-mock
+- manageengine-opmanager/CVE-2015-7765
+
 ## oracle-ebs-mock
 - oracle-ebs/CVE-2017-3549
 
