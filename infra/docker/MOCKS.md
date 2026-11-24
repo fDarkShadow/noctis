@@ -144,6 +144,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## coldfusion-48282-mock
 - coldfusion/CVE-2026-48282
 
+## coldfusion-authbypass-mock
+- coldfusion/CVE-2013-0632
+
 ## coldfusion-mock
 - coldfusion/CVE-2024-20767
 
