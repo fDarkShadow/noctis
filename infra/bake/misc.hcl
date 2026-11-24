@@ -54,6 +54,13 @@ target "drupal-sqli-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/drupal-sqli-mock:${variant}"]
 }
+target "ektron-mock" {
+  name       = "ektron-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ektron-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ektron-mock:${variant}"]
+}
 target "exchange-mock" {
   name       = "exchange-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
