@@ -30,7 +30,7 @@ description: |
   its SecurityMode, so clients may run unsigned sessions. An attacker able to
   intercept or relay traffic (NTLM relay to SMB) can tamper with or hijack them.
 cves: []
-category: misconfiguration
+category: hardening
 severity: medium
 confidence_base: 0.40
 tags: [smb, smb2, smb3, signing, ntlm-relay, misconfig, hardening]
