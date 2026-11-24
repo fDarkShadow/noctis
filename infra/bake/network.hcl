@@ -103,3 +103,10 @@ target "dlink-dwr-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dlink-dwr-mock:${variant}"]
 }
+target "cucm-3315-mock" {
+  name       = "cucm-3315-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cucm-3315-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cucm-3315-mock:${variant}"]
+}
