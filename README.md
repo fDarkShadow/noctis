@@ -406,6 +406,10 @@ tests/vulnerabilities/<product>/<id>.yaml    # <id> = the CVE, or a kebab-case s
 tests/common/                                # reusable includes
 ```
 
+**Today: <!-- feed-stats:feeds -->311<!-- /feed-stats --> vulnerability tests** in <!-- feed-stats:products -->208<!-- /feed-stats --> product directories — <!-- feed-stats:cve_feeds -->274<!-- /feed-stats --> CVE
+detections covering **<!-- feed-stats:cves -->406<!-- /feed-stats --> distinct CVEs**, plus <!-- feed-stats:nocve_feeds -->37<!-- /feed-stats --> CVE-less misconfiguration / exposure
+checks.
+
 Coverage spans **CVE detections** across Apache, Atlassian (Confluence/Jira), F5 BIG-IP,
 Fortinet, Ivanti, Citrix NetScaler, VMware, Cisco, GitLab, Jenkins, ColdFusion, CrushFTP, Cleo,
 PaperCut, and many more — plus a growing set of **protocol / exposure checks** under
@@ -415,7 +419,8 @@ cleartext POP3/IMAP, finger, rsync, X11, VNC, LDAP anonymous bind, SMBv1; weak T
 and more.
 
 ```sh
-grep -rl '^cves:' tests/vulnerabilities | wc -l   # how many feeds today
+task feeds-stats                  # recount from tests/vulnerabilities/ (run from infra/)
+task feeds-stats -- --write       # refresh every counter in README.md and docs/
 ```
 
 See **[CLAUDE.md](CLAUDE.md)** for the full authoring reference and reference feeds to copy from.

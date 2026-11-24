@@ -14,8 +14,18 @@ pub(super) fn resolve_port(port: &Option<String>, ctx: &Context) -> Option<u16> 
     resolved.trim().parse().ok().or(ctx.target_port)
 }
 
+/// Interpolate a step's `method:` (default `GET`). An undefined variable is an error, never
+/// a request sent with the literal `{{...}}` text as its method.
+pub(super) fn resolve_method(method: Option<&str>, ctx: &Context) -> Result<String> {
+    let raw = method.unwrap_or("GET");
+    Ok(expr::interpolate(raw, &ctx.vars)?.trim().to_string())
+}
+
 pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> {
-    let method = step.method.as_deref().unwrap_or("GET");
+    // `method` is templated like `path` / `headers` / `body`, so shared includes such as
+    // tests/common/http_base.yaml can take it from a var (`method: "{{http_method}}"`).
+    let method = resolve_method(step.method.as_deref(), ctx)?;
+    let method = method.as_str();
     let path = step.path.as_deref().unwrap_or("/");
 
     // Scheme comes from {{scheme}} injected by the runner (derived from the discovered service
@@ -72,5 +82,37 @@ pub async fn run(step: &Step, def: &TestDef, ctx: &mut Context) -> Result<bool> 
             tracing::warn!(step = %step.id, url = %url, "http error: {e}");
             handle_outcome(&step.on_failure, step, def, ctx, None)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ctx() -> Context {
+        Context::new("127.0.0.1", Some(8080), "http", None)
+    }
+
+    #[test]
+    fn method_defaults_to_get() {
+        assert_eq!(resolve_method(None, &ctx()).unwrap(), "GET");
+    }
+
+    #[test]
+    fn method_literal_is_kept() {
+        assert_eq!(resolve_method(Some("POST"), &ctx()).unwrap(), "POST");
+    }
+
+    #[test]
+    fn method_template_is_interpolated() {
+        // tests/common/http_base.yaml declares `method: "{{http_method}}"`.
+        let mut c = ctx();
+        c.set("http_method", serde_json::Value::String("GET".into()));
+        assert_eq!(resolve_method(Some("{{http_method}}"), &c).unwrap(), "GET");
+    }
+
+    #[test]
+    fn method_with_undefined_var_is_an_error() {
+        assert!(resolve_method(Some("{{nope}}"), &ctx()).is_err());
     }
 }

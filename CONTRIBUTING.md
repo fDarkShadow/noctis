@@ -69,6 +69,8 @@ task test ID=CVE-2021-41773  # run TP + TN for one vulnerability
 task test-all                # run every vulnerability
 task feeds-check             # sha lockfile + uid-uniqueness check
 task mocks-manifest          # regenerate infra/docker/MOCKS.md
+task feeds-stats             # count feeds / CVEs (-- --write refreshes README + Pages)
+task bake-gen                # regenerate infra/bake/mocks.hcl after adding a mock
 ```
 
 `CLAUDE.md` documents every convention, pattern, and pitfall in depth — **read it
@@ -80,7 +82,8 @@ adapt them rather than inventing new patterns.
 
 ## Adding a detection feed
 
-1. **Feed** — `tests/vulnerabilities/<product>/<id>.yaml` with:
+1. **Feed** — `tests/vulnerabilities/<product>/<id>.yaml` (one directory per
+   product, shared by all its CVEs — reuse it if it exists) with:
    - a stable, unique **UUID v4** `uid` (never reuse or change one);
    - `cves:` set to the matching 0, 1, or N CVE IDs (`[]` is valid and normal for
      a misconfiguration/exposure check — use `category:` to classify it);

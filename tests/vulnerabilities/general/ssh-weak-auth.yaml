@@ -10,9 +10,6 @@ services: [ssh]
 author: florian
 version: "1.0.0"
 
-vars:
-  port: 22
-
 steps:
   - id: ssh-inspect
     action: ssh_check

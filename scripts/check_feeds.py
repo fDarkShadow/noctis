@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes.
+"""Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes +
+no `{{...}}` template in a step field the engine reads literally.
 
 Run via `task feeds-check` (from infra/). Pass --write to regenerate the lockfile
 after an intentional feed edit — do that as part of the same commit, never separately.
@@ -96,6 +97,35 @@ def check_includes(paths: list[str]) -> list[str]:
     return errors
 
 
+# Step fields the engine reads as literal text — it never runs them through the
+# `{{var}}` template engine. A template there is sent / matched verbatim and the step
+# silently misbehaves (e.g. `method: "{{http_method}}"` used to go out as the HTTP
+# method itself). Keep this list in sync with src/engine/actions/*.rs.
+LITERAL_STEP_FIELDS = ("id", "action", "store_as", "source", "pattern", "var_name", "handle", "line_ending")
+_LITERAL_RE = re.compile(
+    r"^\s+(?:-\s+)?(" + "|".join(LITERAL_STEP_FIELDS) + r"):\s*(.*\{\{.*)$"
+)
+
+
+def check_literal_fields(paths: list[str]) -> list[str]:
+    errors = []
+    for path in paths:
+        rel = os.path.relpath(path, REPO_ROOT)
+        with open(path) as f:
+            for n, line in enumerate(f, 1):
+                m = _LITERAL_RE.match(line)
+                if m and not line.lstrip().startswith("#"):
+                    errors.append(
+                        f"{rel}:{n}: `{m.group(1)}:` is not templated by the engine, "
+                        f"so `{m.group(2).strip()}` would be used verbatim"
+                    )
+    return errors
+
+
+def common_paths() -> list[str]:
+    return sorted(glob.glob(os.path.join(REPO_ROOT, "tests", "common", "*.yaml")))
+
+
 def main() -> int:
     write = "--write" in sys.argv
 
@@ -120,6 +150,7 @@ def main() -> int:
 
     errors.extend(check_uid_uniqueness(feed_paths()))
     errors.extend(check_includes(feed_paths()))
+    errors.extend(check_literal_fields(feed_paths() + common_paths()))
 
     if errors:
         print(f"feeds-check: {len(errors)} problem(s):", file=sys.stderr)
@@ -127,7 +158,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve.")
+    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve, no literal-field templates.")
     return 0
 
 
