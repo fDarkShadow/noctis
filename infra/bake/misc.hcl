@@ -236,6 +236,12 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "asustor-mock" {
+  name       = "asustor-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/asustor-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/asustor-mock:${variant}"]
 target "centreon-mock" {
   name       = "centreon-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
