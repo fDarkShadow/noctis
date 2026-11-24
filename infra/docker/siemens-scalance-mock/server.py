@@ -1,41 +1,63 @@
 #!/usr/bin/env python3
-"""Mock for CVE-2013-5709 — Siemens Scalance X-200 Series Switches Insufficient Entropy Vulnerability (CVSS 8.3).
-Ported from OpenVAS/Greenbone NASL 2014/gb_siemens_scalance_62341.nasl (GPL-2.0-only, Greenbone Community Feed)."""
+"""Mock for CVE-2013-5709. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
+vuln and patched behaviours are both realistic so the TN is non-trivial."""
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-VULN_MODE = os.environ.get("CVE_2013_5709_MODE", "patched") == "vuln"
-
-MARKER_BODY = '[CLI\\SYSTEM]\nname=scalance\n'
+VULN = os.environ.get("CVE_2013_5709_MODE", "patched") == "vuln"
 
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
-    def _send_marker(self):
-        body = MARKER_BODY.encode("latin-1", "replace")
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/octet-stream')
+    def _start(self, code):
+        self._body = b""
+        self._code = code
+        self._hdrs = []
+
+    def _h(self, k, v):
+        self._hdrs.append((k, v))
+
+    def _finish(self, body):
+        if isinstance(body, str):
+            body = body.encode("latin-1", "replace")
+        self.send_response(self._code)
+        for k, v in self._hdrs:
+            self.send_header(k, v)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
-    def _not_found(self):
-        self.send_response(404)
-        self.send_header("Content-Type", "text/plain")
-        self.send_header("Content-Length", "10")
-        self.end_headers()
-        self.wfile.write(b"Not found\n")
+    def _read_body(self):
+        n = int(self.headers.get("Content-Length", 0) or 0)
+        return self.rfile.read(n).decode("latin-1", "replace") if n else ""
+
+    def _route(self, method):
+        path = self.path
+        body = self._read_body()
+        vuln = VULN
+        cookie = self.headers.get("Cookie", "")
+        if (vuln and (path == '/fs/cfgFile.cfg')):
+            self._start(200)
+            self._h('Content-Type', 'application/octet-stream')
+            self._finish('[CLI\\SYSTEM]\nname=scalance\n')
+            return
+        if (path == '/fs/cfgFile.cfg'):
+            self._start(200)
+            self._h('Content-Type', 'text/html')
+            self._finish('<html><head><title>Siemens Scalance X-200 Series Switches Insufficient Entropy Vulnerability</title></head><body><h1>Welcome</h1><p>Please sign in to continue.</p><form method=post action=/login><input name=user><input name=pass type=password></form></body></html>\n')
+            return
+        # default
+        self._start(404)
+        self._h("Content-Type", "text/plain")
+        self._finish("Not found\n")
 
     def do_GET(self):
-        if VULN_MODE and (self.path == '/fs/cfgFile.cfg'):
-            self._send_marker()
-        else:
-            self._not_found()
+        self._route("GET")
 
     def do_POST(self):
-        self.do_GET()
+        self._route("POST")
 
 
 def _make_https_server(port):
