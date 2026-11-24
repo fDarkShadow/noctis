@@ -713,3 +713,6 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## zookeeper-mock
 - general/zookeeper-4lw-exposed
+
+## zte-zxdsl-mock
+- zte-zxdsl/CVE-2014-9183

@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "zte-zxdsl-mock" {
+  name       = "zte-zxdsl-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zte-zxdsl-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zte-zxdsl-mock:${variant}"]
 target "servision-mock" {
   name       = "servision-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
