@@ -4,7 +4,14 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("CLIPBUCKET_MODE", "patched") == "vuln"
 
+# Marker reflected by the injected UNION SELECT concat() column, per the OpenVAS
+# plugin. The hex 0x53514c2d496e6a656374696f6e2d54657374 decodes to
+# "SQL-Injection-Test"; the mock reflects it ONLY when that literal is sent.
 MARKER = "SQL-Injection-Test"
+MARKER_HEX = "53514c2d496e6a656374696f6e2d54657374"
+
+# ClipBucket fingerprint — served in both modes (NASL extra_check ">ClipBucket").
+BRAND = ">ClipBucket"
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args): pass
@@ -22,18 +29,20 @@ class Handler(BaseHTTPRequestHandler):
         p = self.path
         # Page view endpoint — the injectable pid parameter.
         if p.startswith("/view_page.php"):
-            if VULN_MODE and "union" in p.lower() and "pid=0%27" in p.lower():
-                # Vulnerable: the UNION SELECT reflects the marker column into the page.
+            if VULN_MODE and MARKER_HEX in p.lower():
+                # Vulnerable: the concat() column reflects the marker into the page.
                 self._send(200,
-                    "<html><body><h1>Page</h1>"
+                    "<html><head><title>ClipBucket</title></head><body>"
+                    "<h1%s</h1>"
                     "<div class='page-title'>%s<br/></div>"
-                    "<a href='login.php'>Login</a></body></html>" % MARKER)
+                    "<a href='login.php'>Login</a></body></html>" % (BRAND, MARKER))
             else:
-                # Patched (or benign request): normal page, no reflection.
+                # Patched, or benign/incomplete request: normal ClipBucket page.
                 self._send(200,
-                    "<html><body><h1>Page</h1>"
+                    "<html><head><title>ClipBucket</title></head><body>"
+                    "<h1%s</h1>"
                     "<p>Page not available.</p>"
-                    "<a href='login.php'>Login</a></body></html>")
+                    "<a href='login.php'>Login</a></body></html>" % BRAND)
         else:
             self._send(404, "<html><body>404 Not Found</body></html>")
 
