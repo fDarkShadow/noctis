@@ -29,6 +29,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## asustor-mock
 - asustor/CVE-2018-11509
 
+## atomcms-mock
+- atomcms/CVE-2014-4852
+
 ## aviatrix-mock
 - aviatrix/CVE-2024-50603
 
