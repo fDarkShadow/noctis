@@ -497,6 +497,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - nuuo/CVE-2016-6553
 - nuuo/CVE-2018-1150
 
+## nuuo-nvrmini2-11523-mock
+- nuuo/CVE-2018-11523
+
 ## nuuo-nvrmini2-mock
 - nuuo-nvrmini2/CVE-2011-5325
 
