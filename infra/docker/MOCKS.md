@@ -35,6 +35,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## awstats-mock
 - awstats/CVE-2017-1000501
 
+## axis2-mock
+- axis2/CVE-2010-0219
+
+## axis2-redirect-mock
+- axis2/CVE-2010-0219
+
 ## backupbuddy-mock
 - backupbuddy/CVE-2013-2741
 

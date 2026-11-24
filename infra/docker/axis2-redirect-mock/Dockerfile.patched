@@ -1,0 +1,14 @@
+# Axis2 default-credentials mock — modern-release (>= 1.7.3) REDIRECT variant,
+# patched: default creds rejected, login POST 302s back to the login page (still
+# issuing a JSESSIONID). Same server.py as infra/docker/axis2-mock/.
+FROM python:3.11-slim
+RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /certs \
+    && openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key \
+       -out /certs/server.crt -days 3650 -nodes \
+       -subj "/CN=noctis-mock"
+COPY server.py /app/server.py
+ENV AXIS2_MODE=patched_redirect
+EXPOSE 80 443
+CMD ["python3", "/app/server.py"]
