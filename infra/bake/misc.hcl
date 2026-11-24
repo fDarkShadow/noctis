@@ -592,3 +592,10 @@ target "deluxebb-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/deluxebb-mock:${variant}"]
 }
+target "jobhut-mock" {
+  name       = "jobhut-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/jobhut-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/jobhut-mock:${variant}"]
+}
