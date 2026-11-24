@@ -116,8 +116,8 @@ cves: [CVE-2023-46805, CVE-2024-21887]         # a chain tracked by multiple CVE
 e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside a CVE.
 
 `category` uses a **closed vocabulary**, enforced by `scripts/check_feeds.py` — pick an
-existing value, never a synonym (`filters.exclude_category` matches the exact string, so
-`sql-injection` would escape an `exclude_category: [sqli]` filter):
+existing value, never a synonym (`filters.exclude_categories` matches the exact string, so
+`sql-injection` would escape an `exclude_categories: [sqli]` filter):
 
 | category | Use for |
 |----------|---------|

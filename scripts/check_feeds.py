@@ -128,7 +128,7 @@ def common_paths() -> list[str]:
     return sorted(glob.glob(os.path.join(REPO_ROOT, "tests", "common", "*.yaml")))
 
 
-# `filters.exclude_category` is an exact-string match, so a synonym escapes it.
+# `filters.exclude_categories` is an exact-string match, so a synonym escapes it.
 GENERAL_CATEGORIES = {"exposure", "hardening", "default-credentials"}
 # Every `category:` in the tree must be one of these (the field stays optional).
 CATEGORIES = GENERAL_CATEGORIES | {
@@ -147,7 +147,7 @@ def check_categories(paths: list[str]) -> list[str]:
     general = os.path.join(FEEDS_DIR, "general") + os.sep
     for path in paths:
         with open(path) as f:
-            m = re.search(r"^category:\s*[\"']?([^\"'\s#]+)", f.read(), re.MULTILINE)
+            m = re.search(r"^category:[ \t]*[\"']?([^\"'\s#]+)", f.read(), re.MULTILINE)
         rel = os.path.relpath(path, FEEDS_DIR)
         in_general = path.startswith(general)
         if not m:
