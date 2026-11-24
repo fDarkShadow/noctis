@@ -666,6 +666,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## vigorconnect-mock
 - vigorconnect/CVE-2021-20123
 
+## vivotek-mock
+- vivotek/CVE-2013-1594
+
 ## vnc-mock
 - general/vnc-no-auth
 
