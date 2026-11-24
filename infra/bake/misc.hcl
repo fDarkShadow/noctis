@@ -549,6 +549,28 @@ target "infusionsoft-gravityforms-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/infusionsoft-gravityforms-mock:${variant}"]
 }
+target "webjump-mock" {
+  name       = "webjump-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/webjump-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/webjump-mock:${variant}"]
+}
+
+target "symantec-epm-mock" {
+  name       = "symantec-epm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/symantec-epm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/symantec-epm-mock:${variant}"]
+}
+target "phplinkadmin-mock" {
+  name       = "phplinkadmin-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phplinkadmin-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phplinkadmin-mock:${variant}"]
+}
 
 target "axis2-mock" {
   name       = "axis2-mock-${variant}"

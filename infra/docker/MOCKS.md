@@ -482,6 +482,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## oim-mock
 - oim/CVE-2025-61757
 
+## opennms-mock
+- opennms/CVE-2015-0975
+
 ## oracle-ebs-mock
 - oracle-ebs/CVE-2017-3549
 
@@ -523,6 +526,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## php-nuke-mock
 - php-nuke/CVE-2001-0320
+
+## phplinkadmin-mock
+- phplinkadmin/CVE-2009-1024
 
 ## phprecipebook-mock
 - phprecipebook/CVE-2009-4883
@@ -666,6 +672,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## superset-mock
 - superset/CVE-2023-27524
 
+## symantec-epm-mock
+- symantec-epm/CVE-2013-5014
+
 ## symantec-sepm-mock
 - symantec-sepm/CVE-2014-3437
 
@@ -725,6 +734,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## vnc-mock
 - general/vnc-no-auth
+
+## webjump-mock
+- webjump/CVE-2009-4892
 
 ## webmin-mock
 - webmin/CVE-2019-15107
