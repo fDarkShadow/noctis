@@ -488,6 +488,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## peoplesoft-mock
 - peoplesoft/CVE-2026-35273
 
+## peplink-balance-mock
+- peplink-balance/CVE-2017-8835
+
 ## php-cgi-mock
 - php-cgi/CVE-2024-4577
 
