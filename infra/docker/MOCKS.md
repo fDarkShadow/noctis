@@ -14,6 +14,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## activemq-mock
 - activemq/CVE-2023-46604
 
+## advantech-mock
+- advantech/CVE-2013-1627
+
 ## apache-cve-2021-41773
 - apache-cve/CVE-2021-41773
 
