@@ -29,6 +29,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## apoll-mock
 - apoll/CVE-2008-6270
 
+## articlefr-mock
+- articlefr/CVE-2014-5097
+
 ## asustor-mock
 - asustor/CVE-2018-11509
 
