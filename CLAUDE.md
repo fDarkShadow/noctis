@@ -352,6 +352,9 @@ dedicated mock directory (`<product>-<cve-number>-mock`) instead.
    - Four hosts minimum: `<id>_vuln`, `<id>_vuln_https`, `<id>_patched`, `<id>_patched_https`
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
    - HTTPS hosts: add `container_port: 443` and `target_service: https`
+   - UDP-only mocks (DNS, NTP, SNMP, memcached-udp): add `target_protocol: udp` — the role then
+     picks a free UDP port, publishes `-p port:container_port/udp`, waits on the container instead
+     of a TCP `wait_for`, and sends `"protocol": "udp"` in the scan request
    - Optional `container_env: {VAR: value}` — passed as `-e` to the container. Use it to run
      one mock in another mode instead of creating a second mock directory (see
      `infra/inventories/axis2/CVE-2010-0219/hosts.yml`, `AXIS2_MODE: vuln_redirect`)
