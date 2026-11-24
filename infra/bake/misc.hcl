@@ -242,4 +242,28 @@ target "dolibarr-mock" {
   context    = "../docker/dolibarr-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dolibarr-mock:${variant}"]
+target "clipbucket-mock" {
+  name       = "clipbucket-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/clipbucket-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/clipbucket-mock:${variant}"]
+target "wp-symposium-mock" {
+  name       = "wp-symposium-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wp-symposium-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wp-symposium-mock:${variant}"]
+target "zabbix-mock" {
+  name       = "zabbix-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zabbix-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zabbix-mock:${variant}"]
+target "phprecipebook-mock" {
+  name       = "phprecipebook-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phprecipebook-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phprecipebook-mock:${variant}"]
 }
