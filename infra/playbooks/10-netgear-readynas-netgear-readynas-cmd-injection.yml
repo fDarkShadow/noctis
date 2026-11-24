@@ -1,0 +1,10 @@
+---
+- name: "CVE-2013-2751/2752 — NetGear ReadyNAS RAIDiator FrontView command injection"
+  hosts: netgear_readynas_cmd_injection
+  gather_facts: false
+  vars:
+    cve_id: "CVE-2013-2751"
+    expected_cves: ["CVE-2013-2751", "CVE-2013-2752"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/netgear-readynas/netgear-readynas-cmd-injection.yaml"
+  roles:
+    - common_docker
