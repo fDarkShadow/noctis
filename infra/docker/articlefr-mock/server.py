@@ -4,10 +4,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("ARTICLEFR_MODE", "patched") == "vuln"
 
-# ArticleFR fingerprint — served in both modes (NASL probes only an ArticleFR
-# install). The version reflection below is server-computed (version()), not
-# echoed from the URL.
-FINGERPRINT = '<meta name="generator" content="ArticleFR CMS">'
+# ArticleFR fingerprint footer — served on /index.php in both modes. The NASL
+# fetches <dir>/index.php and requires 'Powered by ... >ArticleFR' before
+# sending the payload. The rate.php version reflection below is server-computed
+# (version()), not echoed from the URL, and does NOT carry the fingerprint (a
+# real rate.php returns a bare rating fragment).
+FINGERPRINT = ('<div id="footer">Powered by '
+               '<a href="http://www.articlefr.com/">ArticleFR</a></div>')
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args): pass
@@ -23,20 +26,24 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = self.path
+        # index.php — ArticleFR fingerprint page (NASL get_app_location probe).
+        if p == "/" or p == "/index.php" or p.startswith("/index.php?"):
+            self._send(200,
+                "<html><body><h1>ArticleFR CMS</h1>%s</body></html>" % FINGERPRINT)
         # rate.php — the injectable 'id' parameter of the rating endpoint.
-        if p.startswith("/rate.php") and "act=set" in p:
+        elif p.startswith("/rate.php") and "act=set" in p:
             if VULN_MODE and "union" in p.lower() and "id=0" in p.lower():
                 # Vulnerable: the UNION SELECT reflects version() into the
                 # rating response -> matches scored.*from.([0-9.]+)
                 self._send(200,
-                    "<html><head>%s</head><body>"
+                    "<html><body>"
                     "<div class=\"rating\">Already scored. Result from 5.5.38</div>"
-                    "</body></html>" % FINGERPRINT)
+                    "</body></html>")
             else:
                 # Patched (or benign request): normal rating ack, no reflection.
                 self._send(200,
-                    "<html><head>%s</head><body>"
-                    "<div class=\"rating\">Thanks for rating.</div></body></html>" % FINGERPRINT)
+                    "<html><body>"
+                    "<div class=\"rating\">Thanks for rating.</div></body></html>")
         else:
             self._send(404, "<html><body>404 Not Found</body></html>")
 
