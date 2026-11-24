@@ -517,3 +517,9 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
   include makes the engine skip the *whole* feed with only a log warning; `task feeds-check` now
   fails on any include that doesn't resolve.
 - **`task feeds-check` fails on a feed you edited** — that's by design: any content change to a file already in `tests/vulnerabilities/.feed-shas.json` must be accompanied by `task feeds-check -- --write` in the same commit, so an unreviewed/accidental edit to an existing feed shows up in the diff instead of silently merging.
+- **Templates only work in templated fields** — `{{var}}` is resolved in `path`, `method`,
+  `headers`, `body`, `send`, `send_hex`, `port`, `evidence`… but `id`, `action`, `store_as`,
+  `source`, `pattern`, `var_name`, `handle` and `line_ending` are read literally. `task feeds-check`
+  rejects a template in those fields (`method:` used to be literal too, so
+  `tests/common/http_base.yaml`'s `method: "{{http_method}}"` went out verbatim and every feed
+  including it silently lost its `probe` step).
