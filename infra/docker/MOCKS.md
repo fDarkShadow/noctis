@@ -382,6 +382,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## memcached-tcp-mock
 - general/memcached-tcp-exposed
 
+## merak-webmail-mock
+- merak-webmail/CVE-2004-1719
+
 ## metabase-mock
 - metabase/CVE-2021-41277
 
