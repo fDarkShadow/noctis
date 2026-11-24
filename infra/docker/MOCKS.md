@@ -215,6 +215,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## gitlab-password-reset-mock
 - gitlab-password-reset/CVE-2023-7028
 
+## gitlist-mock
+- gitlist/CVE-2014-4511
+
 ## goanywhere-mock
 - goanywhere/CVE-2024-0204
 
