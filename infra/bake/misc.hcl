@@ -242,4 +242,16 @@ target "wp-symposium-mock" {
   context    = "../docker/wp-symposium-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/wp-symposium-mock:${variant}"]
+target "zabbix-mock" {
+  name       = "zabbix-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zabbix-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zabbix-mock:${variant}"]
+target "phprecipebook-mock" {
+  name       = "phprecipebook-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phprecipebook-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phprecipebook-mock:${variant}"]
 }
