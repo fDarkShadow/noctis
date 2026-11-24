@@ -236,6 +236,128 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "symantec-sepm-mock" {
+  name       = "symantec-sepm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/symantec-sepm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/symantec-sepm-mock:${variant}"]
+target "civicrm-mock" {
+  name       = "civicrm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/civicrm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/civicrm-mock:${variant}"]
+
+target "joomla-contenthistory-mock" {
+  name       = "joomla-contenthistory-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/joomla-contenthistory-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/joomla-contenthistory-mock:${variant}"]
+target "pragyan-cms-mock" {
+  name       = "pragyan-cms-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/pragyan-cms-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/pragyan-cms-mock:${variant}"]
+target "simple-ads-manager-mock" {
+  name       = "simple-ads-manager-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/simple-ads-manager-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/simple-ads-manager-mock:${variant}"]
+target "livelycart-mock" {
+  name       = "livelycart-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/livelycart-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/livelycart-mock:${variant}"]
+target "joomla-eq-calendar-mock" {
+  name       = "joomla-eq-calendar-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/joomla-eq-calendar-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/joomla-eq-calendar-mock:${variant}"]
+target "vbulletin-forumrunner-mock" {
+  name       = "vbulletin-forumrunner-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vbulletin-forumrunner-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vbulletin-forumrunner-mock:${variant}"]
+target "navis-webaccess-mock" {
+  name       = "navis-webaccess-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/navis-webaccess-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/navis-webaccess-mock:${variant}"]
+target "peplink-balance-mock" {
+  name       = "peplink-balance-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/peplink-balance-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/peplink-balance-mock:${variant}"]
+target "merak-webmail-mock" {
+  name       = "merak-webmail-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/merak-webmail-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/merak-webmail-mock:${variant}"]
+target "password-protect-mock" {
+  name       = "password-protect-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/password-protect-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/password-protect-mock:${variant}"]
+target "backupbuddy-mock" {
+  name       = "backupbuddy-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/backupbuddy-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/backupbuddy-mock:${variant}"]
+target "netgear-prosafe-mock" {
+  name       = "netgear-prosafe-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netgear-prosafe-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netgear-prosafe-mock:${variant}"]
+target "vivotek-mock" {
+  name       = "vivotek-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vivotek-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vivotek-mock:${variant}"]
+target "php-nuke-mock" {
+  name       = "php-nuke-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/php-nuke-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/php-nuke-mock:${variant}"]
+target "zte-zxdsl-mock" {
+  name       = "zte-zxdsl-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zte-zxdsl-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zte-zxdsl-mock:${variant}"]
+target "servision-mock" {
+  name       = "servision-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/servision-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/servision-mock:${variant}"]
+target "splunk-mock" {
+  name       = "splunk-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/splunk-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/splunk-mock:${variant}"]
+target "quantum-mock" {
+  name       = "quantum-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/quantum-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/quantum-mock:${variant}"]
 target "canon-11692-mock" {
   name       = "canon-11692-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
