@@ -49,7 +49,7 @@
     "version": { "type": "string" },
     "category": {
       "type": "string",
-      "description": "Optional free-form classification (e.g. exposure, ssh, injection, auth-bypass)."
+      "description": "Optional free-form classification (e.g. auth-bypass, rce, sqli). Feeds in general/ use exposure, hardening or default-credentials."
     },
     "references": {
       "type": "array",

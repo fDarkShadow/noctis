@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes +
-no `{{...}}` template in a step field the engine reads literally.
+no `{{...}}` template in a step field the engine reads literally + `general/`
+feeds use one of the agreed categories (see CLAUDE.md, "TestDef (YAML)").
 
 Run via `task feeds-check` (from infra/). Pass --write to regenerate the lockfile
 after an intentional feed edit — do that as part of the same commit, never separately.
@@ -126,6 +127,29 @@ def common_paths() -> list[str]:
     return sorted(glob.glob(os.path.join(REPO_ROOT, "tests", "common", "*.yaml")))
 
 
+# `filters.exclude_category` is an exact-string match, so a synonym escapes it.
+GENERAL_CATEGORIES = {"exposure", "hardening", "default-credentials"}
+
+
+def check_general_categories(paths: list[str]) -> list[str]:
+    errors = []
+    general = os.path.join(FEEDS_DIR, "general") + os.sep
+    for path in paths:
+        if not path.startswith(general):
+            continue
+        with open(path) as f:
+            m = re.search(r"^category:\s*[\"']?([^\"'\s#]+)", f.read(), re.MULTILINE)
+        rel = os.path.relpath(path, FEEDS_DIR)
+        if not m:
+            errors.append(f"{rel}: general/ feed has no category")
+        elif m.group(1) not in GENERAL_CATEGORIES:
+            errors.append(
+                f"{rel}: category {m.group(1)!r} — general/ feeds use one of "
+                f"{sorted(GENERAL_CATEGORIES)}"
+            )
+    return errors
+
+
 def main() -> int:
     write = "--write" in sys.argv
 
@@ -151,6 +175,7 @@ def main() -> int:
     errors.extend(check_uid_uniqueness(feed_paths()))
     errors.extend(check_includes(feed_paths()))
     errors.extend(check_literal_fields(feed_paths() + common_paths()))
+    errors.extend(check_general_categories(feed_paths()))
 
     if errors:
         print(f"feeds-check: {len(errors)} problem(s):", file=sys.stderr)
@@ -158,7 +183,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve, no literal-field templates.")
+    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve, no literal-field templates, general/ categories valid.")
     return 0
 
 

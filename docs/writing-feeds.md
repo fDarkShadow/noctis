@@ -14,7 +14,7 @@ that prove it. Feeds live under `tests/vulnerabilities/<product>/<id>.yaml`.
 uid: 7f3d1b9a-4c62-4e8d-9a07-2b5e6c1f84d0   # stable UUID v4 — never change
 name: "Elasticsearch exposed without authentication"
 cves: []                    # 0, 1, or many CVE IDs
-category: exposure          # free-form classifier (used when cves is empty)
+category: exposure          # general/ feeds: exposure | hardening | default-credentials
 severity: critical          # info | low | medium | high | critical
 confidence_base: 0.50       # raised by confidence_delta on match
 tags: [elasticsearch, unauthenticated, exposure]
