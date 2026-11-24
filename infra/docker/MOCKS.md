@@ -47,6 +47,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cacti-mock
 - cacti/CVE-2022-46169
 
+## canon-mf-access-bypass-mock
+- canon/CVE-2018-11711
+
 ## cassandra-mock
 - general/cassandra-no-auth
 
