@@ -41,18 +41,18 @@ class Handler(BaseHTTPRequestHandler):
         if (method == 'GET' and path.startswith('/index.php/component/users')):
             self._start(200)
             self._h('Content-Type', 'text/html')
-            self._h('Set-Cookie', '1a2b3c4d5e6f=deadbeef; path=/')
-            self._finish('<html><body><form><fieldset><input type="hidden" name="1a2b3c4d5e6f" value="1"></fieldset></form></body></html>\n')
+            self._h('Set-Cookie', 'b0a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5=deadbeefcafe1234; path=/')
+            self._finish('<html><body><form><fieldset><input type="hidden" name="1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d" value="1"></fieldset></form></body></html>\n')
             return
         if (vuln and 'com_fields' in path):
             self._start(500)
             self._h('Content-Type', 'text/html')
-            self._finish("<html><body>XPATH syntax error: '~3.7.0'</body></html>\n")
+            self._finish("<html><title>Home Page</title><body>Home Page<br>1064 - XPATH syntax error: ':255:'</body></html>\n")
             return
         if ('com_fields' in path):
             self._start(200)
             self._h('Content-Type', 'text/html')
-            self._finish('<html><body>Forbidden field context</body></html>\n')
+            self._finish('<html><body>Home Page<br>Invalid field context, request ignored.</body></html>\n')
             return
         # default
         self._start(404)
