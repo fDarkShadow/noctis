@@ -77,7 +77,10 @@ class Handler(BaseHTTPRequestHandler):
         return ""
 
     def do_POST(self):
-        if self.path == "/axis2-admin/login":
+        # Accept the login at both the web root and the stock /axis2 webapp
+        # context (/axis2/axis2-admin/login), matching a real deploy.
+        if self.path.endswith("/axis2-admin/login"):
+            ctx = self.path[: -len("/axis2-admin/login")]  # "" or "/axis2"
             body = self._read_body()
             default_creds = "userName=admin" in body and "password=axis2" in body
             if VULN_MODE and default_creds and not REDIRECT_MODE:
@@ -89,15 +92,15 @@ class Handler(BaseHTTPRequestHandler):
                     extra_headers={"Set-Cookie": "JSESSIONID=A1B2C3D4E5F6A7B8C9D0E1F2; Path=/axis2"},
                 )
             elif VULN_MODE and default_creds and REDIRECT_MODE:
-                # Axis2 >= 1.7.3: successful login → 302 to the admin area with a
-                # JSESSIONID; the welcome text is NOT here. The scanner must GET
-                # the Location carrying this cookie.
+                # Axis2 >= 1.7.3: successful login → 302 to the admin area (same
+                # webapp context) with a JSESSIONID; the welcome text is NOT here.
+                # The scanner must GET the Location carrying this cookie.
                 self._send(
                     302,
                     "",
                     extra_headers={
-                        "Location": "/axis2-admin/",
-                        "Set-Cookie": "JSESSIONID=%s; Path=/axis2" % VULN_SESSION,
+                        "Location": ctx + "/axis2-admin/",
+                        "Set-Cookie": "JSESSIONID=%s; Path=%s/axis2" % (VULN_SESSION, ctx),
                     },
                 )
             elif REDIRECT_MODE:
@@ -107,8 +110,8 @@ class Handler(BaseHTTPRequestHandler):
                     302,
                     "",
                     extra_headers={
-                        "Location": "/axis2-admin/login",
-                        "Set-Cookie": "JSESSIONID=F2E1D0C9B8A7F6E5D4C3B2A1; Path=/axis2",
+                        "Location": ctx + "/axis2-admin/login",
+                        "Set-Cookie": "JSESSIONID=F2E1D0C9B8A7F6E5D4C3B2A1; Path=%s/axis2" % ctx,
                     },
                 )
             else:
@@ -125,7 +128,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, "Not found")
 
     def do_GET(self):
-        if self.path == "/axis2-admin/":
+        if self.path.endswith("/axis2-admin/"):
             # Authenticated admin area reached only via the post-login redirect.
             # Vuln redirect mode serves the admin module page, but only when the
             # request carries the JSESSIONID issued by the successful login —
@@ -134,7 +137,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, ADMIN_PAGE)
             else:
                 self._send(200, LOGIN_PAGE)
-        elif self.path == "/axis2-admin/login":
+        elif self.path.endswith("/axis2-admin/login"):
             self._send(200, LOGIN_PAGE)
         else:
             self._send(404, "Not found")

@@ -236,3 +236,17 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "axis2-mock" {
+  name       = "axis2-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/axis2-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/axis2-mock:${variant}"]
+}
+target "axis2-redirect-mock" {
+  name       = "axis2-redirect-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/axis2-redirect-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/axis2-redirect-mock:${variant}"]
+}
