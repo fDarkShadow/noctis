@@ -289,11 +289,23 @@ mod tests {
         // SMB1 reply, short reply, error status, and no reply at all.
         let smb1 = "00000023ff534d4272000000009853c800000000000000000000000000002f4b00000000010000";
         let err_status = SMB2_HDR.replacen("4000000000000000", "4000000022000000", 1);
+        // Our own NEGOTIATE request echoed back (an echo service on an "smb" port):
+        // SMB2 signature, status 0, command 0 — but no SERVER_TO_REDIR flag and a
+        // request StructureSize of 36, so it must not count as a response.
+        let echo = "0000009efe534d42400000000000000000000100000000000000000000000000\
+                    0000000000000000000000000000000000000000000000000000000000000000\
+                    000000002400050001000000000000006e6f637469732d736d622d70726f6265\
+                    700000000100000002021002000302031103000001002600000000000100200001\
+                    006e6f637469732d707265617574682d696e746567726974792d73616c742d3332";
+        // A response-shaped reply with an unknown dialect.
+        let unknown_dialect = format!("{SMB2_HDR}0100ffff01006e6f6374");
         for reply in [
             json!(smb1),
             json!("0000"),
             json!(format!("{err_status}0100110301006e6f6374")),
             json!(null),
+            json!(echo),
+            json!(unknown_dialect),
         ] {
             assert_eq!(smb2_parse(reply.clone())["smb2"], json!(false), "{reply}");
         }

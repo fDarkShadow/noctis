@@ -41,8 +41,8 @@ def smb2_negotiate_response(req: bytes) -> bytes:
     """SMB2 NEGOTIATE response for an SMB2 NEGOTIATE request (NBSS-framed)."""
     smb = req[4:]
     count = struct.unpack_from("<H", smb, 66)[0] if len(smb) >= 68 else 0
-    offered = [struct.unpack_from("<H", smb, 100 + 2 * i)[0]
-               for i in range(count) if len(smb) >= 102 + 2 * i]
+    count = min(count, max(0, (len(smb) - 100) // 2))  # never read past the buffer
+    offered = [struct.unpack_from("<H", smb, 100 + 2 * i)[0] for i in range(count)]
     common = [d for d in offered if d in SMB2_DIALECTS]
     dialect = max(common) if common else 0x0202
 
@@ -71,7 +71,7 @@ def handle(conn):
             conn.sendall(smb2_negotiate_response(req))
         else:
             conn.sendall(REPLY)  # SMB1 NEGOTIATE (or anything else): unchanged reply
-    except OSError:
+    except (OSError, struct.error):  # malformed / truncated request: just close
         pass
     finally:
         conn.close()

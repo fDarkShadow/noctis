@@ -116,7 +116,8 @@ reply's `response_hex` in a `script` step: byte offset *N* is hex offset *2N*, `
 map, which later `match` / `condition:` steps read with dot notation. The magic bytes stay in
 the feed — no engine change per protocol. From
 [`general/smb-signing-not-required.yaml`](https://github.com/fDarkShadow/noctis/blob/main/tests/vulnerabilities/general/smb-signing-not-required.yaml)
-(SMB2 NEGOTIATE → `SecurityMode` at byte 70, `DialectRevision` at byte 72):
+(SMB2 NEGOTIATE → `SecurityMode` at byte 70, `DialectRevision` at byte 72; abridged — the
+shipped feed also names the dialect and flags legacy-only 2.x servers):
 
 ```yaml
 - id: smb2-negotiate
@@ -134,8 +135,14 @@ the feed — no engine change per protocol. From
     let hex = if type_of(smb.response_hex) == "string" { smb.response_hex } else { "" };
     let mode = u16le(substr(hex, 140, 143));   // byte 70
     let rev  = u16le(substr(hex, 144, 147));   // byte 72
-    #{ smb2: substr(hex, 8, 15) == "fe534d42", signing_required: (mode & 2) == 2,
-       dialect_hex: p16be(rev) }
+    // Prove it is a NEGOTIATE *response*, not an echo of the request:
+    let ok = strlen(hex) >= 148
+      && substr(hex, 8, 15) == "fe534d42"           // SMB2 signature
+      && u32le(substr(hex, 24, 31)) == 0            // Status OK
+      && (u32le(substr(hex, 40, 47)) & 1) == 1      // Flags: SERVER_TO_REDIR
+      && u16le(substr(hex, 136, 139)) == 65         // response StructureSize
+      && (rev == 0x0202 || rev == 0x0210 || rev == 0x0300 || rev == 0x0302 || rev == 0x0311);
+    #{ smb2: ok, signing_required: (mode & 2) == 2, dialect_hex: p16be(rev) }
 
 - id: check-signing
   action: match

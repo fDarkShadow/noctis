@@ -19,6 +19,8 @@
 #   4   ProtocolId   fe534d42          hex  8..15
 #   12  Status       u32le, 0 = OK     hex 24..31
 #   16  Command      u16le, 0          hex 32..35
+#   20  Flags        u32le, bit 0x01 SERVER_TO_REDIR   hex 40..47
+#   68  StructureSize u16le, 65 (NEGOTIATE response)   hex 136..139
 #   70  SecurityMode u16le             hex 140..143  (0x01 enabled, 0x02 REQUIRED)
 #   72  DialectRevision u16le          hex 144..147
 uid: 57f3bc70-28a2-4d5b-a684-7a74a4a087bf
@@ -61,10 +63,6 @@ steps:
     store_as: neg
     code: |
       let hex = if type_of(smb.response_hex) == "string" { tolower(smb.response_hex) } else { "" };
-      let ok = strlen(hex) >= 148
-        && substr(hex, 8, 15) == "fe534d42"
-        && u32le(substr(hex, 24, 31)) == 0
-        && u16le(substr(hex, 32, 35)) == 0;
       let mode = u16le(substr(hex, 140, 143));
       let rev = u16le(substr(hex, 144, 147));
       let name = if rev == 0x0202 { "2.0.2" }
@@ -73,6 +71,16 @@ steps:
         else if rev == 0x0302 { "3.0.2" }
         else if rev == 0x0311 { "3.1.1" }
         else { "unknown" };
+      // A real NEGOTIATE *response*, not an echo of our request (which also has
+      // the SMB2 signature, status 0 and command 0): SERVER_TO_REDIR flag set,
+      // response StructureSize 65, and a dialect we actually offered.
+      let ok = strlen(hex) >= 148
+        && substr(hex, 8, 15) == "fe534d42"
+        && u32le(substr(hex, 24, 31)) == 0
+        && u16le(substr(hex, 32, 35)) == 0
+        && (u32le(substr(hex, 40, 47)) & 1) == 1
+        && u16le(substr(hex, 136, 139)) == 65
+        && name != "unknown";
       #{
         smb2: ok,
         dialect: name,
