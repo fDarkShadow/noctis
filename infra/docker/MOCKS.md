@@ -131,6 +131,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cslu-mock
 - cslu/CVE-2024-20439
 
+## cucm-3315-mock
+- cucm/CVE-2011-3315
+
 ## cucm-mock
 - cucm/CVE-2026-20230
 
