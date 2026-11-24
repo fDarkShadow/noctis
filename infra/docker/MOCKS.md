@@ -123,6 +123,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - cleo/CVE-2024-50623
 
 ## clipbucket-mock
+- clipbucket/CVE-2012-5849
 - clipbucket/clipbucket-multiple-vulns
 
 ## coldfusion-26360-mock
