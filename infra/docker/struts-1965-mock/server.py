@@ -8,9 +8,9 @@
 #
 # Vuln mode:    POST /struts2-showcase/skill/save.action — when the form body
 #               carries the S2-012 OGNL payload (currentSkill.name=%{...
-#               _memberAccess ... ProcessBuilder ... echo RCEWorked ... }), the
-#               server emulates OGNL/Java method execution and echoes the
-#               executed output "RCEWorked" in the response body (HTTP 200).
+#               _memberAccess ... getResponse().getWriter() ...
+#               println('RCEWorked') ... }), the server emulates in-JVM OGNL
+#               method execution and writes "RCEWorked" to the response (HTTP 200).
 #               A request WITHOUT the OGNL payload gets the ordinary skill page
 #               with no marker — so the TP proves the payload matters.
 # Patched mode: same Showcase pages, but skill/save.action never evaluates OGNL
@@ -42,13 +42,21 @@ SKILL_FORM_BODY = (
 
 
 def _has_ognl_payload(raw_body):
-    """True when the form carries an S2-012 OGNL injection in currentSkill.name."""
+    """True when the form carries the NASL's S2-012 OGNL injection.
+
+    The real payload sets _memberAccess, grabs the servlet response writer and
+    calls println('RCEWorked') in-JVM. Require those signatures so the TP proves
+    the payload matters (an empty/benign POST must not echo the marker).
+    """
     try:
         decoded = urllib.parse.unquote_plus(raw_body.decode("utf-8", "replace"))
     except Exception:
         return False
-    # The real OGNL S2-012 payload sets _memberAccess and spawns a ProcessBuilder.
-    return ("_memberAccess" in decoded) and ("ProcessBuilder" in decoded)
+    return (
+        ("_memberAccess" in decoded)
+        and ("getWriter" in decoded)
+        and ("println" in decoded)
+    )
 
 
 class Handler(BaseHTTPRequestHandler):
