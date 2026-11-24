@@ -564,3 +564,10 @@ target "symantec-epm-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/symantec-epm-mock:${variant}"]
 }
+target "phplinkadmin-mock" {
+  name       = "phplinkadmin-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phplinkadmin-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phplinkadmin-mock:${variant}"]
+}

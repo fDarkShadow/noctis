@@ -521,6 +521,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## php-nuke-mock
 - php-nuke/CVE-2001-0320
 
+## phplinkadmin-mock
+- phplinkadmin/CVE-2009-1024
+
 ## phprecipebook-mock
 - phprecipebook/CVE-2009-4883
 
