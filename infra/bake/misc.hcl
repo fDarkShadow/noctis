@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "php-nuke-mock" {
+  name       = "php-nuke-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/php-nuke-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/php-nuke-mock:${variant}"]
+}
