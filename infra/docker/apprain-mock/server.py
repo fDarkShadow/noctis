@@ -4,8 +4,15 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("APPRAIN_MODE", "patched") == "vuln"
 
-# Bounded marker matched by ov-sql-inj-test:[0-9]+.*:ov-sql-inj-test
-MARKER = "ov-sql-inj-test:424242:appRain:ov-sql-inj-test"
+# Bounded marker reflected by the injected CONCAT() column, per the OpenVAS
+# plugin: ov-sql-inj-test:<@@version>:ov-sql-inj-test. The mock reflects it ONLY
+# when the request carries the CONCAT(0x6f762d... payload (not self-fulfilling).
+MARKER = "ov-sql-inj-test:5.5.40-log:ov-sql-inj-test"
+PAYLOAD_SIG = "concat(0x6f762d"
+
+# appRain fingerprint — served in both modes (NASL: 200 + "Start with appRain<"
+# and extra_check ">Profile").
+FINGERPRINT = "<h1>Profile</h1><p>Start with appRain</p>"
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args): pass
@@ -21,19 +28,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = self.path
-        # Profile endpoint — the injectable SQLi sink.
-        if p.startswith("/profile/index.php"):
-            if VULN_MODE:
-                # Vulnerable: the injected UNION SELECT reflects the bounded marker.
+        # Profile endpoint — fingerprint request and injectable SQLi sink.
+        if p.startswith("/profile/"):
+            if VULN_MODE and PAYLOAD_SIG in p.lower():
+                # Vulnerable: the injected CONCAT() column reflects the marker.
                 self._send(200,
-                    "<html><body><h1>Profile</h1>"
+                    "<html><body>%s"
                     "<div class='profile-field'>%s</div>"
-                    "</body></html>" % MARKER)
+                    "</body></html>" % (FINGERPRINT, MARKER))
             else:
-                # Patched: normal profile page, no reflection.
-                self._send(200,
-                    "<html><body><h1>Profile</h1>"
-                    "<p>No profile found.</p></body></html>")
+                # Fingerprint page (both modes) / patched: appRain profile, no marker.
+                self._send(200, "<html><body>%s</body></html>" % FINGERPRINT)
         else:
             self._send(404, "<html><body>404 Not Found</body></html>")
 
