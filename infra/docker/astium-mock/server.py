@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Mock for CVE-2013-10043. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
-vuln and patched behaviours are both realistic so the TN is non-trivial."""
+vuln and patched behaviours are both realistic so the TN is non-trivial. The vuln branch
+requires the astiumnls session cookie on the logon POST and dashboard GET, so the feed's
+cookie-extraction + Cookie-header steps are actually exercised."""
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN = os.environ.get("CVE_2013_10043_MODE", "patched") == "vuln"
+SESSION = "a1b2c3d4e5"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -38,18 +41,21 @@ class Handler(BaseHTTPRequestHandler):
         body = self._read_body()
         vuln = VULN
         cookie = self.headers.get("Cookie", "")
+        has_session = ("astiumnls=" + SESSION) in cookie
         if (vuln and method == 'GET' and path.startswith('/index.php')):
             self._start(302)
-            self._h('Location', '/index.php?astiumnls=a1b2c3d4e5')
-            self._h('Set-Cookie', 'astiumnls=a1b2c3d4e5; path=/')
+            self._h('Location', '/index.php?astiumnls=' + SESSION)
+            self._h('Set-Cookie', 'astiumnls=' + SESSION + '; path=/')
             self._finish('')
             return
-        if (vuln and method == 'POST' and path == '/en/logon.php'):
+        # Login bypass: require the session cookie and the SQLi payload, as a real target would.
+        if (vuln and method == 'POST' and path == '/en/logon.php'
+                and has_session and "user_name=system%27" in body):
             self._start(302)
             self._h('Location', '/en/database/dashboard.php')
             self._finish('')
             return
-        if (vuln and path == '/en/database/dashboard.php'):
+        if (vuln and path == '/en/database/dashboard.php' and has_session):
             self._start(200)
             self._h('Content-Type', 'text/html')
             self._finish("<html><head><title>Astium</title></head><body><h1>system admin's Dashboard</h1></body></html>\n")
