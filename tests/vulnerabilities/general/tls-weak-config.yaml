@@ -12,9 +12,6 @@ version: "1.0.0"
 references:
   - "https://www.ssllabs.com/projects/best-practices/"
 
-vars:
-  port: 443
-
 steps:
   - id: tls-inspect
     action: tls_check
