@@ -243,6 +243,8 @@ target "gitlist-mock" {
   context    = "../docker/gitlist-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/gitlist-mock:${variant}"]
+}
+
 target "symantec-sepm-mock" {
   name       = "symantec-sepm-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
