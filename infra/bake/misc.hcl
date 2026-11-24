@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "password-protect-mock" {
+  name       = "password-protect-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/password-protect-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/password-protect-mock:${variant}"]
 target "backupbuddy-mock" {
   name       = "backupbuddy-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
