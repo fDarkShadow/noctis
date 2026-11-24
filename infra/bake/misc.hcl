@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "leaguemanager-mock" {
+  name       = "leaguemanager-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/leaguemanager-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/leaguemanager-mock:${variant}"]
+}
