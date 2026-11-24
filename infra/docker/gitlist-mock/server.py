@@ -2,7 +2,7 @@
 """Mock for CVE-2014-4511 (gitlist) — OpenVAS NASL 2014/gb_gitlist_rce_06_14.nasl (GPL-2.0-only)."""
 import os, ssl, threading, urllib.parse, base64, html
 from http.server import BaseHTTPRequestHandler, HTTPServer
-CFG = {'kind': 'sqli', 'gate': '%60id%60', 'pre': {'path': '/', 'body': '<html><body><a href="/example">example</a> Powered by <a href="https://gitlist.org">GitList</a></body></html>'}, 'url_path': '/example/blame/master/%22%22</%60id%60', 'witness': 'uid=0(root) gid=0(root) groups=0(root)'}
+CFG = {'kind': 'sqli', 'gate': '%60id%60', 'pre': {'path': '/', 'body': '<html><body>Powered by <a href="https://gitlist.org">GitList</a><ul><li><i class="icon-folder-open icon-spaced"></i> <a href="/example/">example</a></li></ul></body></html>'}, 'url_path': '/example/blame/master/""</%60id%60', 'witness': 'uid=0(root) gid=0(root) groups=0(root)'}
 VULN = os.environ.get('GITLIST_MODE', "patched") == "vuln"
 BENIGN = "<html><head><title>OK</title></head><body>Service operational.</body></html>"
 class H(BaseHTTPRequestHandler):
