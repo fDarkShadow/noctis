@@ -29,7 +29,7 @@
           {{ container_runtime }} run -d
           --name {{ container_name }}
           --network {{ container_network }}
-          -p {{ target_port }}:{{ container_port | default(80) }}/{{ target_protocol | default('tcp') }}
+          -p 127.0.0.1:{{ target_port }}:{{ container_port | default(80) }}/{{ target_protocol | default('tcp') }}
           {% for k, v in (container_env | default({})).items() %}-e {{ (k ~ '=' ~ v) | quote }} {% endfor %}
           {{ docker_image }}
       changed_when: true
