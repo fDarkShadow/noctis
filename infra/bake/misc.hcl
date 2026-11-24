@@ -691,3 +691,10 @@ target "dokeos-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dokeos-mock:${variant}"]
 }
+target "wikiwebhelp-mock" {
+  name       = "wikiwebhelp-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wikiwebhelp-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wikiwebhelp-mock:${variant}"]
+}
