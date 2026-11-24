@@ -409,6 +409,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## papercut-mock
 - papercut/CVE-2023-27351
 
+## password-protect-mock
+- password-protect/CVE-2004-1647
+
 ## pentaho-43939-mock
 - pentaho/CVE-2022-43939
 
