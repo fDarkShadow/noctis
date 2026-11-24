@@ -6,6 +6,7 @@ group "default" {
     "acti-camera-mock",
     "activemq-jolokia-mock",
     "activemq-mock",
+    "advantech-mock",
     "ajaxportal-mock",
     "apache-cve-2021-41773",
     "apache-cve-2021-42013",
@@ -337,6 +338,14 @@ target "activemq-mock" {
   context    = "../docker/activemq-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/activemq-mock:${variant}"]
+}
+
+target "advantech-mock" {
+  name       = "advantech-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/advantech-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/advantech-mock:${variant}"]
 }
 
 target "ajaxportal-mock" {
