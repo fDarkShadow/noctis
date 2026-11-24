@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
-"""Mock for Dragan Mitic Apoll admin/login.php SQL injection (CVE-2008-6270).
+"""Mock for Dragan Mitic Apoll admin/login.php SQL injection (CVE-2008-6270 /
+CVE-2008-6272).
 
-Vuln mode: a SQL-injection payload posted to /admin/login.php bypasses
-authentication and the server redirects to the admin index with a
-"Location: index.php" header. Patched mode: the login is rejected (401,
-no redirect) so the detection pattern is absent → zero findings.
+Both modes serve the product realistically: GET /admin/login.php returns a 200
+Apoll admin login page (same fingerprint, no redirect), which the NASL gate
+requires. The modes differ only on how the login POST is handled:
+
+* vuln mode: when the POST body carries the real SQL-injection tautology in the
+  ``username`` field (``' or ' 1=1'-- '`` — the NASL payload), the login query
+  evaluates true, the attacker is authenticated and the server redirects to the
+  admin index with ``Location: index.php``. A normal/failed login (no injection)
+  just re-serves the login page (200, no redirect) — so the redirect proves the
+  payload mattered, not that the mock echoes a marker unconditionally.
+
+* patched mode: the credentials are treated as data (parameterised/escaped), so
+  the injection does NOT authenticate. Every login attempt — injection or not —
+  is rejected with the login page re-shown (200, "Invalid credentials", no
+  redirect). The product is fully served; only the vulnerable behaviour is gone,
+  so the detection pattern ("Location: index.php") is absent -> zero findings.
 """
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -13,6 +26,23 @@ VULN_MODE = os.environ.get("APOLL_MODE", "patched") == "vuln"
 CERT_DIR = os.environ.get("CERT_DIR", "/certs")
 PORT_HTTP = int(os.environ.get("PORT_HTTP", "80"))
 PORT_HTTPS = int(os.environ.get("PORT_HTTPS", "443"))
+
+LOGIN_PAGE = (
+    "<!DOCTYPE html><html><head><title>Apoll :: Administration</title></head>"
+    "<body><h1>Apoll Admin Login</h1>"
+    "<form name=\"login\" action=\"login.php\" method=\"post\">"
+    "<input type=\"text\" name=\"username\">"
+    "<input type=\"password\" name=\"password\">"
+    "<input type=\"submit\" name=\"submit\" value=\"Login\"></form>"
+    "<p>Powered by Apoll</p></body></html>"
+)
+LOGIN_PAGE_ERR = LOGIN_PAGE.replace(
+    "<h1>Apoll Admin Login</h1>",
+    "<h1>Apoll Admin Login</h1><p class=\"error\">Invalid username or password.</p>",
+)
+
+# The exact SQL-injection tautology the NASL submits in the username field.
+INJECTION = "' or ' 1=1'-- '"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -30,21 +60,28 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def do_POST(self):
-        length = int(self.headers.get("Content-Length", 0) or 0)
-        body = self.rfile.read(length).decode("latin-1") if length else ""
-        if self.path == "/admin/login.php":
-            # A SQL-injection payload ("' or '1'='1") in the login fields
-            # bypasses auth on a vulnerable install and redirects to index.php.
-            if VULN_MODE and ("%271%27%3D%271" in body or "'1'='1" in body or "1'='1" in body):
-                self._send(302, "", extra_headers={"Location": "index.php"})
-            else:
-                self._send(401, "Authentication required")
+    def do_GET(self):
+        # The login page is always present (both modes) — the NASL gate needs a
+        # 200 with no pre-existing redirect.
+        if self.path.split("?", 1)[0] == "/admin/login.php":
+            self._send(200, LOGIN_PAGE)
         else:
             self._send(404, "Not found")
 
-    def do_GET(self):
-        self._send(404, "Not found")
+    def do_POST(self):
+        if self.path.split("?", 1)[0] != "/admin/login.php":
+            self._send(404, "Not found")
+            return
+        length = int(self.headers.get("Content-Length", 0) or 0)
+        body = self.rfile.read(length).decode("latin-1") if length else ""
+        is_injection = "username=" in body and INJECTION in body
+        if VULN_MODE and is_injection:
+            # Injected tautology authenticates -> redirect to the admin index.
+            self._send(302, "", extra_headers={"Location": "index.php"})
+        else:
+            # Patched (always) or a non-injection login in vuln mode: rejected,
+            # login page re-served with an error. No redirect.
+            self._send(200, LOGIN_PAGE_ERR)
 
 
 def _make_https_server(port):
