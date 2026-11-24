@@ -236,6 +236,80 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "servision-mock" {
+  name       = "servision-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/servision-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/servision-mock:${variant}"]
+target "splunk-mock" {
+  name       = "splunk-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/splunk-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/splunk-mock:${variant}"]
+target "quantum-mock" {
+  name       = "quantum-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/quantum-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/quantum-mock:${variant}"]
+target "canon-11692-mock" {
+  name       = "canon-11692-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/canon-11692-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/canon-11692-mock:${variant}"]
+target "solarwinds-srm-mock" {
+  name       = "solarwinds-srm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/solarwinds-srm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/solarwinds-srm-mock:${variant}"]
+target "brother-mock" {
+  name       = "brother-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/brother-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/brother-mock:${variant}"]
+target "canon-lbp6030w-mock" {
+  name       = "canon-lbp6030w-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/canon-lbp6030w-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/canon-lbp6030w-mock:${variant}"]
+
+target "lexmark-mock" {
+  name       = "lexmark-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/lexmark-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/lexmark-mock:${variant}"]
+target "netgear-readynas-mock" {
+  name       = "netgear-readynas-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netgear-readynas-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netgear-readynas-mock:${variant}"]
+target "cups-mock" {
+  name       = "cups-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cups-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cups-mock:${variant}"]
+target "struts-2248-mock" {
+  name       = "struts-2248-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-2248-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-2248-mock:${variant}"]
+target "cotonti-mock" {
+  name       = "cotonti-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cotonti-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cotonti-mock:${variant}"]
 target "wincc-mock" {
   name       = "wincc-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
