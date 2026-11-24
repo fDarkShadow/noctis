@@ -236,6 +236,12 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "canon-11692-mock" {
+  name       = "canon-11692-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/canon-11692-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/canon-11692-mock:${variant}"]
 target "solarwinds-srm-mock" {
   name       = "solarwinds-srm-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
