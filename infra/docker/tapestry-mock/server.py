@@ -1,41 +1,74 @@
 #!/usr/bin/env python3
-"""Mock for CVE-2021-27850 — Apache Tapestry 5.4.0 < 5.6.3, 5.7.0 < 5.7.1 RCE Vulnerability (CVSS 10.0).
-Ported from OpenVAS/Greenbone NASL 2021/apache/gb_apache_tapestry_rce_vuln_apr21.nasl (GPL-2.0-only, Greenbone Community Feed)."""
+"""Mock for CVE-2021-27850. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
+vuln and patched behaviours are both realistic so the TN is non-trivial."""
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-VULN_MODE = os.environ.get("CVE_2021_27850_MODE", "patched") == "vuln"
-
-MARKER_BODY = 'Êþº¾ AppModule InnerClasses\n'
+VULN = os.environ.get("CVE_2021_27850_MODE", "patched") == "vuln"
 
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
-    def _send_marker(self):
-        body = MARKER_BODY.encode("latin-1", "replace")
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/java')
+    def _start(self, code):
+        self._body = b""
+        self._code = code
+        self._hdrs = []
+
+    def _h(self, k, v):
+        self._hdrs.append((k, v))
+
+    def _finish(self, body):
+        if isinstance(body, str):
+            body = body.encode("latin-1", "replace")
+        self.send_response(self._code)
+        for k, v in self._hdrs:
+            self.send_header(k, v)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
-    def _not_found(self):
-        self.send_response(404)
-        self.send_header("Content-Type", "text/plain")
-        self.send_header("Content-Length", "10")
-        self.end_headers()
-        self.wfile.write(b"Not found\n")
+    def _read_body(self):
+        n = int(self.headers.get("Content-Length", 0) or 0)
+        return self.rfile.read(n).decode("latin-1", "replace") if n else ""
+
+    def _route(self, method):
+        path = self.path
+        body = self._read_body()
+        vuln = VULN
+        cookie = self.headers.get("Cookie", "")
+        if (vuln and path == '/assets/app/something/services/AppModule.class/'):
+            self._start(302)
+            self._h('Location', '/assets/meta/AppModule.class')
+            self._h('Content-Type', 'text/html')
+            self._finish('<html><body>Found</body></html>\n')
+            return
+        if (vuln and path == '/assets/meta/AppModule.class'):
+            self._start(200)
+            self._h('Content-Type', 'application/java')
+            self._finish('Êþº¾\x00\x00AppModule$InnerClasses SignatureAttribute\n')
+            return
+        if (path == '/assets/app/something/services/AppModule.class/'):
+            self._start(200)
+            self._h('Content-Type', 'text/html')
+            self._finish('<html><head><title>Apache Tapestry</title></head><body>Welcome</body></html>\n')
+            return
+        if (path == '/assets/meta/AppModule.class'):
+            self._start(404)
+            self._h('Content-Type', 'text/plain')
+            self._finish('Not found\n')
+            return
+        # default
+        self._start(404)
+        self._h("Content-Type", "text/plain")
+        self._finish("Not found\n")
 
     def do_GET(self):
-        if VULN_MODE and (self.path == '/assets/app/something/services/AppModule.class/'):
-            self._send_marker()
-        else:
-            self._not_found()
+        self._route("GET")
 
     def do_POST(self):
-        self.do_GET()
+        self._route("POST")
 
 
 def _make_https_server(port):
