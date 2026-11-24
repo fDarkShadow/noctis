@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """Mock for Oracle E-Business Suite IESFOOTPRINT SQL injection (CVE-2017-3549).
 
-Both modes serve the /OA_HTML/AppsLocalLogin.jsp login page used by the
-preliminary gate. The login response carries the two Set-Cookie headers a real
-EBS hands out — the JSESSIONID session cookie and a second, non-J cookie — which
-the feed harvests and must replay on the exploit request.
+The request flow mirrors the source NASL:
 
-vuln   : /OA_HTML/iesfootprint.jsp, *when the harvested session cookie is sent*,
-         returns HTTP 200 and reflects the injected request parameters into an
-         authenticated-looking Oracle Applications page (SQLi marker + session
-         chrome present). Without the session cookie it bounces to login — so the
-         TP genuinely exercises the cookie-harvest step.
-patched: iesfootprint.jsp still serves HTTP 200 (the endpoint exists on a patched
-         EBS) but the injected value is validated away — no reflected marker, so
-         the scan reports nothing.
+  * /OA_HTML/AppsLocalLogin.jsp (both modes) answers with a 302 whose
+    ``Location:`` points at a ``/OA_HTML/RF.jsp`` target and whose body ends
+    ``</A></BODY></HTML>`` — the redirect the NASL extracts and follows. No
+    session cookie or login marker is served here, so the feed MUST follow the
+    redirect to proceed (proving the redirect hop, not a shortcut on the first
+    reply).
+  * /OA_HTML/RF.jsp (both modes) is the redirect target: it serves the login
+    page carrying BOTH gate markers ("title>Login</title" and
+    content="Oracle UIX") and the two Set-Cookie headers a real EBS hands out
+    (JSESSIONID + a second, non-J cookie) that the feed harvests and replays.
+  * /OA_HTML/iesfootprint.jsp:
+      vuln   : returns HTTP 200 and reflects the injected parameters into an
+               authenticated Oracle Applications page (SQLi marker + session
+               chrome) ONLY when BOTH harvested cookies (JSESSIONID and the
+               second oracle.uix cookie) are replayed — so the TP genuinely
+               exercises the two-cookie harvest. Otherwise it bounces to login.
+      patched: returns HTTP 200 (the endpoint exists on a patched EBS) but the
+               injected value is validated away — no reflected marker, so the
+               scan reports nothing.
 """
 import os
 import ssl
@@ -22,8 +30,18 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 VULN_MODE = os.environ.get("ORACLE_EBS_MODE", "patched") == "vuln"
 
-# Login page: carries BOTH gate markers ("title>Login</title" and
-# content="Oracle UIX") that the feed AND-checks before proceeding.
+# AppsLocalLogin.jsp redirect target (the /OA path the NASL follows).
+REDIRECT_PATH = "/OA_HTML/RF.jsp?function_id=1019663&resp_appl_id=-1"
+
+# Body of the AppsLocalLogin.jsp redirect reply — ends with the exact
+# </A></BODY></HTML> tail the NASL's Location pattern anchors on.
+REDIRECT_BODY = (
+    "<HTML><BODY>Object moved to "
+    '<A HREF="' + REDIRECT_PATH + '">here</A></BODY></HTML>'
+)
+
+# Login page served on the redirect target: carries BOTH gate markers
+# ("title>Login</title" and content="Oracle UIX") that the feed AND-checks.
 LOGIN_PAGE = (
     "<html><head><title>Login</title>"
     '<meta name="generator" content="Oracle UIX"></head>'
@@ -48,8 +66,9 @@ PATCHED_PAGE = (
     "</body></html>"
 )
 
-# Second, non-J session cookie served alongside JSESSIONID (matches the NASL's
-# `Set-Cookie: ([^J;]+)` harvest of the first non-J cookie).
+# JSESSIONID plus a second, non-J session cookie. The feed harvests cookie1 via
+# `Set-Cookie: (JSESSIONID[^;]+)` and cookie2 via `Set-Cookie: ([^J;]+)` (the
+# first non-J Set-Cookie), then replays both.
 SESSION_COOKIES = [
     "JSESSIONID=0000noctismockSESSION; path=/; HttpOnly",
     "oracle.uix=0; path=/",
@@ -60,12 +79,14 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
 
-    def _send(self, code, body, ct="text/html", cookies=None):
+    def _send(self, code, body, ct="text/html", cookies=None, location=None):
         if isinstance(body, str):
             body = body.encode()
         self.send_response(code)
         self.send_header("Content-Type", ct)
         self.send_header("Content-Length", str(len(body)))
+        if location is not None:
+            self.send_header("Location", location)
         for cookie in cookies or []:
             self.send_header("Set-Cookie", cookie)
         self.end_headers()
@@ -75,13 +96,19 @@ class Handler(BaseHTTPRequestHandler):
         # self.path preserves the %3C%3E encoding of the raw tcp_connect request.
         path = self.path
         if path.startswith("/OA_HTML/AppsLocalLogin.jsp"):
-            # Hand out the session cookies on the login page, like a real EBS.
+            # Redirect to the /OA target — no cookies / markers here, forcing
+            # the feed to follow the redirect like a real EBS.
+            self._send(302, REDIRECT_BODY, location=REDIRECT_PATH)
+            return
+        if path.startswith("/OA_HTML/RF.jsp"):
+            # Redirect target: the login page + session cookies.
             self._send(200, LOGIN_PAGE, cookies=SESSION_COOKIES)
             return
         if path.startswith("/OA_HTML/iesfootprint.jsp"):
             if VULN_MODE:
                 cookie_hdr = self.headers.get("Cookie", "")
-                if "JSESSIONID" in cookie_hdr:
+                # Require BOTH harvested cookies, proving the two-cookie harvest.
+                if "JSESSIONID" in cookie_hdr and "oracle.uix" in cookie_hdr:
                     self._send(200, VULN_PAGE)
                 else:
                     # No live session → EBS bounces the request back to login.
