@@ -1,41 +1,85 @@
 #!/usr/bin/env python3
-"""Mock for CVE-2013-10043 — Astium VoIP PBX <= 2.1 SQLi Vulnerability (CVSS 10.0).
-Ported from OpenVAS/Greenbone NASL 2013/gb_astium_voip_pbx_51273.nasl (GPL-2.0-only, Greenbone Community Feed)."""
+"""Mock for CVE-2013-10043. Ported alongside the OpenVAS NASL detection (GPL-2.0-only).
+vuln and patched behaviours are both realistic so the TN is non-trivial."""
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-VULN_MODE = os.environ.get("CVE_2013_10043_MODE", "patched") == "vuln"
-
-MARKER_BODY = ''
+VULN = os.environ.get("CVE_2013_10043_MODE", "patched") == "vuln"
 
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
-    def _send_marker(self):
-        body = MARKER_BODY.encode("latin-1", "replace")
-        self.send_response(302)
-        self.send_header('Location', 'http://host/index.php?astiumnls=a1b2c3d4e5')
+    def _start(self, code):
+        self._body = b""
+        self._code = code
+        self._hdrs = []
+
+    def _h(self, k, v):
+        self._hdrs.append((k, v))
+
+    def _finish(self, body):
+        if isinstance(body, str):
+            body = body.encode("latin-1", "replace")
+        self.send_response(self._code)
+        for k, v in self._hdrs:
+            self.send_header(k, v)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
-    def _not_found(self):
-        self.send_response(404)
-        self.send_header("Content-Type", "text/plain")
-        self.send_header("Content-Length", "10")
-        self.end_headers()
-        self.wfile.write(b"Not found\n")
+    def _read_body(self):
+        n = int(self.headers.get("Content-Length", 0) or 0)
+        return self.rfile.read(n).decode("latin-1", "replace") if n else ""
+
+    def _route(self, method):
+        path = self.path
+        body = self._read_body()
+        vuln = VULN
+        cookie = self.headers.get("Cookie", "")
+        if (vuln and method == 'GET' and path.startswith('/index.php')):
+            self._start(302)
+            self._h('Location', '/index.php?astiumnls=a1b2c3d4e5')
+            self._h('Set-Cookie', 'astiumnls=a1b2c3d4e5; path=/')
+            self._finish('')
+            return
+        if (vuln and method == 'POST' and path == '/en/logon.php'):
+            self._start(302)
+            self._h('Location', '/en/database/dashboard.php')
+            self._finish('')
+            return
+        if (vuln and path == '/en/database/dashboard.php'):
+            self._start(200)
+            self._h('Content-Type', 'text/html')
+            self._finish("<html><head><title>Astium</title></head><body><h1>system admin's Dashboard</h1></body></html>\n")
+            return
+        if (method == 'GET' and path.startswith('/index.php')):
+            self._start(200)
+            self._h('Content-Type', 'text/html')
+            self._finish('<html><head><title>Astium VoIP PBX</title></head><body>Login</body></html>\n')
+            return
+        if (method == 'POST' and path == '/en/logon.php'):
+            self._start(200)
+            self._h('Content-Type', 'text/html')
+            self._finish('<html><body>Invalid credentials</body></html>\n')
+            return
+        if (path == '/en/database/dashboard.php'):
+            self._start(401)
+            self._h('Content-Type', 'text/html')
+            self._h('WWW-Authenticate', 'Basic realm="Astium"')
+            self._finish('<html><body>401 Authorization Required</body></html>\n')
+            return
+        # default
+        self._start(404)
+        self._h("Content-Type", "text/plain")
+        self._finish("Not found\n")
 
     def do_GET(self):
-        if VULN_MODE and (self.path.startswith('/index.php')):
-            self._send_marker()
-        else:
-            self._not_found()
+        self._route("GET")
 
     def do_POST(self):
-        self.do_GET()
+        self._route("POST")
 
 
 def _make_https_server(port):
