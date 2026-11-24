@@ -107,8 +107,11 @@ steps:
 
 In a feed that also has unauthenticated steps, leave `requires_credentials` off and guard
 the authenticated ones with `condition: "cred_enabled"` instead (`cred_enabled` is always
-defined; the `cred_*` value vars exist only when supplied). Password and token values are
-replaced by `<redacted>` in every finding field — as given, percent-encoded, and as the
+defined; the `cred_*` value vars exist only when supplied — referencing
+`{{cred_password}}` in a request that only sent a `token` aborts the test with an
+undefined-variable error, so guard such steps). Password and token values are
+replaced by `<redacted>` in every finding field and log line — as given, lowercase hex,
+percent-encoded, and as the
 Basic-auth base64 of `username:password`. Any other encoding (hashes, JSON escaping, a
 custom `base64_encode` of something else) is not recognised, so never put credentials or
 values derived from them in evidence.

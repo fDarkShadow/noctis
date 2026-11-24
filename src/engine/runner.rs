@@ -71,12 +71,16 @@ impl Runner {
                     .take_while(|s| s.loop_cfg.is_none() && s.action != "wait_oob")
                     .count();
                 let group = &steps[i..i + 1 + tail];
-                let stop = run_loop_group(group, loop_cfg, def, &mut ctx).await?;
+                let stop = run_loop_group(group, loop_cfg, def, &mut ctx)
+                    .await
+                    .map_err(|e| redact_error(e, def, step, &ctx))?;
                 i += 1 + tail;
                 stop
             } else {
                 i += 1;
-                execute_step(step, def, &mut ctx, None).await?
+                execute_step(step, def, &mut ctx, None)
+                    .await
+                    .map_err(|e| redact_error(e, def, step, &ctx))?
             };
 
             if stop {
@@ -88,6 +92,25 @@ impl Runner {
         info!(test = %def.uid, findings = ctx.findings.len(), "test complete");
 
         Ok(ctx.findings)
+    }
+}
+
+/// Step errors bubble up to the scan manager's `test error` warn log, and some
+/// (Rhai runtime errors, template errors) can quote variable values. When the
+/// scan carries credentials, re-wrap the error with its text redacted.
+fn redact_error(
+    e: crate::error::NoctisError,
+    def: &TestDef,
+    step: &Step,
+    ctx: &Context,
+) -> crate::error::NoctisError {
+    if !ctx.has_secrets() {
+        return e;
+    }
+    crate::error::NoctisError::StepError {
+        test: def.uid.to_string(),
+        step: step.id.clone(),
+        message: ctx.redact(&e.to_string()),
     }
 }
 
@@ -222,9 +245,12 @@ mod tests {
             .await
             .unwrap();
         let json = serde_json::to_string(&f).unwrap();
-        assert!(!json.contains("hunter2-pw"), "{json}");
-        assert!(!json.contains("tok-secret"), "{json}");
-        assert!(json.contains("login admin / <redacted>"), "{json}");
+        assert!(!json.contains("hunter2-pw"), "password leaked into finding");
+        assert!(!json.contains("tok-secret"), "token leaked into finding");
+        assert!(
+            json.contains("login admin / <redacted>"),
+            "expected redaction marker in finding"
+        );
     }
 
     #[test]
@@ -232,5 +258,35 @@ mod tests {
         assert!(skip_for_missing_credentials(&cred_def(true), false));
         assert!(!skip_for_missing_credentials(&cred_def(true), true));
         assert!(!skip_for_missing_credentials(&cred_def(false), false));
+    }
+
+    #[tokio::test]
+    async fn step_error_text_is_redacted_when_credentials_present() {
+        // A script step whose runtime error quotes the token value.
+        let yaml = r#"
+uid: 7b0f1c62-3f0e-4c69-9a43-5d3a1f0c2e11
+name: err-redact
+severity: info
+steps:
+  - id: boom
+    action: script
+    code: "throw cred_token"
+"#;
+        let def: TestDef = serde_saphyr::from_str(yaml).expect("feed parses");
+        let runner = Runner::new(None).with_credentials(Some(Credentials {
+            username: None,
+            password: None,
+            token: Some("tok-very-secret".into()),
+        }));
+        let err = runner
+            .run(&def, "127.0.0.1", Some(1), "http")
+            .await
+            .expect_err("script throws");
+        let text = err.to_string();
+        assert!(
+            !text.contains("tok-very-secret"),
+            "token leaked into step error"
+        );
+        assert!(text.contains("<redacted>"), "expected redaction marker");
     }
 }

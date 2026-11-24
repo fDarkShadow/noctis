@@ -122,7 +122,7 @@ fn validate_credentials(c: &Credentials) -> Result<(), ValidationError> {
 
 impl Credentials {
     /// Values that must never leak into findings or logs: the password and
-    /// token as given, their percent-encoded forms (as they appear once
+    /// token as given, their lowercase hex, their percent-encoded forms (as they appear once
     /// templated into a URL or form body), and the base64 of
     /// `username:password` (an HTTP Basic `Authorization` header). The
     /// username itself is not treated as a secret for scrubbing purposes.
@@ -134,6 +134,9 @@ impl Credentials {
                 continue;
             }
             out.push(raw.clone());
+            // Lowercase hex, as it shows up in `response_hex` when a feed sends
+            // the secret over a binary protocol (`send_hex: "{{hexstr(...)}}"`).
+            out.push(raw.bytes().map(|b| format!("{b:02x}")).collect());
             for enc in [percent_encode(raw, false), percent_encode(raw, true)] {
                 if enc != *raw {
                     out.push(enc);
@@ -426,6 +429,7 @@ mod tests {
         assert!(s.contains(&"p+w%22d".to_string()));
         // base64("admin:p w\"d") — HTTP Basic auth header value.
         assert!(s.contains(&"YWRtaW46cCB3ImQ=".to_string()));
+        assert!(s.contains(&"7020772264".to_string()));
         assert!(!s.contains(&"admin".to_string()));
     }
 
@@ -459,6 +463,8 @@ mod tests {
         };
         // password + base64("u:p") for Basic auth; empty token and the
         // username itself are not secrets.
-        assert_eq!(c.secrets(), vec!["dTpw".to_string(), "p".to_string()]);
+        let mut want = vec!["70".to_string(), "dTpw".to_string(), "p".to_string()];
+        want.sort();
+        assert_eq!(c.secrets(), want);
     }
 }

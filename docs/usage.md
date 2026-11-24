@@ -76,7 +76,7 @@ marked `requires_credentials: true` is skipped when no credentials are sent.
 {: .note }
 > Credentials are write-only. They never appear in `GET /scans`, webhook payloads or `Debug`
 > output, and password / token values are replaced by `<redacted>` in findings and engine
-> logs, including their percent-encoded forms and the Basic-auth base64 of
+> logs, including their lowercase hex and percent-encoded forms and the Basic-auth base64 of
 > `username:password`. Other encodings a feed builds itself are not recognised.
 
 ### Findings

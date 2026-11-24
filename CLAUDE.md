@@ -371,6 +371,9 @@ dedicated mock directory (`<product>-<cve-number>-mock`) instead.
    - Optional `container_env: {VAR: value}` — passed as `-e` to the container. Use it to run
      one mock in another mode instead of creating a second mock directory (see
      `infra/inventories/axis2/CVE-2010-0219/hosts.yml`, `AXIS2_MODE: vuln_redirect`)
+   - Optional `noctis_credentials: {username: …, password: …}` (or `token:`) — for a feed
+     with `requires_credentials: true`; the role adds `credentials` to POST /scans and
+     `no_log`s the submit tasks
    - **No `target_port`** — port is allocated dynamically
    - On every vuln host set `expected_qod` (highest QoD branch the mock exercises) and
      `expected_min_confidence` (`confidence_base + highest_delta - 0.05`). These are asserted
@@ -531,9 +534,9 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
   login (it is then skipped, no task, when the request has no `credentials`); for a feed
   with an optional authenticated branch, guard those steps with `condition: "cred_enabled"`
   instead. Only `cred_enabled` is always defined — `{{cred_password}}` in a strict field
-  (path/body/send…) errors when the request had no password. Password/token values (literal, percent-encoded,
-  and the Basic-auth base64 of `user:pass`) are replaced by `<redacted>` in every finding
-  field and engine log line; other encodings are not recognised, so never put credentials or
+  (path/body/send…) errors when the request had no password. Password/token values (literal, lowercase hex,
+  percent-encoded, and the Basic-auth base64 of `user:pass`) are replaced by `<redacted>` in every finding
+  field, engine log line and step error; other encodings are not recognised, so never put credentials or
   derived values in `evidence:`. Very short passwords also mask unrelated matching text. In an inventory, pass them with `noctis_credentials: {username: …,
   password: …}` on the host — the `common_docker` role adds `credentials` to POST /scans and
   `no_log`s those tasks.

@@ -42,6 +42,9 @@ pub struct Context {
     /// Secret values (credential password / token) scrubbed from every finding
     /// field and from logged URLs via [`Context::redact`]. Never exposed.
     secrets: Vec<String>,
+    /// One alternation over `secrets` (longest first), so redaction is a single
+    /// pass and a short secret can never match inside an inserted `<redacted>`.
+    secret_re: Option<regex::Regex>,
 }
 
 impl Context {
@@ -90,6 +93,7 @@ impl Context {
             oob_server,
             connections: HashMap::new(),
             secrets: Vec::new(),
+            secret_re: None,
         }
     }
 
@@ -117,19 +121,40 @@ impl Context {
         self.secrets = c.secrets();
         // Longest first so a secret that contains another is masked whole.
         self.secrets.sort_by_key(|s| std::cmp::Reverse(s.len()));
+        self.secret_re = if self.secrets.is_empty() {
+            None
+        } else {
+            let alt = self
+                .secrets
+                .iter()
+                .map(|s| regex::escape(s))
+                .collect::<Vec<_>>()
+                .join("|");
+            regex::Regex::new(&alt).ok()
+        };
+    }
+
+    /// `true` when credentials with at least one secret value were injected.
+    pub fn has_secrets(&self) -> bool {
+        !self.secrets.is_empty()
     }
 
     /// Replace every credential secret (password, token) in `s` with `<redacted>`.
     /// Applied to all finding text and to logged URLs so a feed that echoes a
     /// response (or templates a secret into a URL) never leaks it.
     pub fn redact(&self, s: &str) -> String {
-        let mut out = s.to_string();
-        for secret in &self.secrets {
-            if out.contains(secret.as_str()) {
-                out = out.replace(secret.as_str(), REDACTED);
+        match &self.secret_re {
+            Some(re) => re.replace_all(s, REDACTED).into_owned(),
+            // Regex construction cannot realistically fail on escaped literals;
+            // fall back to sequential replacement rather than leaking.
+            None => {
+                let mut out = s.to_string();
+                for secret in &self.secrets {
+                    out = out.replace(secret.as_str(), REDACTED);
+                }
+                out
             }
         }
-        out
     }
 
     /// Merge YAML static vars into the context (already-set keys are kept).
@@ -224,5 +249,14 @@ mod tests {
     fn redact_without_credentials_is_identity() {
         let ctx = Context::new("h", Some(80), "http", None);
         assert_eq!(ctx.redact("hunter2"), "hunter2");
+    }
+
+    #[test]
+    fn redact_is_single_pass_for_short_secrets() {
+        let mut ctx = Context::new("h", Some(80), "http", None);
+        // "d" must not match inside the "<redacted>" inserted for "dd".
+        ctx.inject_credentials(Some(&creds(Some("u"), Some("d"), Some("dd"))));
+        assert_eq!(ctx.redact("x dd y"), "x <redacted> y");
+        assert!(ctx.has_secrets());
     }
 }

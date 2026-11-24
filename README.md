@@ -279,8 +279,8 @@ include `webhook_url`, `oob`, `filters` (e.g. exclude a CVE), and `credentials`.
 is required and a `password` needs a `username` (otherwise `422`). Credentials are
 write-only: they never appear in `GET /scans`, webhook payloads or `Debug` output, and the
 password / token values are replaced by `<redacted>` in every finding field and engine log
-line. Masking covers the literal values, their percent-encoded forms and the Basic-auth
-base64 of `username:password`; any other transformation a feed applies (hashing, JSON
+line. Masking covers the literal values, their lowercase hex and percent-encoded forms and
+the Basic-auth base64 of `username:password`; any other transformation a feed applies (hashing, JSON
 escaping, a custom encoding) is not recognised, so don't echo such values into evidence. A feed that
 declares `requires_credentials: true` is skipped (no task, no finding) when the request has
 no `credentials`.
