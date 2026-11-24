@@ -476,6 +476,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## oim-mock
 - oim/CVE-2025-61757
 
+## opennms-mock
+- opennms/CVE-2015-0975
+
 ## oracle-ebs-mock
 - oracle-ebs/CVE-2017-3549
 
@@ -722,6 +725,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## vnc-mock
 - general/vnc-no-auth
+
+## webjump-mock
+- webjump/CVE-2009-4892
 
 ## webmin-mock
 - webmin/CVE-2019-15107
