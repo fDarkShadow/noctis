@@ -328,6 +328,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## jira-mock
 - jira/CVE-2021-26086
 
+## joomla-contenthistory-mock
+- joomla-contenthistory/CVE-2015-7297
+
 ## joomla-eq-calendar-mock
 - joomla-eq-calendar/CVE-2015-4654
 

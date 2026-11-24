@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "joomla-contenthistory-mock" {
+  name       = "joomla-contenthistory-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/joomla-contenthistory-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/joomla-contenthistory-mock:${variant}"]
 target "pragyan-cms-mock" {
   name       = "pragyan-cms-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
