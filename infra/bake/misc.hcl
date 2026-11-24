@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "simple-ads-manager-mock" {
+  name       = "simple-ads-manager-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/simple-ads-manager-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/simple-ads-manager-mock:${variant}"]
+}
