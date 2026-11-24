@@ -720,6 +720,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## vnc-mock
 - general/vnc-no-auth
 
+## webjump-mock
+- webjump/CVE-2009-4892
+
 ## webmin-mock
 - webmin/CVE-2019-15107
 
