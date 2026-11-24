@@ -1,0 +1,10 @@
+---
+- name: "Quantum Scalar i500 / Dell ML6000 / IBM TS3310 information disclosure (CVE-2012-1841)"
+  hosts: quantum_scalar_lfi
+  gather_facts: false
+  vars:
+    cve_id: "CVE-2012-1841"
+    expected_cves: ["CVE-2012-1841", "CVE-2012-1842", "CVE-2012-1844"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/quantum/quantum-scalar-lfi.yaml"
+  roles:
+    - common_docker
