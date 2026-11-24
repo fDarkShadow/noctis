@@ -240,6 +240,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## docker-api-mock
 - general/docker-api-exposed
 
+## dokeos-mock
+- dokeos/CVE-2013-6341
+
 ## dolibarr-mock
 - dolibarr/dolibarr-404-mult-vuln
 

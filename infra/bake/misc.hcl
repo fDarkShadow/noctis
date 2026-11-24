@@ -684,6 +684,13 @@ target "zerocms-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zerocms-mock:${variant}"]
 }
+target "dokeos-mock" {
+  name       = "dokeos-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dokeos-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dokeos-mock:${variant}"]
+}
 target "wikiwebhelp-mock" {
   name       = "wikiwebhelp-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
