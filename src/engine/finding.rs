@@ -67,25 +67,25 @@ fn build_finding(
         title: spec
             .title
             .as_ref()
-            .map(|t| expr::interpolate_lenient(t, &ctx.vars))
+            .map(|t| ctx.redact(&expr::interpolate_lenient(t, &ctx.vars)))
             .unwrap_or_else(|| def.name.clone()),
         description: spec
             .description
             .as_ref()
-            .map(|d| expr::interpolate_lenient(d, &ctx.vars)),
+            .map(|d| ctx.redact(&expr::interpolate_lenient(d, &ctx.vars))),
         remediation: spec
             .remediation
             .as_ref()
-            .map(|r| expr::interpolate_lenient(r, &ctx.vars)),
+            .map(|r| ctx.redact(&expr::interpolate_lenient(r, &ctx.vars))),
     };
 
     let evidence = Evidence {
-        matched: evidence_raw,
+        matched: evidence_raw.map(|m| ctx.redact(&m)),
         request: None,
         response_excerpt: spec
             .evidence
             .as_ref()
-            .map(|e| expr::interpolate_lenient(e, &ctx.vars)),
+            .map(|e| ctx.redact(&expr::interpolate_lenient(e, &ctx.vars))),
     };
 
     let finding = Finding::new(
@@ -136,6 +136,7 @@ mod tests {
             cvss: Some(10.0),
             category: Some("injection".to_string()),
             services: vec![],
+            requires_credentials: false,
             includes: vec![],
             vars: IndexMap::new(),
             steps: vec![],
