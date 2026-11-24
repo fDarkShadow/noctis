@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "symantec-epm-mock" {
+  name       = "symantec-epm-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/symantec-epm-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/symantec-epm-mock:${variant}"]
+}
