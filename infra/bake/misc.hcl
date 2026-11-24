@@ -599,3 +599,95 @@ target "deluxebb-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/deluxebb-mock:${variant}"]
 }
+target "jobhut-mock" {
+  name       = "jobhut-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/jobhut-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/jobhut-mock:${variant}"]
+}
+target "ajaxportal-mock" {
+  name       = "ajaxportal-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ajaxportal-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ajaxportal-mock:${variant}"]
+}
+
+target "axis2-mock" {
+  name       = "axis2-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/axis2-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/axis2-mock:${variant}"]
+}
+target "axis2-redirect-mock" {
+  name       = "axis2-redirect-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/axis2-redirect-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/axis2-redirect-mock:${variant}"]
+}
+target "kloxo-mock" {
+  name       = "kloxo-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/kloxo-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/kloxo-mock:${variant}"]
+}
+target "leaguemanager-mock" {
+  name       = "leaguemanager-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/leaguemanager-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/leaguemanager-mock:${variant}"]
+}
+target "articlefr-mock" {
+  name       = "articlefr-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/articlefr-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/articlefr-mock:${variant}"]
+}
+target "elearning-server-mock" {
+  name       = "elearning-server-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/elearning-server-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/elearning-server-mock:${variant}"]
+}
+target "trombinoscope-mock" {
+  name       = "trombinoscope-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/trombinoscope-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/trombinoscope-mock:${variant}"]
+}
+target "apprain-mock" {
+  name       = "apprain-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/apprain-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/apprain-mock:${variant}"]
+}
+target "efront-mock" {
+  name       = "efront-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/efront-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/efront-mock:${variant}"]
+}
+target "refbase-mock" {
+  name       = "refbase-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/refbase-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/refbase-mock:${variant}"]
+}
+target "zerocms-mock" {
+  name       = "zerocms-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zerocms-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zerocms-mock:${variant}"]
+}
