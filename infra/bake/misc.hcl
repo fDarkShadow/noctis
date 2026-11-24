@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "wikiwebhelp-mock" {
+  name       = "wikiwebhelp-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wikiwebhelp-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wikiwebhelp-mock:${variant}"]
+}
