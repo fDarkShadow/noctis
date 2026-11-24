@@ -1,0 +1,10 @@
+---
+- name: "Siemens SIMATIC WinCC HMI — multiple input validation vulnerabilities"
+  hosts: simatic_wincc_input_validation
+  gather_facts: false
+  vars:
+    cve_id: "CVE-2011-4512 / CVE-2011-4878 / CVE-2011-4879"
+    expected_cves: ["CVE-2011-4512", "CVE-2011-4878", "CVE-2011-4879"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/wincc/simatic-wincc-input-validation.yaml"
+  roles:
+    - common_docker
