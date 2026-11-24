@@ -1,0 +1,10 @@
+---
+- name: "Splunk 4.0-4.2.4 Multiple Vulnerabilities (CVE-2011-4642/4643/4644/4778) — active check"
+  hosts: splunk_multiple_vuln
+  gather_facts: false
+  vars:
+    cve_id: "splunk-multiple-vuln"
+    expected_cves: ["CVE-2011-4642", "CVE-2011-4643", "CVE-2011-4644", "CVE-2011-4778"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/splunk/splunk-multiple-vuln.yaml"
+  roles:
+    - common_docker
