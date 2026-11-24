@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "livelycart-mock" {
+  name       = "livelycart-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/livelycart-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/livelycart-mock:${variant}"]
 target "joomla-eq-calendar-mock" {
   name       = "joomla-eq-calendar-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }

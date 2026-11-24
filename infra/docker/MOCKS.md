@@ -358,6 +358,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## lexmark-mock
 - lexmark/CVE-2021-44736
 
+## livelycart-mock
+- livelycart/CVE-2015-5148
+
 ## livewire-mock
 - livewire/CVE-2025-54068
 
