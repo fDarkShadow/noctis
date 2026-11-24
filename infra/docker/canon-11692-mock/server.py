@@ -1,8 +1,19 @@
 #!/usr/bin/env python3
 # Mock for CVE-2018-11692 — Canon Printers Authentication Bypass.
-# Vuln mode: unauthenticated POST /frame.cgi?page=DevInfoSetDev is answered
-# with a session cookie (Set-Cookie), matching the NASL detection.
-# Patched mode: the same request returns 401 with no Set-Cookie → zero findings.
+#
+# Both modes serve the same Canon Remote UI fingerprint: a home page, a login
+# endpoint /tlogin.cgi that issues a CookieID session cookie, and the device
+# frame endpoint /frame.cgi?page=DevInfoSetDev. The modes differ ONLY in whether
+# the Administrator Mode password is enforced.
+#
+# Vuln mode: /tlogin.cgi with Action=LOGIN and an empty user_name grants an
+#   ADMIN session cookie (CookieID=admin...). Presenting that cookie to
+#   /frame.cgi?page=DevInfoSetDev returns the management frameset containing the
+#   marker switch("DevInfoSetDev") — the real exploit signal.
+# Patched mode: /tlogin.cgi still issues a CookieID session cookie (same product
+#   fingerprint) but it is an UNAUTHENTICATED guest session; /frame.cgi always
+#   returns the login page, never the switch("DevInfoSetDev") marker. So the bare
+#   cookie is still present but the auth bypass does not work → zero findings.
 import os, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -11,7 +22,30 @@ CERT_DIR = os.environ.get("CERT_DIR", "/certs")
 PORT_HTTP = int(os.environ.get("PORT_HTTP", "80"))
 PORT_HTTPS = int(os.environ.get("PORT_HTTPS", "443"))
 
-ENDPOINT = "/frame.cgi?page=DevInfoSetDev"
+ADMIN_COOKIE = "admin1610705327"   # issued only by the vulnerable login
+GUEST_COOKIE = "guest00000000"     # issued by the patched (auth-enforcing) login
+
+HOME_PAGE = (
+    "<html><head><title>Canon LBP6650 Remote UI</title></head>"
+    "<body><h1>Canon Remote UI</h1><p>Copyright CANON INC.</p>"
+    "<a href=\"/tlogin.cgi\">Administrator Mode</a></body></html>"
+)
+
+LOGIN_PAGE = (
+    "<html><head><title>Canon Login</title></head>"
+    "<body><form action=\"/tlogin.cgi\" method=\"post\">"
+    "<input name=\"user_name\"><input type=\"submit\" value=\"Log In\"></form>"
+    "<p>Copyright CANON INC.</p></body></html>"
+)
+
+# Authenticated device-management frameset. The script marker switch("DevInfoSetDev")
+# is what the NASL / feed confirms on.
+DEVINFO_PAGE = (
+    "<html><head><title>DevInfoSetDev</title>"
+    "<script>function init(){switch(\"DevInfoSetDev\"){case 0:break;}}</script>"
+    "</head><body><h2>Device Information Settings</h2>"
+    "<p>Model: Canon LBP6650  Copyright CANON INC.</p></body></html>"
+)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -26,18 +60,38 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _body(self):
+        n = int(self.headers.get("Content-Length", "0") or "0")
+        return self.rfile.read(n).decode("latin-1") if n else ""
+
     def do_POST(self):
-        if self.path == ENDPOINT:
-            if VULN_MODE:
-                self._send(200, "<html><body>Canon Device Information</body></html>",
-                           extra_headers={"Set-Cookie": "ccsid=0123456789abcdef; path=/"})
+        if self.path == "/tlogin.cgi":
+            data = self._body()
+            if VULN_MODE and "Action=LOGIN" in data:
+                # Auth bypass: admin session granted without a password.
+                self._send(200, LOGIN_PAGE,
+                           extra_headers={"Set-Cookie": "CookieID=%s; path=/" % ADMIN_COOKIE})
             else:
-                self._send(401, "Authentication required")
+                # Patched (or non-LOGIN): a session cookie is still issued, but it
+                # is an unauthenticated guest session.
+                self._send(200, LOGIN_PAGE,
+                           extra_headers={"Set-Cookie": "CookieID=%s; path=/" % GUEST_COOKIE})
         else:
             self._send(404, "Not found")
 
     def do_GET(self):
-        self._send(404, "Not found")
+        if self.path == "/frame.cgi?page=DevInfoSetDev":
+            cookie = self.headers.get("Cookie", "")
+            if VULN_MODE and ("CookieID=" + ADMIN_COOKIE) in cookie:
+                # Bypass cookie accepted → serve the management frameset.
+                self._send(200, DEVINFO_PAGE)
+            else:
+                # No valid admin session → bounce back to the login page (no marker).
+                self._send(200, LOGIN_PAGE)
+        elif self.path in ("/", "/index.html"):
+            self._send(200, HOME_PAGE)
+        else:
+            self._send(404, "Not found")
 
 
 def _make_https_server(port):
