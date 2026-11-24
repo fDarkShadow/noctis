@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "pragyan-cms-mock" {
+  name       = "pragyan-cms-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/pragyan-cms-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/pragyan-cms-mock:${variant}"]
+}
