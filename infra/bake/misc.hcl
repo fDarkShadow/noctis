@@ -663,3 +663,10 @@ target "apprain-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/apprain-mock:${variant}"]
 }
+target "efront-mock" {
+  name       = "efront-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/efront-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/efront-mock:${variant}"]
+}

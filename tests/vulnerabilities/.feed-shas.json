@@ -68,6 +68,7 @@
   "dlink-dwr/CVE-2018-19300.yaml": "a07547ec730e6de46c5fe19ca6d4f066971d3ad965bdaf8fa29e4810c8bd8b9d",
   "dolibarr/dolibarr-404-mult-vuln.yaml": "7ca773d943620e4f49e4158f6c0623d8e4b4a3ffe82f7a17465f6985ea153182",
   "drupal-sqli/CVE-2026-9082.yaml": "3591402becc4be0e953ba81ee0342cdefe96c92130320e8d1d26196109f4a9af",
+  "efront/CVE-2010-1918.yaml": "2c511b7b553f6edb556d66b60533840e8245943b2ca1dd98464054a956683e9e",
   "ektron/CVE-2012-5357.yaml": "999020525f1c95592ad55f4e9873b064c72b998ad92daa0f32aadf7f30e9dee8",
   "elearning-server/CVE-2012-2923.yaml": "2e8c23ffc901b68acc069bab2e4dbd598a8f1585437507a472d64a0c92f67b6e",
   "elite-bulletin-board/CVE-2012-5874.yaml": "b97a1ecbbea0f1d2c327926ba03eacbc8e3f8e6293b84163ee646f04e593535b",
