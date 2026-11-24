@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "merak-webmail-mock" {
+  name       = "merak-webmail-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/merak-webmail-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/merak-webmail-mock:${variant}"]
+}
