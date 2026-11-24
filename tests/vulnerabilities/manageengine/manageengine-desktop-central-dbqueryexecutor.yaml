@@ -1,0 +1,114 @@
+# ManageEngine Desktop Central <= 10.0.184 — unauthenticated DB Query Executor
+# CVE-2018-5337, CVE-2018-5338, CVE-2018-5339, CVE-2018-5341
+#
+# Ported from OpenVAS/Greenbone NVT
+#   2018/zohocorp/gb_manageengine_desktop_central_mult_vuln_apr18.nasl (GPL-2.0-only)
+#
+# Detection: an unauthenticated GET to /jsp/admin/DBQueryExecutor.jsp with a
+# read-only SELECT on the aaauser table. A vulnerable server answers 200 with the
+# Query Executor page and the result table (CREATEDTIME / USER_ID / LAST_NAME
+# columns). Fixed servers no longer expose the page without authentication.
+# The query string carries %20-encoding, so the request is sent verbatim over
+# tcp_connect (HTTP/1.0) and matched on resp.banner.
+# QoD 75 (response analysis).
+uid: 45ac5bb4-3480-4cfe-8733-c8c8c6145aa1
+name: "ManageEngine Desktop Central unauthenticated DB Query Executor (CVE-2018-5337 et al.)"
+description: |
+  Detects ManageEngine Desktop Central builds <= 10.0.184 whose
+  DBQueryExecutor.jsp answers database queries without authentication.
+  A read-only SELECT on the aaauser table returns the query result page.
+cves: [CVE-2018-5337, CVE-2018-5338, CVE-2018-5339, CVE-2018-5341]
+cvss: 7.5
+severity: high
+category: auth-bypass
+confidence_base: 0.30
+tags: [manageengine, desktop-central, zoho, auth-bypass, sqli, openvas-port]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2018-5337"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2018-5338"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2018-5339"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2018-5341"
+  - "OpenVAS NVT 2018/zohocorp/gb_manageengine_desktop_central_mult_vuln_apr18.nasl (GPL-2.0-only)"
+
+steps:
+  - id: init-flags
+    action: set_var
+    var_name: dbq_page
+    var_value: false
+
+  - id: dbquery-probe
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /jsp/admin/DBQueryExecutor.jsp?actionFrom=getResult&query=SELECT%20*%20from%20aaauser; HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: dbq_resp
+
+  # http_vuln_check(check_header:TRUE, pattern:"execute SQL queries")
+  - id: dbquery-page
+    action: match
+    source: dbq_resp.banner
+    pattern: "(?s)^HTTP/1\\.[01] 200.*execute SQL queries"
+    on_match:
+      set_vars:
+        dbq_page: true
+
+  # extra_check: every marker below must also be present; any miss clears the flag
+  - id: dbquery-extra-1
+    action: match
+    source: dbq_resp.banner
+    condition: "dbq_page == true"
+    pattern: ">CREATEDTIME<"
+    on_failure:
+      set_vars:
+        dbq_page: false
+
+  - id: dbquery-extra-2
+    action: match
+    source: dbq_resp.banner
+    condition: "dbq_page == true"
+    pattern: ">USER_ID<"
+    on_failure:
+      set_vars:
+        dbq_page: false
+
+  - id: dbquery-extra-3
+    action: match
+    source: dbq_resp.banner
+    condition: "dbq_page == true"
+    pattern: ">LAST_NAME<"
+    on_failure:
+      set_vars:
+        dbq_page: false
+
+  - id: dbquery-extra-4
+    action: match
+    source: dbq_resp.banner
+    condition: "dbq_page == true"
+    pattern: "retrieve any specific  information"
+    on_failure:
+      set_vars:
+        dbq_page: false
+
+  - id: dbquery-extra-5
+    action: match
+    source: dbq_resp.banner
+    condition: "dbq_page == true"
+    pattern: "Query Executor"
+    on_failure:
+      set_vars:
+        dbq_page: false
+
+  - id: dbquery-confirmed
+    action: match
+    source: dbq_resp.banner
+    condition: "dbq_page == true"
+    pattern: "execute SQL queries"
+    on_match:
+      finding:
+        confidence_delta: 0.50
+        qod: 75
+        evidence: "Unauthenticated DBQueryExecutor.jsp returned aaauser query result: {{dbq_resp.banner}}"
+      stop: true
