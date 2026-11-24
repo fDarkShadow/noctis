@@ -581,6 +581,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## spark-mock
 - general/spark-master-exposed
 
+## splunk-mock
+- splunk/splunk-multiple-vuln
+
 ## splunk-pg-mock
 - splunk-pg/CVE-2026-20253
 
