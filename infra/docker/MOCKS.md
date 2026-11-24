@@ -757,6 +757,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## tomcat-put-mock
 - tomcat-put/CVE-2025-24813
 
+## trombinoscope-mock
+- trombinoscope/CVE-2012-4282
+
 ## twonky-mock
 - twonky/CVE-2025-13315
 
