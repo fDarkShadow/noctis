@@ -720,6 +720,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## symantec-sepm-mock
 - symantec-sepm/CVE-2014-3437
 
+## synology-mock
+- synology/CVE-2024-50630
+
 ## tbk-dvr-mock
 - tbk-dvr/CVE-2024-3721
 
