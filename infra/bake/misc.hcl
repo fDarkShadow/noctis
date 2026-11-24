@@ -54,6 +54,13 @@ target "drupal-sqli-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/drupal-sqli-mock:${variant}"]
 }
+target "ektron-mock" {
+  name       = "ektron-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ektron-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ektron-mock:${variant}"]
+}
 target "exchange-mock" {
   name       = "exchange-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -570,6 +577,27 @@ target "phplinkadmin-mock" {
   context    = "../docker/phplinkadmin-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/phplinkadmin-mock:${variant}"]
+}
+target "gravityboardx-mock" {
+  name       = "gravityboardx-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/gravityboardx-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/gravityboardx-mock:${variant}"]
+}
+target "deluxebb-mock" {
+  name       = "deluxebb-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/deluxebb-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/deluxebb-mock:${variant}"]
+}
+target "jobhut-mock" {
+  name       = "jobhut-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/jobhut-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/jobhut-mock:${variant}"]
 }
 
 target "axis2-mock" {
