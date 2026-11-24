@@ -521,6 +521,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## postgres-mock
 - general/postgres-trust-auth
 
+## pragyan-cms-mock
+- pragyan-cms/CVE-2015-1471
+
 ## projectsend-mock
 - projectsend/CVE-2024-11680
 
