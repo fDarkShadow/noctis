@@ -108,6 +108,50 @@ Use `tcp_connect` for any payload encoded in the path — reqwest normalises URL
   pattern: "root:.*:0:0"
 ```
 
+## Parsing a binary reply
+
+For a binary protocol, send one raw frame with `tcp_dialogue` + `send_hex` and parse the
+reply's `response_hex` in a `script` step: byte offset *N* is hex offset *2N*, `substr` takes an
+**inclusive** end, and `u16le`/`u32be`/… decode a fixed-width integer. The script can return a
+map, which later `match` / `condition:` steps read with dot notation. The magic bytes stay in
+the feed — no engine change per protocol. From
+[`general/smb-signing-not-required.yaml`](https://github.com/fDarkShadow/noctis/blob/main/tests/vulnerabilities/general/smb-signing-not-required.yaml)
+(SMB2 NEGOTIATE → `SecurityMode` at byte 70, `DialectRevision` at byte 72):
+
+```yaml
+- id: smb2-negotiate
+  action: tcp_dialogue
+  port: "{{port}}"
+  read_banner: false
+  send_hex: "0000009efe534d42…"          # NBSS + SMB2 header + NEGOTIATE (5 dialects)
+  store_as: smb
+
+- id: parse-negotiate
+  action: script
+  condition: "smb.connected == true"
+  store_as: neg
+  code: |
+    let hex = if type_of(smb.response_hex) == "string" { smb.response_hex } else { "" };
+    let mode = u16le(substr(hex, 140, 143));   // byte 70
+    let rev  = u16le(substr(hex, 144, 147));   // byte 72
+    #{ smb2: substr(hex, 8, 15) == "fe534d42", signing_required: (mode & 2) == 2,
+       dialect_hex: p16be(rev) }
+
+- id: check-signing
+  action: match
+  source: neg.signing_required
+  pattern: "^false$"
+  condition: "neg.smb2 == true"
+  on_match:
+    finding:
+      title: "SMB signing not required"
+      qod: 75
+      evidence: "dialect 0x{{neg.dialect_hex}}, signing not required"
+```
+
+When a later frame depends on a value from an earlier reply (challenge–response), use
+`tcp_open` / `tcp_send` / `tcp_close` instead and build the next `send_hex` in the `script`.
+
 ## Validate a feed
 
 ```sh

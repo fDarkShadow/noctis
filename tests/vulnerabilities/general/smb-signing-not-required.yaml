@@ -1,0 +1,97 @@
+# Flag an SMB2/3 server that does not require message signing.
+#
+# Unsigned SMB lets an attacker in the path tamper with or relay the session
+# (NTLM relay to SMB, e.g. ntlmrelayx) — the classic hardening finding on
+# member servers and workstations. Detection is a single SMB2 NEGOTIATE sent as
+# a binary tcp_dialogue frame; the reply is parsed in a `script` step, so the
+# protocol bytes live here in the feed, not in the engine.
+#
+# Request (162 bytes): NBSS header [00 + 3-byte BE length 0x9e]
+#   + SMB2 header (64 B, ProtocolId fe534d42, Command 0 = NEGOTIATE)
+#   + NEGOTIATE (StructureSize 36, DialectCount 5, SecurityMode 0x01 signing
+#     enabled, ClientGuid "noctis-smb-probe", NegotiateContextOffset 0x70,
+#     NegotiateContextCount 1)
+#   + dialects 0x0202 0x0210 0x0300 0x0302 0x0311 (little-endian) + 2 B pad
+#   + SMB2_PREAUTH_INTEGRITY_CAPABILITIES context (SHA-512, 32-byte salt) —
+#     required for a real server to accept the 3.1.1 dialect.
+#
+# Reply offsets (byte → hex offset = byte × 2):
+#   4   ProtocolId   fe534d42          hex  8..15
+#   12  Status       u32le, 0 = OK     hex 24..31
+#   16  Command      u16le, 0          hex 32..35
+#   70  SecurityMode u16le             hex 140..143  (0x01 enabled, 0x02 REQUIRED)
+#   72  DialectRevision u16le          hex 144..147
+uid: 57f3bc70-28a2-4d5b-a684-7a74a4a087bf
+name: "SMB signing not required"
+description: |
+  The server negotiated SMB2/SMB3 without SMB2_NEGOTIATE_SIGNING_REQUIRED in
+  its SecurityMode, so clients may run unsigned sessions. An attacker able to
+  intercept or relay traffic (NTLM relay to SMB) can tamper with or hijack them.
+cves: []
+category: misconfiguration
+severity: medium
+confidence_base: 0.40
+tags: [smb, smb2, smb3, signing, ntlm-relay, misconfig, hardening]
+services: [smb, microsoft-ds]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://learn.microsoft.com/openspecs/windows_protocols/ms-smb2/63abf97c-0d09-47e2-88d6-6bfa552949a5"
+  - "https://learn.microsoft.com/troubleshoot/windows-server/networking/overview-server-message-block-signing"
+
+steps:
+  - id: smb2-negotiate
+    action: tcp_dialogue
+    port: "{{port}}"
+    read_banner: false
+    timeout_secs: 10
+    send_hex: "0000009efe534d424000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002400050001000000000000006e6f637469732d736d622d70726f6265700000000100000002021002000302031103000001002600000000000100200001006e6f637469732d707265617574682d696e746567726974792d73616c742d3332"
+    store_as: smb
+
+  # Parse the NEGOTIATE response. Returns a map stored as `neg`:
+  #   smb2             bool  — a successful SMB2 NEGOTIATE response came back
+  #   dialect          str   — negotiated dialect, e.g. "3.1.1"
+  #   dialect_hex      str   — DialectRevision as 4 hex digits, e.g. "0311"
+  #   security_mode    int   — raw SecurityMode
+  #   signing_required bool  — SecurityMode & 0x02
+  #   legacy_only      bool  — best dialect is SMB 2.0.2 / 2.1 (no SMB3 at all)
+  - id: parse-negotiate
+    action: script
+    condition: "smb.connected == true"
+    store_as: neg
+    code: |
+      let hex = if type_of(smb.response_hex) == "string" { tolower(smb.response_hex) } else { "" };
+      let ok = strlen(hex) >= 148
+        && substr(hex, 8, 15) == "fe534d42"
+        && u32le(substr(hex, 24, 31)) == 0
+        && u16le(substr(hex, 32, 35)) == 0;
+      let mode = u16le(substr(hex, 140, 143));
+      let rev = u16le(substr(hex, 144, 147));
+      let name = if rev == 0x0202 { "2.0.2" }
+        else if rev == 0x0210 { "2.1" }
+        else if rev == 0x0300 { "3.0" }
+        else if rev == 0x0302 { "3.0.2" }
+        else if rev == 0x0311 { "3.1.1" }
+        else { "unknown" };
+      #{
+        smb2: ok,
+        dialect: name,
+        dialect_hex: p16be(rev),
+        security_mode: mode,
+        signing_required: (mode & 2) == 2,
+        legacy_only: ok && (rev == 0x0202 || rev == 0x0210)
+      }
+
+  - id: check-signing
+    action: match
+    source: neg.signing_required
+    pattern: "^false$"
+    condition: "neg.smb2 == true"
+    on_match:
+      finding:
+        title: "SMB signing not required"
+        description: "The SMB2/3 NEGOTIATE response does not set SMB2_NEGOTIATE_SIGNING_REQUIRED, so unsigned sessions are accepted and NTLM relay / tampering is possible."
+        remediation: "Require SMB signing on the server (GPO 'Microsoft network server: Digitally sign communications (always)' = Enabled, or Samba 'server signing = mandatory'), and disable SMB 2.0.2/2.1-only stacks in favour of SMB 3.x."
+        confidence_delta: 0.50
+        qod: 75
+        evidence: "SMB2 NEGOTIATE: dialect {{neg.dialect}} (0x{{neg.dialect_hex}}), SecurityMode {{neg.security_mode}} (signing not required), legacy-only dialect: {{neg.legacy_only}}"

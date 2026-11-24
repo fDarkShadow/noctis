@@ -248,6 +248,11 @@ Between `tcp_send` steps, compute the next frame in a `script` step with the exi
 builtins: `u32be(substr(resp.response_hex, <hexoff>, <hexoff+7>))` parses a big-endian
 u32 at a byte offset (hex offset = byte × 2), and `md5(...)` / `pack` build the reply.
 See `tests/vulnerabilities/couchdb/CVE-2022-24706.yaml` for the full Erlang-cookie flow.
+For a single request/reply, parse `tcp_dialogue`'s `response_hex` the same way and return a
+map from the `script` (`#{ dialect: ..., signing_required: ... }`) that later steps read as
+`neg.signing_required` — see `tests/vulnerabilities/general/smb-signing-not-required.yaml`,
+whose parse logic is unit-tested against canned replies in `src/expr/rhai.rs`. Guard a missing
+reply with `type_of(resp.response_hex) == "string"` (it is `()` when nothing came back).
 
 ```
 # tcp_open  (store_as)
@@ -473,6 +478,7 @@ shared build inputs, not mocks.
 | 0-CVE check, loop over a static list (`cves: []`, `category:`) | `tests/vulnerabilities/general/exposed-paths.yaml` |
 | 0-CVE check, ssh_check + match | `tests/vulnerabilities/general/ssh-weak-auth.yaml` |
 | 0-CVE check, tls_check | `tests/vulnerabilities/general/tls-weak-config.yaml` |
+| Binary protocol: `send_hex` frame + `script` parsing `response_hex` into a map (SMB2 NEGOTIATE) | `tests/vulnerabilities/general/smb-signing-not-required.yaml` |
 
 ### Dynamic port allocation
 Mock ports are published on `127.0.0.1` only (`-p 127.0.0.1:<port>:<container_port>/<proto>`),

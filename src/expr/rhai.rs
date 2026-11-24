@@ -235,6 +235,70 @@ mod tests {
         assert_eq!(out, json!("00157200000000b4ae6978053f3042dd26b037a0851ba4"));
     }
 
+    /// Run the shipped `general/smb-signing-not-required` feed's parse script
+    /// against a canned SMB2 NEGOTIATE reply (hex) — the feed's own code, so a
+    /// broken offset in the YAML fails here, not only end-to-end.
+    fn smb2_parse(reply_hex: serde_json::Value) -> serde_json::Value {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/vulnerabilities/general/smb-signing-not-required.yaml");
+        let def = crate::loader::load(&path).unwrap();
+        let step = def
+            .steps
+            .iter()
+            .find(|s| s.id == "parse-negotiate")
+            .expect("parse-negotiate step");
+        let mut vars = v(&[("smb", json!({"connected": true, "response_hex": reply_hex}))]);
+        eval_script(step.code.as_deref().unwrap(), &mut vars, "s").unwrap()
+    }
+
+    // SMB2 NEGOTIATE response prefix: NBSS + 64-byte SMB2 header (status 0,
+    // command NEGOTIATE) + StructureSize 65; then SecurityMode + DialectRevision.
+    const SMB2_HDR: &str = "000000aefe534d42400000000000000000000100010000000000000000000000\
+                            0000000000000000000000000000000000000000000000000000000000000000\
+                            000000004100";
+
+    #[test]
+    fn script_smb2_negotiate_signing_not_required() {
+        let out = smb2_parse(json!(format!("{SMB2_HDR}0100110301006e6f6374")));
+        assert_eq!(out["smb2"], json!(true));
+        assert_eq!(out["dialect"], json!("3.1.1"));
+        assert_eq!(out["dialect_hex"], json!("0311"));
+        assert_eq!(out["security_mode"], json!(1));
+        assert_eq!(out["signing_required"], json!(false));
+        assert_eq!(out["legacy_only"], json!(false));
+    }
+
+    #[test]
+    fn script_smb2_negotiate_signing_required() {
+        let out = smb2_parse(json!(format!("{SMB2_HDR}0300020300006e6f6374")));
+        assert_eq!(out["smb2"], json!(true));
+        assert_eq!(out["dialect"], json!("3.0.2"));
+        assert_eq!(out["signing_required"], json!(true));
+    }
+
+    #[test]
+    fn script_smb2_negotiate_legacy_only_dialect() {
+        let out = smb2_parse(json!(format!("{SMB2_HDR}0100100200006e6f6374")));
+        assert_eq!(out["dialect"], json!("2.1"));
+        assert_eq!(out["legacy_only"], json!(true));
+        assert_eq!(out["signing_required"], json!(false));
+    }
+
+    #[test]
+    fn script_smb2_negotiate_rejects_non_smb2_replies() {
+        // SMB1 reply, short reply, error status, and no reply at all.
+        let smb1 = "00000023ff534d4272000000009853c800000000000000000000000000002f4b00000000010000";
+        let err_status = SMB2_HDR.replacen("4000000000000000", "4000000022000000", 1);
+        for reply in [
+            json!(smb1),
+            json!("0000"),
+            json!(format!("{err_status}0100110301006e6f6374")),
+            json!(null),
+        ] {
+            assert_eq!(smb2_parse(reply.clone())["smb2"], json!(false), "{reply}");
+        }
+    }
+
     // ── json_to_dynamic / dynamic_to_json ─────────────────────────────────
 
     #[test]

@@ -119,6 +119,7 @@
   "general/prometheus-exposed.yaml": "a2abdc30d080f0020040b72fdd6319ed67c655215b860c56b208ce660779ac45",
   "general/redis-unauthenticated.yaml": "6170c58e43f33084ae3c6a2fb923bc17aad88541b3539ecb62bc461017a5e595",
   "general/rsync-anonymous-list.yaml": "f9189f26e915acf114a3fe8fd66663f00409015455d7b0a1584f373caf4302b2",
+  "general/smb-signing-not-required.yaml": "5d6240a1239b364be2756d05f6bf497b008e52f9ab8cb156a3fe0a59d01c225e",
   "general/smbv1-enabled.yaml": "efbb35f50311302cc9ddddc27be2256358f63f116503134a3aceb56bf47b8121",
   "general/smtp-open-relay.yaml": "8c2a536579b0ecb10bef7b947d72b9ed4b182efa6015cc09a03f0225e171327a",
   "general/snmp-default-community.yaml": "2a94e14ae642d17ad455e6bdffbf225edd90a0f540916a84aa77833bb809657f",
