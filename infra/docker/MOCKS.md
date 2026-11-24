@@ -479,6 +479,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## servicenow-ssti-mock
 - servicenow-ssti/CVE-2024-4879
 
+## servision-mock
+- servision/CVE-2015-0930
+
 ## servu-mock
 - servu/CVE-2024-28995
 

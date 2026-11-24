@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "servision-mock" {
+  name       = "servision-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/servision-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/servision-mock:${variant}"]
+}
