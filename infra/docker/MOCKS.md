@@ -409,6 +409,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## nakivo-mock
 - nakivo/CVE-2024-48248
 
+## netgear-prosafe-mock
+- netgear-prosafe/CVE-2013-4775
+
 ## netgear-readynas-mock
 - netgear-readynas/netgear-readynas-cmd-injection
 

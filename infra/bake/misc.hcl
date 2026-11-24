@@ -237,6 +237,12 @@ target "movabletype-mock" {
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
 
+target "netgear-prosafe-mock" {
+  name       = "netgear-prosafe-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netgear-prosafe-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netgear-prosafe-mock:${variant}"]
 target "vivotek-mock" {
   name       = "vivotek-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
