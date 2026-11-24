@@ -416,6 +416,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## joomla-mock
 - joomla/CVE-2023-23752
 
+## joomla-sqli-may17-mock
+- joomla/CVE-2017-8917
+
 ## jupyter-mock
 - general/jupyter-no-auth
 

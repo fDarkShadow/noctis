@@ -161,6 +161,7 @@
   "jobhut/CVE-2009-4797.yaml": "a70a2f6dcd4e77bf91251c4baaf42cbffc020bbcea06328b4a8c8bbf333841fe",
   "joomla-contenthistory/CVE-2015-7297.yaml": "405754f6056128afc8872069f7dc598d3a73ef0e0df23cb59eb68a6b62db5f9b",
   "joomla-eq-calendar/CVE-2015-4654.yaml": "e6b7f50890caf5e0f6de541b2579a5f3f9f65e4ce0df71238fe902d91bc125d8",
+  "joomla/CVE-2017-8917.yaml": "5cdb023bb54d7386ce7fe1c3fb2f6dc30382b5028e23d9bf38f328f78e244f49",
   "joomla/CVE-2023-23752.yaml": "b545fb489288bfd117031772c555e270ebec155d4ae9c8ea0ba594d7c0be35ac",
   "kace/CVE-2025-32975.yaml": "ebf319f85232b956f22b6fb2e589fc9984e5703dfed4efc6f2fe4c958cc79148",
   "kentico/CVE-2025-2747.yaml": "86d5d50e9f28c1b20071b421dafc140aa595c1b021ec3a842ea5771162818396",
