@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "peplink-balance-mock" {
+  name       = "peplink-balance-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/peplink-balance-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/peplink-balance-mock:${variant}"]
+}
