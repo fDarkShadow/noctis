@@ -155,6 +155,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## docker-api-mock
 - general/docker-api-exposed
 
+## dolibarr-mock
+- dolibarr/dolibarr-404-mult-vuln
+
 ## drupal-sqli-mock
 - drupal-sqli/CVE-2026-9082
 

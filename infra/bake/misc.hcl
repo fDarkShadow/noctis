@@ -236,6 +236,12 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "dolibarr-mock" {
+  name       = "dolibarr-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dolibarr-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dolibarr-mock:${variant}"]
 target "clipbucket-mock" {
   name       = "clipbucket-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
