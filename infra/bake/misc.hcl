@@ -236,3 +236,10 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "deluxebb-mock" {
+  name       = "deluxebb-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/deluxebb-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/deluxebb-mock:${variant}"]
+}
