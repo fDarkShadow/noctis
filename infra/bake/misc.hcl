@@ -236,6 +236,12 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+target "canon-lbp6030w-mock" {
+  name       = "canon-lbp6030w-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/canon-lbp6030w-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/canon-lbp6030w-mock:${variant}"]
 
 target "lexmark-mock" {
   name       = "lexmark-mock-${variant}"
