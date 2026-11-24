@@ -385,6 +385,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## kibana-mock
 - kibana/CVE-2019-7609
 
+## kloxo-mock
+- kloxo/CVE-2014-125124
+
 ## kubernetes-mock
 - general/kubernetes-anonymous
 

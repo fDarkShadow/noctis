@@ -621,3 +621,10 @@ target "axis2-redirect-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/axis2-redirect-mock:${variant}"]
 }
+target "kloxo-mock" {
+  name       = "kloxo-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/kloxo-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/kloxo-mock:${variant}"]
+}
