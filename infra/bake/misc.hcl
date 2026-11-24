@@ -677,3 +677,10 @@ target "refbase-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/refbase-mock:${variant}"]
 }
+target "zerocms-mock" {
+  name       = "zerocms-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zerocms-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zerocms-mock:${variant}"]
+}
