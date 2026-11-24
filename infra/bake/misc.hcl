@@ -236,3 +236,11 @@ target "movabletype-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/movabletype-mock:${variant}"]
 }
+
+target "navis-webaccess-mock" {
+  name       = "navis-webaccess-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/navis-webaccess-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/navis-webaccess-mock:${variant}"]
+}
