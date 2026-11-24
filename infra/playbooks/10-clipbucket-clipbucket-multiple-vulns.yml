@@ -1,0 +1,10 @@
+---
+- name: "clipbucket-multiple-vulns — ClipBucket 2.6 videos.php SQL injection (CVE-2012-6642/6643/6644)"
+  hosts: clipbucket_multiple_vulns
+  gather_facts: false
+  vars:
+    cve_id: "CVE-2012-6642"
+    expected_cves: ["CVE-2012-6642", "CVE-2012-6643", "CVE-2012-6644"]
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/clipbucket/clipbucket-multiple-vulns.yaml"
+  roles:
+    - common_docker
