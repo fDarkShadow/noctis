@@ -1,0 +1,75 @@
+# CUPS < 2.0.3 Multiple Vulnerabilities (CVE-2015-1158, CVE-2015-1159)
+#
+# The CUPS web interface help page reflects the QUERY request parameter into
+# the generated HTML without escaping it (CVE-2015-1159, a reflected XSS in the
+# CGI templating engine), part of the CUPS < 2.0.3 vulnerability chain that also
+# includes a privilege-escalation issue (CVE-2015-1158).
+#
+# Detection: send a crafted GET /help/ request whose QUERY parameter carries a
+# <script>alert(document.cookie)</script> payload and confirm the payload is
+# reflected verbatim in the response body. The payload is URL-encoded in the
+# path, so a verbatim HTTP/1.0 request via tcp_connect is required (reqwest would
+# normalise the %xx sequences) and the match runs on resp.banner.
+#
+# Ported from OpenVAS/Greenbone NVT 2015/gb_cups_CVE_2015_1158.nasl (GPL-2.0-only).
+uid: 0d7ba9ba-c76d-423e-9ee6-6acadcf97d90
+name: "CUPS < 2.0.3 Multiple Vulnerabilities (CVE-2015-1158, CVE-2015-1159)"
+description: |
+  Tests the CUPS web interface for a reflected cross-site scripting flaw in the
+  help page QUERY parameter (CVE-2015-1159), tracked together with CVE-2015-1158
+  as the CUPS < 2.0.3 vulnerability chain. Confirms by sending the crafted GET
+  request and checking the script payload is echoed back unescaped.
+cves: [CVE-2015-1158, CVE-2015-1159]
+cvss: 10.0
+severity: critical
+confidence_base: 0.30
+category: xss
+tags: [cups, printing, xss, web-abuse]
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2015-1158"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2015-1159"
+  - "OpenVAS/Greenbone NASL 2015/gb_cups_CVE_2015_1158.nasl (GPL-2.0-only)"
+
+steps:
+  # Initialise the extra-check guard (accessing an undefined Rhai var in a
+  # condition throws and silently skips the step).
+  - id: init
+    action: set_var
+    var_name: help_page
+    var_value: false
+
+  # Encoded payload in the path → verbatim HTTP/1.0 via tcp_connect, match on
+  # resp.banner. URL mirrors the NASL request exactly.
+  - id: xss-probe
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /help/?QUERY=%3Ca%20href=%22%20%3E%3Cscript%3Ealert%28document.cookie%29%3C/script%3E%3C!--&SEARCH=Search HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: resp
+
+  # Extra check from the NASL (make_list ">Online Help"): confirm this is the
+  # CUPS help page, so an unrelated reflection on some other page can't trip it.
+  - id: helppage-check
+    action: match
+    source: resp.banner
+    pattern: ">Online Help"
+    on_match:
+      set_vars:
+        help_page: true
+
+  # Primary pattern from the NASL — the unescaped script payload reflected back,
+  # gated on the help-page extra check.
+  - id: xss-match
+    action: match
+    source: resp.banner
+    pattern: "script>alert\\(document\\.cookie\\)</script>"
+    condition: "help_page == true"
+    on_match:
+      finding:
+        confidence_delta: 0.55
+        qod: 75
+        evidence: "Reflected XSS confirmed — CUPS help page echoed unescaped payload: {{resp.banner}}"
+      stop: true
