@@ -5,12 +5,15 @@ Ported from OpenVAS/Greenbone NASL 2014/wing_ftp/gb_wing_ftp_server_command_exec
 (GPL-2.0-only, Greenbone Community Feed).
 
 Reproduces the admin web console auth-then-exploit flow:
-  POST /admin_login.html       username/password → on success sets a UIDADMIN session cookie
+  POST /admin_loginok.html     username/password → on success sets a UIDADMIN session cookie
   POST /admin_lua_script.html  (authenticated) executes Lua; os.execute / print run arbitrary code
 
-Vuln mode: the Lua console evaluates the supplied code and returns its output — so a
-`print("a" .. "b")` payload comes back as the concatenated string `ab`, proving execution.
-Patched mode: the Lua console is removed (403), so the exploit yields no marker.
+In both modes the Lua console evaluates the supplied code and returns its output — so a
+`print("a" .. "b")` payload comes back as the concatenated string `ab`, proving execution
+(running Lua there is a normal admin feature, still present in fixed releases).
+Vuln and patched mode differ ONLY by the version advertised in the Server header:
+4.3.8 (vulnerable) vs 4.4.0 (fixed). A patched host therefore stays clean solely because
+of the feed's version gate, which the patched test hosts exercise.
 Both modes reject wrong credentials (no session cookie issued).
 """
 import hashlib
@@ -28,9 +31,9 @@ VULN_MODE = os.environ.get("CVE_2015_4107_MODE", "patched") == "vuln"
 EXPECTED_USER = os.environ.get("WING_ADMIN_USER", "admin")
 EXPECTED_PASS = os.environ.get("WING_ADMIN_PASS", "wingftp-admin-pw")
 
-# Version advertised in the Server header. <= 4.3.8 is vulnerable; the patched image
-# reports a fixed release so the feed's version gate rules it out even though the admin
-# Lua console (a normal feature) is still present.
+# Version advertised in the Server header — the ONLY difference between vuln and patched
+# mode. <= 4.3.8 is vulnerable; the patched image reports a fixed release (4.4.0), so the
+# feed's version gate rules it out even though the admin Lua console behaves identically.
 VERSION = os.environ.get("WING_VERSION", "4.3.8" if VULN_MODE else "4.4.0")
 
 
@@ -109,10 +112,6 @@ class Handler(BaseHTTPRequestHandler):
         if self._cookie_token() != VALID_TOKEN:
             self._send(401, "<html>Not authenticated</html>\n")
             return
-        if not VULN_MODE:
-            # Patched build removes the arbitrary-command Lua console.
-            self._send(403, "<html>Lua console disabled</html>\n")
-            return
         command = (form.get("command") or [""])[0]
         output = _eval_lua_print(command)
         if output is None:
@@ -122,7 +121,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         form = parse_qs(self._read_body())
-        if self.path.startswith("/admin_login.html"):
+        if self.path.startswith("/admin_loginok.html"):
             self._handle_login(form)
         elif self.path.startswith("/admin_lua_script.html"):
             self._handle_lua(form)
@@ -130,10 +129,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, "Not found\n", ct="text/plain")
 
     def do_GET(self):
-        if self.path.startswith("/admin_login.html"):
-            self._send(200, "<html>Wing FTP Server Administrator - Login</html>\n")
-        else:
-            self._send(404, "Not found\n", ct="text/plain")
+        self._send(404, "Not found\n", ct="text/plain")
 
 
 if __name__ == "__main__":
