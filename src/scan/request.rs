@@ -201,7 +201,7 @@ pub struct ScanFilters {
     #[serde(default)]
     pub exclude_cve: Vec<String>,
 
-    /// Exclude by `category` (misconfig YAML field).
+    /// Exclude by `category` (closed vocabulary, see CLAUDE.md "TestDef (YAML)").
     #[serde(default)]
     pub exclude_categories: Vec<String>,
 

@@ -58,7 +58,7 @@ configured, OOB steps are skipped.
 | `tests` | One or more feed files or directories to run |
 | `concurrency` | Parallel tasks, 1–100 (default 5) |
 | `webhook_url` | *(optional)* URL notified when the scan completes |
-| `filters` | *(optional)* exclude by `exclude_uids`, `exclude_cve`, `exclude_categories`, `exclude_tags`. Categories are a closed list — e.g. `hardening` (TLS / headers / legacy protocols), `default-credentials` (login attempts), `exposure`; see [writing feeds](writing-feeds.html#structure) |
+| `filters` | *(optional)* exclude by `exclude_uids`, `exclude_cve`, `exclude_categories`, `exclude_tags`. Categories are a closed list — e.g. `hardening` (TLS / headers / legacy protocols), `default-credentials` (login attempts), `exposure`; see [categories](writing-feeds.html#categories) |
 | `oob` | *(optional)* `enabled`, `host`, `port` — per-scan OOB callback server |
 | `credentials` | *(optional)* `username`, `password`, `token` for authenticated feeds — see below |
 

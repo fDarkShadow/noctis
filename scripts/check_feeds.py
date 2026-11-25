@@ -136,7 +136,6 @@ CATEGORIES = GENERAL_CATEGORIES | {
     "rce",
     "sqli",
     "file-read",
-    "file-write",
     "xss",
     "ssrf",
 }
