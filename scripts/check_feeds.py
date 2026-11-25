@@ -129,16 +129,17 @@ def common_paths() -> list[str]:
 
 
 # `filters.exclude_categories` is an exact-string match, so a synonym escapes it.
+# The vocabulary lives in the schema's `category` enum (single source of truth).
+SCHEMA_PATH = os.path.join(REPO_ROOT, "schemas", "feed.schema.json")
+with open(SCHEMA_PATH) as _f:
+    CATEGORIES = set(json.load(_f)["properties"]["category"]["enum"])
 GENERAL_CATEGORIES = {"exposure", "hardening", "default-credentials"}
-# Every `category:` in the tree must be one of these (the field stays optional).
-CATEGORIES = GENERAL_CATEGORIES | {
-    "auth-bypass",
-    "rce",
-    "sqli",
-    "file-read",
-    "xss",
-    "ssrf",
-}
+assert GENERAL_CATEGORIES <= CATEGORIES, "general/ categories must be in the schema enum"
+# A top-level `category:` line: quoted or bare scalar, optional trailing comment.
+_CATEGORY_RE = re.compile(
+    r"""^category:[ \t]*(?:"([^"\n]*)"|'([^'\n]*)'|([^\s#'"][^#\n]*?))?[ \t]*(?:#.*)?$""",
+    re.MULTILINE,
+)
 
 
 def check_categories(paths: list[str]) -> list[str]:
@@ -146,14 +147,18 @@ def check_categories(paths: list[str]) -> list[str]:
     general = os.path.join(FEEDS_DIR, "general") + os.sep
     for path in paths:
         with open(path) as f:
-            m = re.search(r"^category:[ \t]*[\"']?([^\"'\s#]+)", f.read(), re.MULTILINE)
+            m = _CATEGORY_RE.search(f.read())
         rel = os.path.relpath(path, FEEDS_DIR)
         in_general = path.startswith(general)
-        if not m:
+        cat = None
+        if m:
+            cat = next((g for g in m.groups() if g is not None), None)
+            if cat is not None and cat.strip() in ("", "~", "null"):
+                cat = None if cat.strip() != "" else ""
+        if cat is None:
             if in_general:
                 errors.append(f"{rel}: general/ feed has no category")
             continue
-        cat = m.group(1)
         if in_general and cat not in GENERAL_CATEGORIES:
             errors.append(
                 f"{rel}: category {cat!r} — general/ feeds use one of {sorted(GENERAL_CATEGORIES)}"
@@ -161,7 +166,7 @@ def check_categories(paths: list[str]) -> list[str]:
         elif cat not in CATEGORIES:
             errors.append(
                 f"{rel}: unknown category {cat!r} — use one of {sorted(CATEGORIES)} "
-                "(or extend CATEGORIES and CLAUDE.md if a new group is really needed)"
+                "(or extend the schema enum and CLAUDE.md if a new group is really needed)"
             )
     return errors
 

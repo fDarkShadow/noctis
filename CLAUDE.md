@@ -131,7 +131,7 @@ existing value, never a synonym (`filters.exclude_categories` matches the exact 
 |----------|---------|
 | `exposure` | A service or data reachable without authentication, or a feature open to abuse (`redis-unauthenticated`, `smtp-open-relay`, `ntp-monlist`) |
 | `hardening` | Weak protocol / security posture that grants no access on its own (`tls-weak-config`, `http-security-headers`, `smbv1-enabled`, `ssh-weak-auth`) |
-| `default-credentials` | The feed actively tries logins (default or hardcoded credentials) — intrusive, can lock accounts |
+| `default-credentials` | The feed logs in to an account with default or hardcoded credentials — intrusive, can lock accounts (SNMP community guessing stays `exposure`) |
 | `auth-bypass` | Authentication or authorization bypass |
 | `rce` | Code / command execution, including command injection, upload-to-RCE and arbitrary file write — these probes may write on the target |
 | `sqli` | SQL injection |
@@ -140,7 +140,8 @@ existing value, never a synonym (`filters.exclude_categories` matches the exact 
 | `ssrf` | Server-side request forgery |
 
 Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`. `category`
-stays optional elsewhere. Add a value (to `CATEGORIES` in `check_feeds.py` and here) only
+stays optional elsewhere — so `exclude_categories` only skips feeds that carry it; many
+older feeds have none yet. Set it on every new feed. Add a value (to `CATEGORIES` in `check_feeds.py` and here) only
 when a scan operator genuinely needs to exclude that group on its own.
 
 ### Service → port matching

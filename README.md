@@ -301,7 +301,7 @@ name: "Apache httpd 2.4.49 path traversal / RCE"
 cves: [CVE-2021-41773]      # 0, 1, or several CVE IDs — [] for a misconfig/heuristic check
 cvss: 9.8                   # omit when cves is empty
 severity: critical          # info | low | medium | high | critical
-category: file-read         # optional, closed vocabulary — see CLAUDE.md (main label for 0-CVE feeds)
+category: file-read         # optional, closed list — see docs/writing-feeds.md#categories
 confidence_base: 0.30       # starting confidence, before any step runs
 tags: [apache, path-traversal, rce]
 services: [http, https]     # nmap service names — [] means "run on every port"

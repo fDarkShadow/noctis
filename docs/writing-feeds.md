@@ -45,17 +45,26 @@ steps:
         evidence: "Unauthenticated banner: {{es.body}}"
 ```
 
+`cves` cardinality — a feed is a *vulnerability test*, not a "CVE test":
+
+```yaml
+cves: []                               # misconfiguration / exposure check
+cves: [CVE-2021-44228]                 # the common case
+cves: [CVE-2023-46805, CVE-2024-21887] # a chain tracked by several CVE IDs
+```
+
 ### Categories
 
 `category` is optional but, when set, must be one of these values (enforced by
 `scripts/check_feeds.py` and the JSON schema). Scans can skip a whole group with
-`filters.exclude_categories`; only feeds that carry the category are skipped.
+`filters.exclude_categories` — but only feeds that carry the category are skipped, and
+many feeds have none yet, so this is not a guarantee that no intrusive probe runs.
 
 | category | Use for |
 |----------|---------|
 | `exposure` | A service or data reachable without authentication, or a feature open to abuse |
 | `hardening` | Weak protocol / security posture that grants no access on its own (TLS, headers, legacy protocols) |
-| `default-credentials` | The feed tries logins with default or hardcoded credentials — intrusive, can lock accounts |
+| `default-credentials` | The feed logs in to an account with default or hardcoded credentials — intrusive, can lock accounts |
 | `auth-bypass` | Authentication or authorization bypass |
 | `rce` | Code / command execution, incl. command injection, upload-to-RCE, arbitrary file write |
 | `sqli` | SQL injection |
@@ -64,14 +73,6 @@ steps:
 | `ssrf` | Server-side request forgery |
 
 Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`.
-
-`cves` cardinality — a feed is a *vulnerability test*, not a "CVE test":
-
-```yaml
-cves: []                               # misconfiguration / exposure check
-cves: [CVE-2021-44228]                 # the common case
-cves: [CVE-2023-46805, CVE-2024-21887] # a chain tracked by several CVE IDs
-```
 
 ## Step actions
 
