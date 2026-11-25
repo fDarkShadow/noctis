@@ -144,8 +144,9 @@ Follow CLAUDE.md strictly. For each vulnerability:
 
 **a) YAML feed** — `tests/vulnerabilities/<PRODUCT>/<ID>.yaml`
   - Generate a fresh valid UUID v4 (variant byte `[89ab]`)
-  - Set `cves: []` to the 0, 1, or N CVE IDs from the issue; set `category:` for
-    free-form classification regardless of `cves` (always set for a 0-CVE feed)
+  - Set `cves: []` to the 0, 1, or N CVE IDs from the issue; set `category:` from the
+    closed list in CLAUDE.md ("TestDef (YAML)") regardless of `cves` — always set it for
+    a 0-CVE feed, and `general/` feeds use only `exposure`, `hardening` or `default-credentials`
   - Always set `services:`
   - Use `tcp_connect` for any URL-encoded path payload
   - Use `resp.banner` (never `resp.data`)

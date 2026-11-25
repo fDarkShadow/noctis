@@ -27,7 +27,7 @@ cvss: 7.5
 severity: high
 confidence_base: 0.35
 tags: [quantum, scalar, dell-ml6000, ibm-ts3310, lfi, information-disclosure, tape-library]
-category: information-disclosure
+category: file-read
 services: [http, https]
 author: noctis
 version: "1.0.0"

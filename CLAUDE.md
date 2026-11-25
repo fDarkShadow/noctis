@@ -120,8 +120,29 @@ cves: []                                       # misconfiguration / heuristic ch
 cves: [CVE-2021-44228]                         # the common case — exactly one CVE
 cves: [CVE-2023-46805, CVE-2024-21887]         # a chain tracked by multiple CVE IDs
 ```
-`category` (optional, free string) still classifies a feed regardless of `cves` —
+`category` (optional, closed vocabulary — see below) classifies a feed regardless of `cves` —
 e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside a CVE.
+
+`category` uses a **closed vocabulary**, enforced by `scripts/check_feeds.py` — pick an
+existing value, never a synonym (`filters.exclude_categories` matches the exact string, so
+`sql-injection` would escape an `exclude_categories: [sqli]` filter):
+
+| category | Use for |
+|----------|---------|
+| `exposure` | A service or data reachable without authentication, or a feature open to abuse (`redis-unauthenticated`, `smtp-open-relay`, `ntp-monlist`) |
+| `hardening` | Weak protocol / security posture that grants no access on its own (`tls-weak-config`, `http-security-headers`, `smbv1-enabled`, `ssh-weak-auth`) |
+| `default-credentials` | The feed logs in to an account with default or hardcoded credentials — intrusive, can lock accounts (SNMP community guessing stays `exposure`) |
+| `auth-bypass` | Authentication or authorization bypass |
+| `rce` | Code / command execution, including command injection, upload-to-RCE and arbitrary file write — these probes may write on the target |
+| `sqli` | SQL injection |
+| `file-read` | Arbitrary file read: path traversal, LFI, file download/disclosure |
+| `xss` | Cross-site scripting |
+| `ssrf` | Server-side request forgery |
+
+Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`. `category`
+stays optional elsewhere — so `exclude_categories` only skips feeds that carry it; many
+older feeds have none yet. Set it on every new feed. Add a value (to the `category.enum` in `schemas/feed.schema.json` — `check_feeds.py` reads it from there — and to the tables here and in `docs/writing-feeds.md`) only
+when a scan operator genuinely needs to exclude that group on its own.
 
 ### Service → port matching
 - Feed `services: []` → runs on **all** discovered ports

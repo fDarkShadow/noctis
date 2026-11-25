@@ -5,7 +5,7 @@
 uid: 1c22561e-0d2a-4f7d-be74-096137de4982
 name: "Missing HTTP security headers"
 description: "Checks for absence of security-relevant response headers"
-category: http-headers
+category: hardening
 severity: medium
 confidence_base: 0.90
 tags: [http, headers, hardening, owasp]
