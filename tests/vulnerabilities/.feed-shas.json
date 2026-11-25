@@ -179,7 +179,7 @@
   "log4shell/CVE-2021-44228.yaml": "aedc1d2218b3e5c796acea53102427b7289da986cbfc726e955d154f06385dd7",
   "magento/CVE-2024-34102.yaml": "b4fb17d5f4aabc2d2602111f1ce059054792d850e91d8bbcc116c41bf163a4ba",
   "magicinfo/CVE-2024-7399.yaml": "0ce4c7429efe01ab0dbbe2a1324fc00259df1f052013dc95f2c9f694d5f2d598",
-  "manageengine/CVE-2015-7765.yaml": "24e268bd64a46cf960e419835c1de746affa92a3f5fde56d45e19de441b01d63",
+  "manageengine/CVE-2015-7765.yaml": "e8d282dc7a65db24350bdd93dd5170fea6b8835a7a29fbae9f181fec19f738ef",
   "manageengine/CVE-2022-47966.yaml": "03c7cf034c88b5377dfc96e1aa3488a8b48912de33d9f55e4a38759d5d9cd51b",
   "manageengine/manageengine-desktop-central-dbqueryexecutor.yaml": "09138d242972b4ebbe4054d97b97a228119ec65a731aeaac2e81359c26c7f688",
   "merak-webmail/CVE-2004-1719.yaml": "e2b1448c56e8a85bf5598448abdb1af0c0c0f9225e6dcb63fa9e3016145f2551",

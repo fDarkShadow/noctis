@@ -141,7 +141,7 @@ existing value, never a synonym (`filters.exclude_categories` matches the exact 
 
 Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`. `category`
 stays optional elsewhere — so `exclude_categories` only skips feeds that carry it; many
-older feeds have none yet. Set it on every new feed. Add a value (to `CATEGORIES` in `check_feeds.py` and here) only
+older feeds have none yet. Set it on every new feed. Add a value (to the `category.enum` in `schemas/feed.schema.json` — `check_feeds.py` reads it from there — and to the tables here and in `docs/writing-feeds.md`) only
 when a scan operator genuinely needs to exclude that group on its own.
 
 ### Service → port matching
