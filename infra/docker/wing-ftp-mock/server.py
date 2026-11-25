@@ -28,6 +28,11 @@ VULN_MODE = os.environ.get("CVE_2015_4107_MODE", "patched") == "vuln"
 EXPECTED_USER = os.environ.get("WING_ADMIN_USER", "admin")
 EXPECTED_PASS = os.environ.get("WING_ADMIN_PASS", "wingftp-admin-pw")
 
+# Version advertised in the Server header. <= 4.3.8 is vulnerable; the patched image
+# reports a fixed release so the feed's version gate rules it out even though the admin
+# Lua console (a normal feature) is still present.
+VERSION = os.environ.get("WING_VERSION", "4.3.8" if VULN_MODE else "4.4.0")
+
 
 def _session_token(user, password):
     """Deterministic session token for valid credentials (no shared state needed)."""
@@ -58,6 +63,10 @@ def _eval_lua_print(command):
 
 
 class Handler(BaseHTTPRequestHandler):
+    # Advertise the Wing FTP version in the Server header (overrides BaseHTTP default).
+    server_version = f"Wing FTP Server/{VERSION}"
+    sys_version = ""
+
     def log_message(self, *a):
         pass
 
