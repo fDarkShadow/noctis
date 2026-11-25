@@ -14,7 +14,9 @@ that prove it. Feeds live under `tests/vulnerabilities/<product>/<id>.yaml`.
 uid: 7f3d1b9a-4c62-4e8d-9a07-2b5e6c1f84d0   # stable UUID v4 — never change
 name: "Elasticsearch exposed without authentication"
 cves: []                    # 0, 1, or many CVE IDs
-category: exposure          # free-form classifier (used when cves is empty)
+category: exposure          # closed list: exposure | hardening | default-credentials |
+                            # auth-bypass | rce | sqli | file-read | xss | ssrf
+                            # (general/ feeds: the first three only)
 severity: critical          # info | low | medium | high | critical
 confidence_base: 0.50       # raised by confidence_delta on match
 tags: [elasticsearch, unauthenticated, exposure]
@@ -50,6 +52,27 @@ cves: []                               # misconfiguration / exposure check
 cves: [CVE-2021-44228]                 # the common case
 cves: [CVE-2023-46805, CVE-2024-21887] # a chain tracked by several CVE IDs
 ```
+
+### Categories
+
+`category` is optional but, when set, must be one of these values (enforced by
+`scripts/check_feeds.py` and the JSON schema). Scans can skip a whole group with
+`filters.exclude_categories` — but only feeds that carry the category are skipped, and
+many feeds have none yet, so this is not a guarantee that no intrusive probe runs.
+
+| category | Use for |
+|----------|---------|
+| `exposure` | A service or data reachable without authentication, or a feature open to abuse |
+| `hardening` | Weak protocol / security posture that grants no access on its own (TLS, headers, legacy protocols) |
+| `default-credentials` | The feed logs in to an account with default or hardcoded credentials — intrusive, can lock accounts |
+| `auth-bypass` | Authentication or authorization bypass |
+| `rce` | Code / command execution, incl. command injection, upload-to-RCE, arbitrary file write |
+| `sqli` | SQL injection |
+| `file-read` | Path traversal, LFI, file download / disclosure |
+| `xss` | Cross-site scripting |
+| `ssrf` | Server-side request forgery |
+
+Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`.
 
 ## Step actions
 

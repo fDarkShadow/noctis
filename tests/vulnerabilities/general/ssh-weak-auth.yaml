@@ -2,7 +2,7 @@
 uid: b06ad8cb-e183-4a8b-96b5-ae03c613a0db
 name: "SSH password authentication enabled"
 description: "SSH server allows password-based authentication, increasing brute-force risk"
-category: ssh
+category: hardening
 severity: medium
 confidence_base: 0.85
 tags: [ssh, auth, hardening]

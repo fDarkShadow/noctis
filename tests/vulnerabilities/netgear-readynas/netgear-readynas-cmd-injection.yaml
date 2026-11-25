@@ -26,7 +26,7 @@ description: |
 cves: [CVE-2013-2751, CVE-2013-2752]
 cvss: 10.0
 severity: critical
-category: command-injection
+category: rce
 confidence_base: 0.20
 tags: [netgear, readynas, raidiator, frontview, command-injection, rce]
 services: [http, https]
