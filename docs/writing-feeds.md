@@ -85,6 +85,38 @@ Expression helpers available in `match`/`script` include string/regex/byte funct
 | `{{oob_token}}` | UUID unique to this run |
 | `{{oob_url}}` | Full OOB callback URL |
 | `{{oob_enabled}}` | `true` when `--oob` is configured |
+| `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
+| `{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}` | The request's `credentials` fields — each set only when supplied |
+
+## Authenticated feeds
+
+A feed that must log in to the target reads the scan's `credentials` from
+`{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}`. Declare
+`requires_credentials: true` so the feed is skipped cleanly (no task, no finding, a debug
+log) when the request carries no credentials:
+
+```yaml
+requires_credentials: true
+steps:
+  - id: login
+    action: http_request
+    method: POST
+    path: "/admin/login"
+    port: "{{port}}"
+    body: "username={{cred_username}}&password={{cred_password}}"
+    store_as: login
+```
+
+In a feed that also has unauthenticated steps, leave `requires_credentials` off and guard
+the authenticated ones with `condition: "cred_enabled"` instead (`cred_enabled` is always
+defined; the `cred_*` value vars exist only when supplied — referencing
+`{{cred_password}}` in a request that only sent a `token` aborts the test with an
+undefined-variable error, so guard such steps). Password and token values are
+replaced by `<redacted>` in every finding field and log line — as given, lowercase hex,
+percent-encoded, and as the
+Basic-auth base64 of `username:password`. Any other encoding (hashes, JSON escaping, a
+custom `base64_encode` of something else) is not recognised, so never put credentials or
+values derived from them in evidence.
 
 ## Confidence / QoD
 
@@ -109,6 +141,57 @@ Use `tcp_connect` for any payload encoded in the path — reqwest normalises URL
   source: resp.banner        # .banner, not .data
   pattern: "root:.*:0:0"
 ```
+
+## Parsing a binary reply
+
+For a binary protocol, send one raw frame with `tcp_dialogue` + `send_hex` and parse the
+reply's `response_hex` in a `script` step: byte offset *N* is hex offset *2N*, `substr` takes an
+**inclusive** end, and `u16le`/`u32be`/… decode a fixed-width integer. The script can return a
+map, which later `match` / `condition:` steps read with dot notation. The magic bytes stay in
+the feed — no engine change per protocol. From
+[`general/smb-signing-not-required.yaml`](https://github.com/fDarkShadow/noctis/blob/main/tests/vulnerabilities/general/smb-signing-not-required.yaml)
+(SMB2 NEGOTIATE → `SecurityMode` at byte 70, `DialectRevision` at byte 72; abridged — the
+shipped feed also names the dialect and flags legacy-only 2.x servers):
+
+```yaml
+- id: smb2-negotiate
+  action: tcp_dialogue
+  port: "{{port}}"
+  read_banner: false
+  send_hex: "0000009efe534d42…"          # NBSS + SMB2 header + NEGOTIATE (5 dialects)
+  store_as: smb
+
+- id: parse-negotiate
+  action: script
+  condition: "smb.connected == true"
+  store_as: neg
+  code: |
+    let hex = if type_of(smb.response_hex) == "string" { smb.response_hex } else { "" };
+    let mode = u16le(substr(hex, 140, 143));   // byte 70
+    let rev  = u16le(substr(hex, 144, 147));   // byte 72
+    // Prove it is a NEGOTIATE *response*, not an echo of the request:
+    let ok = strlen(hex) >= 148
+      && substr(hex, 8, 15) == "fe534d42"           // SMB2 signature
+      && u32le(substr(hex, 24, 31)) == 0            // Status OK
+      && (u32le(substr(hex, 40, 47)) & 1) == 1      // Flags: SERVER_TO_REDIR
+      && u16le(substr(hex, 136, 139)) == 65         // response StructureSize
+      && (rev == 0x0202 || rev == 0x0210 || rev == 0x0300 || rev == 0x0302 || rev == 0x0311);
+    #{ smb2: ok, signing_required: (mode & 2) == 2, dialect_hex: p16be(rev) }
+
+- id: check-signing
+  action: match
+  source: neg.signing_required
+  pattern: "^false$"
+  condition: "neg.smb2 == true"
+  on_match:
+    finding:
+      title: "SMB signing not required"
+      qod: 75
+      evidence: "dialect 0x{{neg.dialect_hex}}, signing not required"
+```
+
+When a later frame depends on a value from an earlier reply (challenge–response), use
+`tcp_open` / `tcp_send` / `tcp_close` instead and build the next `send_hex` in the `script`.
 
 ## Validate a feed
 

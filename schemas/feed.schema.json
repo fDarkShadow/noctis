@@ -45,6 +45,11 @@
       "items": { "type": "string" },
       "description": "Service names the feed targets (http, https, ssh, …). Empty = all ports."
     },
+    "requires_credentials": {
+      "type": "boolean",
+      "default": false,
+      "description": "Authenticated feed: skipped (no task, no finding) when the scan request carries no `credentials`. Reference them as {{cred_username}} / {{cred_password}} / {{cred_token}}; guard optional authenticated steps with condition: \"cred_enabled\"."
+    },
     "author": { "type": "string" },
     "version": { "type": "string" },
     "category": {
