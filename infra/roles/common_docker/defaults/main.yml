@@ -13,6 +13,11 @@ noctis_oob_callback_port: 9090 # OOB HTTP callback listener
 # Set noctis_use_oob: true in inventory hosts that require OOB detection (Log4Shell, SSRF…)
 noctis_use_oob: false
 
+# Optional per-host scan credentials for authenticated feeds (requires_credentials: true),
+# sent as "credentials" in POST /scans — e.g. noctis_credentials: {username: admin, password: admin}.
+# Leave undefined (the default) to scan unauthenticated. Not defined here on purpose:
+# the role checks `noctis_credentials is defined`.
+
 # Gateway IP of container_network — injected by 01-start-servers.yml so containers can
 # reach the OOB callback listener on the host
 noctis_bridge_gateway: "127.0.0.1"

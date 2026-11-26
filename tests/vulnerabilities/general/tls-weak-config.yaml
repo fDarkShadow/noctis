@@ -2,7 +2,7 @@
 uid: 136b0b9f-9b4c-4a42-95ba-ea0a6f64cffe
 name: "Weak TLS configuration"
 description: "Inspects TLS handshake for deprecated protocol versions and certificate issues"
-category: tls
+category: hardening
 severity: high
 confidence_base: 0.95
 tags: [tls, ssl, crypto, hardening]
@@ -11,9 +11,6 @@ author: florian
 version: "1.0.0"
 references:
   - "https://www.ssllabs.com/projects/best-practices/"
-
-vars:
-  port: 443
 
 steps:
   - id: tls-inspect

@@ -51,10 +51,10 @@ description: "noctis — an open-source Rust black-box vulnerability scanner. Ev
 <!-- ── stats ────────────────────────────────────────────── -->
 <div class="stats">
   <div class="wrap">
-    <div class="stat"><b class="grad">180+</b><span>detection feeds</span></div>
-    <div class="stat"><b class="grad">14</b><span>probe &amp; logic actions</span></div>
+    <div class="stat"><b class="grad"><!-- feed-stats:feeds -->313<!-- /feed-stats --></b><span>vulnerability tests</span></div>
+    <div class="stat"><b class="grad"><!-- feed-stats:cves -->407<!-- /feed-stats --></b><span>CVEs covered</span></div>
+    <div class="stat"><b class="grad"><!-- feed-stats:actions -->17<!-- /feed-stats --></b><span>probe &amp; logic actions</span></div>
     <div class="stat"><b class="grad">6</b><span>protocols — HTTP to SNMP</span></div>
-    <div class="stat"><b class="grad">1</b><span>static binary, no agent</span></div>
   </div>
 </div>
 
@@ -137,7 +137,7 @@ description: "noctis — an open-source Rust black-box vulnerability scanner. Ev
 <section class="showcase" id="feed">
   <div class="wrap split">
     <div class="term" aria-label="Example feed">
-      <div class="term-bar"><i></i><i></i><i></i><span>tests/vulnerabilities/apache-cve/CVE-2021-41773.yaml</span></div>
+      <div class="term-bar"><i></i><i></i><i></i><span>tests/vulnerabilities/apache-httpd/CVE-2021-41773.yaml</span></div>
 {% raw %}<pre><span class="c-k">name</span>: <span class="c-s">"Apache httpd 2.4.49 path traversal"</span>
 <span class="c-k">cves</span>: [<span class="c-s">CVE-2021-41773</span>]
 <span class="c-k">severity</span>: <span class="c-crit">critical</span>
@@ -198,7 +198,7 @@ description: "noctis — an open-source Rust black-box vulnerability scanner. Ev
           <tr><td>Protocols</td><td>broad</td><td>HTTP + TCP / DNS / SSL</td><td class="us">HTTP, TCP, UDP, TLS, SSH, SNMP</td></tr>
           <tr><td>Shared state between checks</td><td class="meh">knowledge base</td><td>none</td><td class="us">none — each feed standalone</td></tr>
           <tr><td>Runtime</td><td>appliance / agent</td><td>Go binary</td><td class="us">Rust static binary + REST API</td></tr>
-          <tr><td>Catalogue size today</td><td>tens of thousands</td><td>thousands</td><td class="us">180+ and growing</td></tr>
+          <tr><td>Catalogue size today</td><td>tens of thousands</td><td>thousands</td><td class="us"><!-- feed-stats:feeds -->313<!-- /feed-stats --> tests, <!-- feed-stats:cves -->407<!-- /feed-stats --> CVEs — growing</td></tr>
         </tbody>
       </table>
     </div>
@@ -225,7 +225,7 @@ description: "noctis — an open-source Rust black-box vulnerability scanner. Ev
       <span class="chip hl">Redis</span><span class="chip hl">MongoDB</span><span class="chip hl">Elasticsearch</span>
       <span class="chip hl">Docker API</span><span class="chip hl">Kubernetes</span><span class="chip hl">etcd</span>
       <span class="chip hl">SNMP</span><span class="chip hl">Telnet</span><span class="chip hl">VNC</span>
-      <span class="chip hl">LDAP</span><span class="chip hl">SMBv1</span><span class="chip hl">weak TLS</span>
+      <span class="chip hl">LDAP</span><span class="chip hl">SMBv1</span><span class="chip hl">SMB signing</span><span class="chip hl">weak TLS</span>
       <span class="chip hl">…</span>
     </div>
   </div>
@@ -242,7 +242,7 @@ description: "noctis — an open-source Rust black-box vulnerability scanner. Ev
         <div class="term-bar"><i></i><i></i><i></i><span>docker</span></div>
 <pre><span class="c-p">$</span> <span class="c-cmd">docker run --rm -p 8080:8080 \</span>
 <span class="c-cmd">    ghcr.io/fdarkshadow/noctis:latest</span>
-<span class="c-cm"># 180+ feeds bundled at /feeds —</span>
+<span class="c-cm"># <!-- feed-stats:feeds -->313<!-- /feed-stats --> feeds bundled at /feeds —</span>
 <span class="c-cm"># mount -v ./my-feeds:/feeds to use your own</span></pre>
       </div>
       <div class="term">

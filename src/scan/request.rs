@@ -1,6 +1,8 @@
+use std::fmt;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use validator::Validate;
+use validator::{Validate, ValidationError};
 
 use crate::model::test_def::TestDef;
 
@@ -46,6 +48,13 @@ pub struct ScanRequest {
     #[validate(nested)]
     #[serde(default)]
     pub filters: Option<ScanFilters>,
+
+    /// Credentials for authenticated feeds (`requires_credentials: true`).
+    /// Write-only: never serialized back out (GET /scans, webhooks) and
+    /// redacted in `Debug` output.
+    #[validate(nested)]
+    #[serde(default, skip_serializing)]
+    pub credentials: Option<Credentials>,
 }
 
 fn default_concurrency() -> usize {
@@ -70,6 +79,114 @@ fn default_oob_port() -> u16 {
     9090
 }
 
+// ── Credentials ───────────────────────────────────────────────────────────
+
+/// Credentials supplied with a scan, exposed to feeds as `{{cred_username}}`,
+/// `{{cred_password}}` and `{{cred_token}}` (plus the boolean `cred_enabled`).
+///
+/// Every field is optional so token-only auth fits the same shape, but at least
+/// one of `username` / `token` must be given, and a `password` needs a `username`.
+///
+/// Secret hygiene: this type is deliberately **not** `Serialize`, and its `Debug`
+/// impl only reports which fields are present — never their values.
+#[derive(Clone, Default, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+#[validate(schema(function = "validate_credentials"))]
+pub struct Credentials {
+    #[validate(length(min = 1, message = "credentials.username must not be empty"))]
+    #[serde(default)]
+    pub username: Option<String>,
+
+    #[serde(default)]
+    pub password: Option<String>,
+
+    /// Bearer / API token — for feeds that authenticate without a username.
+    #[validate(length(min = 1, message = "credentials.token must not be empty"))]
+    #[serde(default)]
+    pub token: Option<String>,
+}
+
+fn validate_credentials(c: &Credentials) -> Result<(), ValidationError> {
+    if c.username.is_none() && c.token.is_none() {
+        return Err(ValidationError::new("credentials_empty")
+            .with_message("credentials must set a username or a token".into()));
+    }
+    if c.password.is_some() && c.username.is_none() {
+        return Err(
+            ValidationError::new("credentials_password_without_username")
+                .with_message("credentials.password requires credentials.username".into()),
+        );
+    }
+    Ok(())
+}
+
+impl Credentials {
+    /// Values that must never leak into findings or logs: the password and
+    /// token as given, their lowercase hex, their percent-encoded forms (as they appear once
+    /// templated into a URL or form body), and the base64 of
+    /// `username:password` (an HTTP Basic `Authorization` header). The
+    /// username itself is not treated as a secret for scrubbing purposes.
+    pub fn secrets(&self) -> Vec<String> {
+        use base64::Engine as _;
+        let mut out: Vec<String> = Vec::new();
+        for raw in [&self.password, &self.token].into_iter().flatten() {
+            if raw.is_empty() {
+                continue;
+            }
+            out.push(raw.clone());
+            // Lowercase hex, as it shows up in `response_hex` when a feed sends
+            // the secret over a binary protocol (`send_hex: "{{hexstr(...)}}"`).
+            out.push(raw.bytes().map(|b| format!("{b:02x}")).collect());
+            for enc in [percent_encode(raw, false), percent_encode(raw, true)] {
+                if enc != *raw {
+                    out.push(enc);
+                }
+            }
+        }
+        if let (Some(u), Some(p)) = (&self.username, &self.password) {
+            if !p.is_empty() {
+                out.push(base64::engine::general_purpose::STANDARD.encode(format!("{u}:{p}")));
+            }
+        }
+        out.sort();
+        out.dedup();
+        out
+    }
+}
+
+/// RFC 3986 percent-encoding of everything but unreserved characters;
+/// `plus_space` encodes a space as `+` (application/x-www-form-urlencoded).
+fn percent_encode(s: &str, plus_space: bool) -> String {
+    let mut out = String::with_capacity(s.len());
+    for b in s.bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'.' | b'_' | b'~' => {
+                out.push(b as char)
+            }
+            b' ' if plus_space => out.push('+'),
+            _ => out.push_str(&format!("%{b:02X}")),
+        }
+    }
+    out
+}
+
+impl fmt::Debug for Credentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn mask(v: &Option<String>) -> &'static str {
+            if v.is_some() {
+                "<redacted>"
+            } else {
+                "<none>"
+            }
+        }
+        f.debug_struct("Credentials")
+            .field("username", &format_args!("{}", mask(&self.username)))
+            .field("password", &format_args!("{}", mask(&self.password)))
+            .field("token", &format_args!("{}", mask(&self.token)))
+            .finish()
+    }
+}
+
 // ── Exclusion filters ─────────────────────────────────────────────────────
 
 /// Filters applied after YAML files are loaded, before execution.
@@ -84,7 +201,7 @@ pub struct ScanFilters {
     #[serde(default)]
     pub exclude_cve: Vec<String>,
 
-    /// Exclude by `category` (misconfig YAML field).
+    /// Exclude by `category` (closed vocabulary, see CLAUDE.md "TestDef (YAML)").
     #[serde(default)]
     pub exclude_categories: Vec<String>,
 
@@ -132,6 +249,7 @@ mod tests {
             cvss: None,
             category: None,
             services: vec![],
+            requires_credentials: false,
             includes: vec![],
             vars: IndexMap::new(),
             steps: vec![],
@@ -225,5 +343,128 @@ mod tests {
             ..Default::default()
         };
         assert!(!f.is_excluded(&def));
+    }
+
+    // ── Credentials ──────────────────────────────────────────────────────
+
+    const BASE: &str = r#""host":"h","services":[{"port":80,"service":"http"}],"tests":["t"]"#;
+
+    fn parse(extra: &str) -> ScanRequest {
+        serde_json::from_str(&format!("{{{BASE}{extra}}}")).unwrap()
+    }
+
+    #[test]
+    fn credentials_absent_by_default() {
+        let r = parse("");
+        assert!(r.credentials.is_none());
+        assert!(r.validate().is_ok());
+    }
+
+    #[test]
+    fn credentials_deserialize_username_password() {
+        let r = parse(r#","credentials":{"username":"admin","password":"s3cr3t"}"#);
+        let c = r.credentials.as_ref().unwrap();
+        assert_eq!(c.username.as_deref(), Some("admin"));
+        assert_eq!(c.password.as_deref(), Some("s3cr3t"));
+        assert!(c.token.is_none());
+        assert!(r.validate().is_ok());
+    }
+
+    #[test]
+    fn credentials_token_only_is_valid() {
+        let r = parse(r#","credentials":{"token":"tok"}"#);
+        assert!(r.validate().is_ok());
+    }
+
+    #[test]
+    fn credentials_unknown_field_rejected() {
+        let raw = format!(r#"{{{BASE},"credentials":{{"user":"admin"}}}}"#);
+        assert!(serde_json::from_str::<ScanRequest>(&raw).is_err());
+    }
+
+    #[test]
+    fn credentials_empty_username_rejected() {
+        let r = parse(r#","credentials":{"username":"","password":"x"}"#);
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn credentials_empty_object_rejected() {
+        let r = parse(r#","credentials":{}"#);
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn credentials_password_without_username_rejected() {
+        let r = parse(r#","credentials":{"password":"x","token":"t"}"#);
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn credentials_empty_token_rejected() {
+        let r = parse(r#","credentials":{"token":""}"#);
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn credentials_validation_error_does_not_echo_values() {
+        let r = parse(r#","credentials":{"username":"","password":"s3cr3t-pw"}"#);
+        let err = serde_json::to_string(&r.validate().unwrap_err()).unwrap();
+        assert!(
+            !err.contains("s3cr3t-pw"),
+            "password echoed in validation error"
+        );
+    }
+
+    #[test]
+    fn credentials_secrets_cover_encoded_forms() {
+        let c = Credentials {
+            username: Some("admin".into()),
+            password: Some("p w\"d".into()),
+            token: None,
+        };
+        let s = c.secrets();
+        assert!(s.contains(&"p w\"d".to_string()));
+        assert!(s.contains(&"p%20w%22d".to_string()));
+        assert!(s.contains(&"p+w%22d".to_string()));
+        // base64("admin:p w\"d") — HTTP Basic auth header value.
+        assert!(s.contains(&"YWRtaW46cCB3ImQ=".to_string()));
+        assert!(s.contains(&"7020772264".to_string()));
+        assert!(!s.contains(&"admin".to_string()));
+    }
+
+    #[test]
+    fn credentials_debug_is_redacted() {
+        let r = parse(
+            r#","credentials":{"username":"admin-user","password":"s3cr3t-pw","token":"tok-xyz"}"#,
+        );
+        let dbg = format!("{r:?}");
+        for secret in ["admin-user", "s3cr3t-pw", "tok-xyz"] {
+            assert!(!dbg.contains(secret), "a credential value leaked in Debug");
+        }
+        assert!(dbg.contains("<redacted>"));
+    }
+
+    #[test]
+    fn credentials_never_serialized() {
+        let r = parse(r#","credentials":{"username":"admin-user","password":"s3cr3t-pw"}"#);
+        let out = serde_json::to_string(&r).unwrap();
+        assert!(!out.contains("credentials"), "credentials key serialized");
+        assert!(!out.contains("s3cr3t-pw"), "password serialized");
+        assert!(!out.contains("admin-user"), "username serialized");
+    }
+
+    #[test]
+    fn credentials_secrets_are_password_and_token() {
+        let c = Credentials {
+            username: Some("u".into()),
+            password: Some("p".into()),
+            token: Some(String::new()),
+        };
+        // password + base64("u:p") for Basic auth; empty token and the
+        // username itself are not secrets.
+        let mut want = vec!["70".to_string(), "dTpw".to_string(), "p".to_string()];
+        want.sort();
+        assert_eq!(c.secrets(), want);
     }
 }

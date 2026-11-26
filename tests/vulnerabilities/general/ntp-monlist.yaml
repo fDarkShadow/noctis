@@ -6,7 +6,7 @@ uid: a432ee80-8e5f-46be-9e0f-52cd757a28b2
 name: "NTP monlist enabled (amplification)"
 cves: [CVE-2013-5211]
 cvss: 7.5
-category: amplification
+category: exposure
 severity: high
 confidence_base: 0.50
 tags: [ntp, monlist, amplification, ddos]
