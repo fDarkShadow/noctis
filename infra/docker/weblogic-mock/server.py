@@ -7,7 +7,8 @@ handled as HTTP.
 
 WEBLOGIC_MODE:
   vuln          T3 HELO and admin console both report WEBLOGIC_VERSION
-                (default 12.2.1.4.0, an affected release).
+                (default 12.2.1.4.0, an affected release; set it to an
+                unaffected release such as 12.2.1.3.0 for a negative test).
   vuln_console  T3 refused (connection closed, as a WebLogic connection filter
                 does); the admin console still reports WEBLOGIC_VERSION.
   patched       WebLogic 14.1.2.0.0, an unaffected release: T3 HELO reports
@@ -18,6 +19,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from mocklib import serve
 
 MODE = os.environ.get("WEBLOGIC_MODE", "patched")
+if MODE not in ("vuln", "vuln_console", "patched"):
+    raise SystemExit("unknown WEBLOGIC_MODE: %r" % MODE)
 if MODE == "patched":
     VERSION = "14.1.2.0.0"
 else:
