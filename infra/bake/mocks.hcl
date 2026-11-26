@@ -232,6 +232,7 @@ group "default" {
     "servicenow-fileread-mock",
     "servicenow-ssti-mock",
     "servision-mock",
+    "servu-28318-mock",
     "servu-mock",
     "shellshock-mock",
     "siemens-scalance-mock",
@@ -2308,6 +2309,14 @@ target "servision-mock" {
   context    = "../docker/servision-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/servision-mock:${variant}"]
+}
+
+target "servu-28318-mock" {
+  name       = "servu-28318-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/servu-28318-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/servu-28318-mock:${variant}"]
 }
 
 target "servu-mock" {
