@@ -339,7 +339,7 @@ mod tests {
 
     #[test]
     fn float_dynamic_to_json_is_number() {
-        let d = Dynamic::from(3.14f64);
+        let d = Dynamic::from(2.5f64);
         assert!(dynamic_to_json(d).is_number());
     }
 

@@ -151,7 +151,7 @@ mod tests {
         s.started_at = Some(UtcTime::now().minus_millis(1000));
         s.completed_at = Some(UtcTime::now());
         let ms = s.elapsed_ms().unwrap();
-        assert!(ms >= 990 && ms <= 1100, "expected ~1000ms, got {ms}");
+        assert!((990..=1100).contains(&ms), "expected ~1000ms, got {ms}");
     }
 
     #[test]
