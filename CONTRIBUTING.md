@@ -101,7 +101,8 @@ adapt them rather than inventing new patterns.
 3. **Mock** — `infra/docker/<product>-mock/` with a `vuln` and a `patched`
    variant. Reuse an existing mock only by *adding* branches, never by changing
    an endpoint another feed depends on (check `infra/docker/MOCKS.md`). Run
-   `task mocks-manifest` afterwards.
+   `task mocks-manifest` and `task bake-gen` afterwards (commit the regenerated
+   `infra/docker/MOCKS.md` and `infra/bake/mocks.hcl`).
 4. **Inventory & playbook** — `infra/inventories/<product>/<id>/hosts.yml` and
    `infra/playbooks/10-<product>-<id>.yml` (the `10-` prefix is required). Set
    `expected_result`, `expected_qod`, and `expected_min_confidence` on vuln hosts

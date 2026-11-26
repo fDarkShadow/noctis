@@ -126,19 +126,21 @@ steps against the live service, and returns findings graded by how strong the ev
 - [x] **Service-aware matching** — feeds declare `services:` (`http`, `https`, `ssh`, `ftp`…); the engine maps them to discovered ports
 - [x] **HTTP/HTTPS** probes (reqwest) and **raw TCP** with verbatim byte payloads (path traversal, injections — no URL normalisation)
 - [x] **Non-HTTP protocols** — line & binary TCP dialogues, UDP, TLS (rustls), SSH (libssh2), SNMP v2c
+- [x] **Persistent sockets** — `tcp_open` / `tcp_send` / `tcp_close` keep one TCP/TLS connection across steps for multi-round-trip challenge–response protocols (e.g. the Erlang-cookie handshake in `couchdb/CVE-2022-24706.yaml`)
 - [x] **OpenVAS-style QoD** grading on every finding
 - [x] **Out-of-band detection** — built-in HTTP callback server (Log4Shell, SSRF, XXE)
 - [x] **Scripting** — [Rhai](https://rhai.rs) with string/regex, crypto/encoding, and binary pack/unpack builtins
 - [x] **SMB negotiate checks** — SMBv1 enabled, SMB2/3 signing not required (negotiated dialect in the evidence), done at the feed level with binary `send_hex` frames parsed by `script` ([#354](https://github.com/fDarkShadow/noctis/issues/354))
 - [x] **REST API** — submit scans, poll status, fetch findings; optional result webhook
+- [x] **Authenticated scans** — write-only `credentials` in the scan request, redacted from findings and logs; `requires_credentials: true` feeds are skipped without them
+- [x] **Scan filters** — skip feeds by `uid`, CVE, tag or `category` (closed vocabulary: `exposure`, `hardening`, `default-credentials`, `rce`, …)
 - [x] **Reproducible E2E tests** — Ansible + rootless Podman mocks, dynamic ports, automated true-positive / true-negative assertions
 - [x] **Multi-arch container** — static `scratch` image on GHCR (`linux/amd64` + `linux/arm64`)
 
 **On the roadmap**
 
-- [ ] Multi-round-trip binary protocol with keyed hash — epmd / Erlang distribution ([#316](https://github.com/fDarkShadow/noctis/issues/316))
-- [ ] On-host validation of the raw SYN probe (`tcp_syn`, needs `CAP_NET_RAW`) ([#330](https://github.com/fDarkShadow/noctis/issues/330))
-- [ ] Growing the feed catalogue via the `automation/feed-sourcing` pipeline and the open [CVE backlog](https://github.com/fDarkShadow/noctis/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Acve)
+- [ ] On-host validation of the raw SYN probe (`tcp_syn` needs `CAP_NET_RAW`, so it is not exercised in CI)
+- [ ] Growing the feed catalogue via the `automation/feed-sourcing` pipeline and the [CVE backlog](https://github.com/fDarkShadow/noctis/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Acve)
 
 ---
 
@@ -267,7 +269,8 @@ noctis serve --oob --oob-host <public-ip> --oob-port 9090   # enable OOB callbac
 ```
 
 `services` is required (min 1). `concurrency` defaults to `5` (range 1–100). Optional fields
-include `webhook_url`, `oob`, `filters` (e.g. exclude a CVE), and `credentials`.
+include `webhook_url`, `oob`, `credentials`, and `filters` — `exclude_uids`, `exclude_cve`,
+`exclude_tags`, `exclude_categories` (only feeds that carry a `category:` are skipped by the last one).
 
 **Authenticated scans** — pass `credentials` to let feeds log in to the target:
 
@@ -459,6 +462,8 @@ task test ID=CVE-2021-41773     # true-positive + true-negative for one vulnerab
 task test-all                   # every vulnerability — servers start once
 task feeds-check                # feed sha lockfile + uid-uniqueness check
 task mocks-manifest             # regenerate infra/docker/MOCKS.md
+task bake-gen                   # regenerate infra/bake/mocks.hcl after adding a mock
+task feeds-stats -- --write     # refresh the feed / CVE counters in README.md and docs/
 ```
 
 Each vulnerability is exercised on four hosts — `vuln` (HTTP), `vuln_https`, `patched`,
