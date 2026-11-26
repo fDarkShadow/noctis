@@ -17,13 +17,11 @@
 # Patched mode: same Showcase page, but the second OGNL evaluation never happens
 #               and the command output is never reflected (ordinary page) — so the
 #               TN exercises the fix on a real, product-serving instance.
-import os, ssl, threading
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from mocklib import serve   # provided by noctis/py-mock-base
 
 VULN_MODE = os.environ.get("STRUTS_31805_MODE", "patched") == "vuln"
-CERT_DIR = os.environ.get("CERT_DIR", "/certs")
-PORT_HTTP = int(os.environ.get("PORT_HTTP", "80"))
-PORT_HTTPS = int(os.environ.get("PORT_HTTPS", "443"))
 
 SHOWCASE_BODY = (
     "<!DOCTYPE html>\n<html><head><title>Struts2 Showcase</title></head>\n"
@@ -72,16 +70,19 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _is_showcase(self):
+        return self.path.rstrip("/") == "/struts2-showcase"
+
     def do_GET(self):
         # Gate / landing page (served by BOTH modes).
-        if self.path.rstrip("/") == "/struts2-showcase" or self.path == "/struts2-showcase/":
+        if self._is_showcase():
             self._send(200, SHOWCASE_BODY)
         else:
             self._send(404, "Not found")
 
     def do_POST(self):
         body = self._read_body()
-        if self.path.rstrip("/") == "/struts2-showcase" or self.path == "/struts2-showcase/":
+        if self._is_showcase():
             # Vulnerable Struts2 performs the forced second OGNL evaluation and
             # executes the injected command, reflecting its output. Only emit the
             # `id` output when the S2-062 payload is present.
@@ -95,18 +96,5 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, "Not found")
 
 
-def _make_https_server(port):
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ctx.load_cert_chain(os.path.join(CERT_DIR, "server.crt"), os.path.join(CERT_DIR, "server.key"))
-    srv = HTTPServer(("0.0.0.0", port), Handler)
-    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
-    return srv
-
-
 if __name__ == "__main__":
-    if PORT_HTTPS:
-        threading.Thread(target=lambda: _make_https_server(PORT_HTTPS).serve_forever(), daemon=True).start()
-    if PORT_HTTP:
-        HTTPServer(("0.0.0.0", PORT_HTTP), Handler).serve_forever()
-    else:
-        threading.Event().wait()
+    serve(Handler, HTTPServer)   # HTTP:80 + HTTPS:443 (cert from the base image)
