@@ -285,6 +285,7 @@ group "default" {
     "vivotek-mock",
     "vnc-mock",
     "webjump-mock",
+    "weblogic-mock",
     "webmin-mock",
     "whatsupgold-mock",
     "whatsupgold-sqli-mock",
@@ -2766,6 +2767,15 @@ target "webjump-mock" {
   context    = "../docker/webjump-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/webjump-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "weblogic-mock" {
+  name       = "weblogic-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/weblogic-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/weblogic-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
