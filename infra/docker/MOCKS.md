@@ -717,6 +717,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## simplehelp-mock
 - simplehelp/CVE-2024-57727
+- simplehelp/CVE-2026-48558
 
 ## smartermail-52691-mock
 - smartermail/CVE-2025-52691
