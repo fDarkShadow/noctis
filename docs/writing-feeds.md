@@ -81,6 +81,7 @@ Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`.
 | `http_request` | HTTP/HTTPS request; result: `resp.status`, `resp.body`, `resp.headers` |
 | `tcp_connect` | Raw TCP connect + banner grab; result: `resp.banner` |
 | `tcp_dialogue` | Multi-line TCP exchange (text) **or** a binary `send_hex` frame; result: `resp.transcript`, `resp.response_hex` |
+| `tcp_open` / `tcp_send` / `tcp_close` | Persistent TCP/TLS socket kept across steps (`handle:`) — for challenge–response protocols where a frame is computed from an earlier reply; `tcp_send` result: `resp.responded`, `resp.response_hex` |
 | `tcp_syn` | TCP SYN probe (port state) |
 | `udp_probe` | UDP datagram probe; result: `resp.response`, `resp.response_hex` |
 | `tls_check` | TLS version, cipher, certificate inspection |
@@ -105,6 +106,7 @@ Expression helpers available in `match`/`script` include string/regex/byte funct
 | `{{scheme}}` | `http` or `https`, derived from the matched service |
 | `{{oob_token}}` | UUID unique to this run |
 | `{{oob_url}}` | Full OOB callback URL |
+| `{{oob_host}}` / `{{oob_port}}` | OOB server host / port |
 | `{{oob_enabled}}` | `true` when `--oob` is configured |
 | `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
 | `{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}` | The request's `credentials` fields — each set only when supplied |
