@@ -2,7 +2,7 @@
 # Cargo.lock only — no third-party build tooling is installed or compiled.
 
 # ── Stage 1: toolchain + static system libraries ─────────────────────────────
-FROM docker.io/library/rust:1.96-alpine AS base
+FROM docker.io/library/rust:1.100-alpine AS base
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static zlib-dev zlib-static libssh2-dev libssh2-static pkgconfig ca-certificates \
     && adduser -D -u 1000 -s /sbin/nologin noctis
 ENV PKG_CONFIG_ALL_STATIC=1 OPENSSL_STATIC=1
