@@ -256,6 +256,7 @@ group "default" {
     "ssh-terrapin-mock",
     "struts-1965-mock",
     "struts-2248-mock",
+    "struts-31805-mock",
     "struts-50164-mock",
     "struts-mock",
     "superset-mock",
@@ -2513,6 +2514,15 @@ target "struts-2248-mock" {
   context    = "../docker/struts-2248-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/struts-2248-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "struts-31805-mock" {
+  name       = "struts-31805-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-31805-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-31805-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
