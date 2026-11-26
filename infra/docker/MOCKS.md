@@ -700,6 +700,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## servision-mock
 - servision/CVE-2015-0930
 
+## servu-28318-mock
+- servu/CVE-2026-28318
+
 ## servu-mock
 - servu/CVE-2024-28995
 
