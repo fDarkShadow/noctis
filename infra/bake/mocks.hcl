@@ -293,6 +293,7 @@ group "default" {
     "whd-mock",
     "wikiwebhelp-mock",
     "wincc-mock",
+    "wing-ftp-mock",
     "wordpress-dirtrav-mock",
     "workspace-one-mock",
     "wp-symposium-mock",
@@ -2837,6 +2838,15 @@ target "wincc-mock" {
   context    = "../docker/wincc-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/wincc-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "wing-ftp-mock" {
+  name       = "wing-ftp-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wing-ftp-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wing-ftp-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

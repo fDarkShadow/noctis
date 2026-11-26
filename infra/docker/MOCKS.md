@@ -884,6 +884,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## wincc-mock
 - wincc/simatic-wincc-input-validation
 
+## wing-ftp-mock
+- wing-ftp/CVE-2015-4107
+
 ## wordpress-dirtrav-mock
 - wordpress/CVE-2007-6369
 
