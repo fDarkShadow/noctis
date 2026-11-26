@@ -11,6 +11,8 @@
 
 <p align="center">
   <a href="https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml"><img src="https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="#available-feeds"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FfDarkShadow%2Fnoctis%2Fbadges%2Ffeeds.json" alt="Vulnerability tests"></a>
+  <a href="#available-feeds"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FfDarkShadow%2Fnoctis%2Fbadges%2Fcves.json" alt="CVEs covered"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-stable-orange" alt="Rust"></a>
   <a href="https://github.com/fDarkShadow/noctis/pkgs/container/noctis"><img src="https://ghcr-badge.egpl.dev/fdarkShadow/noctis/size?tag=latest&label=image" alt="Docker image"></a>

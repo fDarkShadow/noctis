@@ -12,6 +12,11 @@ Run from anywhere (via `task feeds-stats` from infra/):
     python3 scripts/feed_stats.py            # print the stats
     python3 scripts/feed_stats.py --write    # rewrite every marker in the docs
     python3 scripts/feed_stats.py --check    # exit 1 if a marker is out of date
+    python3 scripts/feed_stats.py --badge DIR  # write shields.io endpoint JSON files
+
+`--badge DIR` writes DIR/feeds.json and DIR/cves.json in the shields.io
+endpoint format. The Badges workflow runs it on every push to main and pushes
+the files to the `badges` branch, which the README badges read.
 
 Keys:
   feeds        number of feed files = vulnerability tests (one per vulnerability)
@@ -115,12 +120,40 @@ def sync(stats: dict[str, int], write: bool) -> list[str]:
     return stale
 
 
+BADGES = {
+    # file name: (stats key, label)
+    "feeds": ("feeds", "vulnerability tests"),
+    "cves": ("cves", "CVEs covered"),
+}
+
+
+def write_badges(stats: dict[str, int], out_dir: str) -> None:
+    os.makedirs(out_dir, exist_ok=True)
+    for name, (key, label) in BADGES.items():
+        badge = {
+            "schemaVersion": 1,
+            "label": label,
+            "message": str(stats[key]),
+            "color": "blueviolet",
+        }
+        with open(os.path.join(out_dir, f"{name}.json"), "w", encoding="utf-8") as fh:
+            json.dump(badge, fh, indent=2)
+            fh.write("\n")
+
+
 def main() -> int:
     write = "--write" in sys.argv
     check = "--check" in sys.argv
     stats = compute()
     for k, v in stats.items():
         print(f"{k:12} {v}")
+    if "--badge" in sys.argv:
+        idx = sys.argv.index("--badge")
+        if idx + 1 >= len(sys.argv):
+            print("feed-stats: --badge needs an output directory", file=sys.stderr)
+            return 2
+        write_badges(stats, sys.argv[idx + 1])
+        return 0
     if not (write or check):
         return 0
     stale = sync(stats, write)
