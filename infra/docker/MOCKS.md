@@ -794,6 +794,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## synology-mock
 - synology/CVE-2024-50630
+- synology/beestation-sa-24-23
 
 ## tapestry-mock
 - tapestry/CVE-2021-27850
@@ -866,6 +867,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## webjump-mock
 - webjump/CVE-2009-4892
+
+## weblogic-mock
+- weblogic/CVE-2024-21182
 
 ## webmin-mock
 - webmin/CVE-2019-15107
