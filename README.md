@@ -424,8 +424,8 @@ tests/vulnerabilities/<product>/<id>.yaml    # <id> = the CVE, or a kebab-case s
 tests/common/                                # reusable includes
 ```
 
-**Today: <!-- feed-stats:feeds -->317<!-- /feed-stats --> vulnerability tests** in <!-- feed-stats:products -->210<!-- /feed-stats --> product directories — <!-- feed-stats:cve_feeds -->279<!-- /feed-stats --> CVE
-detections covering **<!-- feed-stats:cves -->411<!-- /feed-stats --> distinct CVEs**, plus <!-- feed-stats:nocve_feeds -->38<!-- /feed-stats --> CVE-less misconfiguration / exposure
+**Today: <!-- feed-stats:feeds -->318<!-- /feed-stats --> vulnerability tests** in <!-- feed-stats:products -->210<!-- /feed-stats --> product directories — <!-- feed-stats:cve_feeds -->280<!-- /feed-stats --> CVE
+detections covering **<!-- feed-stats:cves -->414<!-- /feed-stats --> distinct CVEs**, plus <!-- feed-stats:nocve_feeds -->38<!-- /feed-stats --> CVE-less misconfiguration / exposure
 checks.
 
 Coverage spans **CVE detections** across Apache, Atlassian (Confluence/Jira), F5 BIG-IP,
