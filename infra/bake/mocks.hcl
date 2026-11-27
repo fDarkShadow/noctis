@@ -246,6 +246,7 @@ group "default" {
     "solarwinds-srm-mock",
     "sonicwall-sma-mock",
     "sonicwall-sma1000-mock",
+    "sonicwall-sra-mock",
     "sonicwall-sslvpn-mock",
     "spark-mock",
     "splunk-mock",
@@ -2429,6 +2430,15 @@ target "sonicwall-sma1000-mock" {
   context    = "../docker/sonicwall-sma1000-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/sonicwall-sma1000-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "sonicwall-sra-mock" {
+  name       = "sonicwall-sra-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sonicwall-sra-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sonicwall-sra-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

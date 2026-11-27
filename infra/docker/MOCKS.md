@@ -744,6 +744,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## sonicwall-sma1000-mock
 - sonicwall-sma1000/CVE-2025-23006
 
+## sonicwall-sra-mock
+- sonicwall-sra/CVE-2019-7481
+
 ## sonicwall-sslvpn-mock
 - sonicwall-sslvpn/CVE-2024-53704
 
