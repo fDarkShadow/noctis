@@ -163,6 +163,7 @@ group "default" {
     "merak-webmail-mock",
     "metabase-mock",
     "micollab-mock",
+    "microsoft-omi-38647-mock",
     "minio-mock",
     "mirth-connect-mock",
     "mongodb-mock",
@@ -1711,6 +1712,15 @@ target "micollab-mock" {
   context    = "../docker/micollab-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/micollab-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microsoft-omi-38647-mock" {
+  name       = "microsoft-omi-38647-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microsoft-omi-38647-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microsoft-omi-38647-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

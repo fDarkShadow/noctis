@@ -491,6 +491,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## micollab-mock
 - micollab/CVE-2024-41713
 
+## microsoft-omi-38647-mock
+- microsoft-omi/CVE-2021-38647
+
 ## minio-mock
 - minio/CVE-2023-28432
 
