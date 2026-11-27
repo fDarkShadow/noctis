@@ -177,6 +177,7 @@
   "livewire/CVE-2025-54068.yaml": "b4bb4c76b93fe1ae44b44761a3955e801cca5306e34d4fd1df73aa76d542e749",
   "loadmaster/CVE-2024-1212.yaml": "fa20c688f237ad5e65e0db23b37b8bdefc19811b2a6069bee37d6d2f1a14057c",
   "log4shell/CVE-2021-44228.yaml": "aedc1d2218b3e5c796acea53102427b7289da986cbfc726e955d154f06385dd7",
+  "log4shell/CVE-2021-45046.yaml": "2c998e1d7c387cbe995f484aec7aa0ae2723ecd5eb698cce6ed8cd0813cf90a7",
   "magento/CVE-2024-34102.yaml": "b4fb17d5f4aabc2d2602111f1ce059054792d850e91d8bbcc116c41bf163a4ba",
   "magicinfo/CVE-2024-7399.yaml": "0ce4c7429efe01ab0dbbe2a1324fc00259df1f052013dc95f2c9f694d5f2d598",
   "manageengine/CVE-2015-7765.yaml": "e8d282dc7a65db24350bdd93dd5170fea6b8835a7a29fbae9f181fec19f738ef",

@@ -461,6 +461,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## loadmaster-mock
 - loadmaster/CVE-2024-1212
 
+## log4shell-45046-mock
+- log4shell/CVE-2021-45046
+
 ## log4shell-mock
 - log4shell/CVE-2021-44228
 
