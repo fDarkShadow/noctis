@@ -657,6 +657,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## qlik-sense-mock
 - qlik-sense/CVE-2023-41266
 
+## qnap-photostation-7195-mock
+- qnap-qts/CVE-2019-7195
+
 ## qnap-qts-mock
 - qnap-qts/CVE-2023-47218
 
