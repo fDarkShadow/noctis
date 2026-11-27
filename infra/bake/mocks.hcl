@@ -258,6 +258,7 @@ group "default" {
     "struts-2248-mock",
     "struts-31805-mock",
     "struts-50164-mock",
+    "struts-9791-mock",
     "struts-mock",
     "superset-mock",
     "symantec-epm-mock",
@@ -2533,6 +2534,15 @@ target "struts-50164-mock" {
   context    = "../docker/struts-50164-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/struts-50164-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "struts-9791-mock" {
+  name       = "struts-9791-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-9791-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-9791-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
