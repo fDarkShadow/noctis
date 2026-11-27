@@ -300,6 +300,7 @@ group "default" {
     "wordpress-dirtrav-mock",
     "workspace-one-mock",
     "wp-symposium-mock",
+    "wso2-29464-mock",
     "x11-mock",
     "xwiki-mock",
     "yii2-mock",
@@ -2903,6 +2904,15 @@ target "wp-symposium-mock" {
   context    = "../docker/wp-symposium-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/wp-symposium-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "wso2-29464-mock" {
+  name       = "wso2-29464-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wso2-29464-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wso2-29464-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
