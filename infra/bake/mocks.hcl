@@ -97,6 +97,7 @@ group "default" {
     "expedition-sqli-mock",
     "eyesofnetwork-mock",
     "finger-mock",
+    "forgerock-openam-mock",
     "forticlientems-21643-mock",
     "forticlientems-mock",
     "fortigate-mock",
@@ -1142,6 +1143,15 @@ target "finger-mock" {
   context    = "../docker/finger-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/finger-mock:${variant}"]
+}
+
+target "forgerock-openam-mock" {
+  name       = "forgerock-openam-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/forgerock-openam-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/forgerock-openam-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "forticlientems-21643-mock" {

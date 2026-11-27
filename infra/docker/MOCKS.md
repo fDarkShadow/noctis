@@ -291,6 +291,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## finger-mock
 - general/finger-exposed
 
+## forgerock-openam-mock
+- forgerock-openam/CVE-2021-35464
+
 ## forticlientems-21643-mock
 - forticlientems/CVE-2026-21643
 
