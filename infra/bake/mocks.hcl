@@ -52,6 +52,7 @@ group "default" {
     "coldfusion-mock",
     "commvault-mock",
     "confluence-26084-mock",
+    "confluence-3396-mock",
     "confluence-mock",
     "confluence-restore-mock",
     "confluence-setup-mock",
@@ -748,6 +749,15 @@ target "confluence-26084-mock" {
   context    = "../docker/confluence-26084-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/confluence-26084-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "confluence-3396-mock" {
+  name       = "confluence-3396-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/confluence-3396-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/confluence-3396-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

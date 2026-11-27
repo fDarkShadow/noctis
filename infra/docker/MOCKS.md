@@ -156,6 +156,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## confluence-26084-mock
 - confluence/CVE-2021-26084
 
+## confluence-3396-mock
+- confluence/CVE-2019-3396
+
 ## confluence-mock
 - confluence/CVE-2022-26134
 
