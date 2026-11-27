@@ -40,6 +40,7 @@ group "default" {
     "chamilo-mock",
     "checkpoint-mock",
     "cisco-ise-mock",
+    "cisco-rv-mock",
     "cisco-wsma-mock",
     "civicrm-mock",
     "cleo-55956-mock",
@@ -640,6 +641,15 @@ target "cisco-ise-mock" {
   context    = "../docker/cisco-ise-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cisco-ise-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-rv-mock" {
+  name       = "cisco-rv-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-rv-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-rv-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
