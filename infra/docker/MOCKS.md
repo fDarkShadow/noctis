@@ -933,3 +933,6 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## zte-zxdsl-mock
 - zte-zxdsl/CVE-2014-9183
+
+## zyxel-9054-mock
+- zyxel/CVE-2020-9054
