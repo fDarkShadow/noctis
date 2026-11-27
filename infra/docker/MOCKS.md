@@ -246,6 +246,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dolibarr-mock
 - dolibarr/dolibarr-404-mult-vuln
 
+## drupal-7600-mock
+- drupal/CVE-2018-7600
+
 ## drupal-sqli-mock
 - drupal/CVE-2026-9082
 

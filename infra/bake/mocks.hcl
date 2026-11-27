@@ -82,6 +82,7 @@ group "default" {
     "docker-api-mock",
     "dokeos-mock",
     "dolibarr-mock",
+    "drupal-7600-mock",
     "drupal-sqli-mock",
     "efront-mock",
     "ektron-mock",
@@ -1011,6 +1012,15 @@ target "dolibarr-mock" {
   context    = "../docker/dolibarr-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dolibarr-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "drupal-7600-mock" {
+  name       = "drupal-7600-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/drupal-7600-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/drupal-7600-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
