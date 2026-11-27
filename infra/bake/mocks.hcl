@@ -73,6 +73,7 @@ group "default" {
     "cwp-48703-mock",
     "cyberpanel-mock",
     "dahua-mock",
+    "dasan-gpon-10562-mock",
     "deluxebb-mock",
     "dlink-dcs-mock",
     "dlink-dir3040-mock",
@@ -932,6 +933,15 @@ target "dahua-mock" {
   context    = "../docker/dahua-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dahua-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dasan-gpon-10562-mock" {
+  name       = "dasan-gpon-10562-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dasan-gpon-10562-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dasan-gpon-10562-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
