@@ -156,6 +156,7 @@ group "default" {
     "log4shell-mock",
     "magento-mock",
     "magicinfo-mock",
+    "manageengine-44077-mock",
     "manageengine-5337-mock",
     "manageengine-mock",
     "memcached-mock",
@@ -1651,6 +1652,15 @@ target "magicinfo-mock" {
   context    = "../docker/magicinfo-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/magicinfo-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "manageengine-44077-mock" {
+  name       = "manageengine-44077-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/manageengine-44077-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/manageengine-44077-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

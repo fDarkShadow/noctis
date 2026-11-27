@@ -470,6 +470,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## magicinfo-mock
 - magicinfo/CVE-2024-7399
 
+## manageengine-44077-mock
+- manageengine/CVE-2021-44077
+
 ## manageengine-5337-mock
 - manageengine/manageengine-desktop-central-dbqueryexecutor
 
