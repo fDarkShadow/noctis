@@ -361,6 +361,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## nakivo-mock
 - nakivo/CVE-2024-48248
 
+## netscaler-19781-mock
+- netscaler/CVE-2019-19781
+
 ## netscaler-5777-mock
 - netscaler/CVE-2025-5777
 
