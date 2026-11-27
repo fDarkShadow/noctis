@@ -129,6 +129,7 @@ group "default" {
     "ivanti-mock",
     "ivanti-rce-mock",
     "ivanti-saml-mock",
+    "ivanti-sentry-38035-mock",
     "ivanti-sentry-mock",
     "ivanti-vtm-mock",
     "jenkins-1000861-mock",
@@ -1418,6 +1419,15 @@ target "ivanti-saml-mock" {
   context    = "../docker/ivanti-saml-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ivanti-saml-mock:${variant}"]
+}
+
+target "ivanti-sentry-38035-mock" {
+  name       = "ivanti-sentry-38035-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ivanti-sentry-38035-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ivanti-sentry-38035-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "ivanti-sentry-mock" {

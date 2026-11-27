@@ -388,6 +388,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ivanti-saml-mock
 - ivanti-ics/CVE-2024-21893
 
+## ivanti-sentry-38035-mock
+- ivanti-sentry/CVE-2023-38035
+
 ## ivanti-sentry-mock
 - ivanti-sentry/CVE-2026-10520
 
