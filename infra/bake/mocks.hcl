@@ -7,6 +7,7 @@ group "default" {
     "activemq-jolokia-mock",
     "activemq-mock",
     "advantech-mock",
+    "airflow-13927-mock",
     "ajaxportal-mock",
     "apache-cve-2021-41773",
     "apache-cve-2021-42013",
@@ -350,6 +351,15 @@ target "advantech-mock" {
   context    = "../docker/advantech-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/advantech-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "airflow-13927-mock" {
+  name       = "airflow-13927-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/airflow-13927-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/airflow-13927-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

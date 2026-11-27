@@ -20,6 +20,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## advantech-mock
 - advantech/CVE-2013-1627
 
+## airflow-13927-mock
+- airflow/CVE-2020-13927
+
 ## ajaxportal-mock
 - ajaxportal/CVE-2009-1509
 
