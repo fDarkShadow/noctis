@@ -685,6 +685,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## rsync-mock
 - general/rsync-anonymous-list
 
+## saltstack-16846-mock
+- saltstack/CVE-2020-16846
+
 ## sap-netweaver-mock
 - sap-netweaver/CVE-2025-31324
 
