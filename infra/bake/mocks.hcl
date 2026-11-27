@@ -110,6 +110,7 @@ group "default" {
     "gitlab-mock",
     "gitlab-password-reset-mock",
     "gitlist-mock",
+    "goanywhere-0669-mock",
     "goanywhere-mock",
     "grafana-mock",
     "gravityboardx-mock",
@@ -1254,6 +1255,15 @@ target "gitlist-mock" {
   context    = "../docker/gitlist-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/gitlist-mock:${variant}"]
+}
+
+target "goanywhere-0669-mock" {
+  name       = "goanywhere-0669-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/goanywhere-0669-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/goanywhere-0669-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "goanywhere-mock" {

@@ -330,6 +330,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## gitlist-mock
 - gitlist/CVE-2014-4511
 
+## goanywhere-0669-mock
+- goanywhere/CVE-2023-0669
+
 ## goanywhere-mock
 - goanywhere/CVE-2024-0204
 
