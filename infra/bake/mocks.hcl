@@ -247,6 +247,7 @@ group "default" {
     "sonicwall-sma-mock",
     "sonicwall-sma1000-mock",
     "sonicwall-sslvpn-mock",
+    "sophos-utm-25223-mock",
     "spark-mock",
     "splunk-mock",
     "splunk-pg-mock",
@@ -2438,6 +2439,15 @@ target "sonicwall-sslvpn-mock" {
   context    = "../docker/sonicwall-sslvpn-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/sonicwall-sslvpn-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "sophos-utm-25223-mock" {
+  name       = "sophos-utm-25223-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sophos-utm-25223-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sophos-utm-25223-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
