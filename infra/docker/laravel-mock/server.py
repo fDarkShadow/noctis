@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
-# Mock for CVE-2021-3129 — Laravel Ignition Debug Mode RCE.
+# Mock for CVE-2021-3129 — Laravel + Facade Ignition debug-mode RCE.
 #
-# Vuln mode: POST /_ignition/execute-solution with the php://filter solution
-# returns HTTP 500 reflecting decoded Laravel log output (command result +
-# Illuminate framework stack), as a debug-mode Ignition install would.
-# Patched mode: the endpoint is disabled (debug off / package patched) — 404.
-import os, ssl, threading
+# Realistic, read-only detection surface (QoD 75, response-analysis):
+# POST /_ignition/execute-solution with a MakeViewVariableOptionalSolution whose
+# `viewFile` cannot be opened. On a VULNERABLE, debug-mode install the Ignition
+# route exists and the framework serialises the resulting exception verbatim —
+# a verbose JSON 500 that REFLECTS the attacker-supplied viewFile and leaks the
+# `Illuminate` vendor framework stack. That reflection (our own input echoed
+# back) + the framework leak is exactly what a real vulnerable target returns;
+# it is NOT a marker the mock invents (the viewFile is read from the request).
+#
+# Patched / debug-off: the route is not registered (package patched or
+# APP_DEBUG=false), so it returns a flat 404 with no reflection and no stack.
+import json
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-VULN_MODE = os.environ.get("LARAVEL_MODE", "patched") == "vuln"
+from mocklib import serve  # provided by noctis/py-mock-base
 
-# Decoded output a successful php://filter chain reflects from the Laravel log:
-# the earlier `id` command result plus the Illuminate exception stack.
-VULN_BODY = (
-    "NOCTIS_LARAVEL_CONFIRMED\n"
-    "uid=0(root) gid=0(root) groups=0(root)\n"
-    '{"message":"The stream or file \\"../storage/logs/laravel.log\\" could not '
-    "be opened in append mode\",\"exception\":"
-    '"Illuminate\\\\Contracts\\\\Filesystem\\\\FileNotFoundException",'
-    '"file":"/var/www/html/vendor/laravel/framework/src/Illuminate/'
-    'Foundation/Bootstrap/HandleExceptions.php","line":255}'
-)
+VULN_MODE = os.environ.get("LARAVEL_MODE", "patched") == "vuln"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -41,26 +39,55 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
-        _ = self.rfile.read(length) if length else b""
-        if self.path == "/_ignition/execute-solution":
-            if VULN_MODE:
-                self._send(500, VULN_BODY)
-            else:
-                # Patched / debug off — endpoint not exposed.
-                self._send(404, "Not found", ct="text/plain")
-        else:
+        raw = self.rfile.read(length) if length else b""
+
+        if self.path != "/_ignition/execute-solution":
             self._send(404, "Not found", ct="text/plain")
+            return
 
+        if not VULN_MODE:
+            # Patched / debug off — the Ignition route is not registered.
+            self._send(404, "Not found", ct="text/plain")
+            return
 
-def _make_https_server(port):
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ctx.load_cert_chain("/certs/server.crt", "/certs/server.key")
-    srv = HTTPServer(("0.0.0.0", port), Handler)
-    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
-    return srv
+        # Vulnerable debug-mode Ignition: parse the solution, fail to open the
+        # supplied viewFile, and serialise the exception the way debug mode does
+        # — reflecting the viewFile the client sent and leaking the Illuminate
+        # framework stack. Nothing here is fabricated: the view_file below is the
+        # exact value taken from the request body.
+        view_file = ""
+        try:
+            payload = json.loads(raw.decode("utf-8", "replace"))
+            view_file = str(payload.get("parameters", {}).get("viewFile", ""))
+        except Exception:
+            view_file = ""
+
+        body = {
+            "message": (
+                'file_get_contents(%s): Failed to open stream: '
+                "No such file or directory" % view_file
+            ),
+            "exception": "ErrorException",
+            "file": (
+                "/var/www/html/vendor/laravel/framework/src/"
+                "Illuminate/Filesystem/Filesystem.php"
+            ),
+            "line": 110,
+            "class": "Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution",
+            "trace": [
+                {
+                    "file": (
+                        "/var/www/html/vendor/laravel/framework/src/"
+                        "Illuminate/Filesystem/Filesystem.php"
+                    ),
+                    "line": 110,
+                    "function": "Illuminate\\Foundation\\Bootstrap"
+                    "\\HandleExceptions::handleError",
+                },
+            ],
+        }
+        self._send(500, json.dumps(body))
 
 
 if __name__ == "__main__":
-    https = _make_https_server(443)
-    threading.Thread(target=https.serve_forever, daemon=True).start()
-    HTTPServer(("0.0.0.0", 80), Handler).serve_forever()
+    serve(Handler, HTTPServer)  # HTTP:80 + HTTPS:443 (cert from the base image)

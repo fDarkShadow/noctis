@@ -1584,6 +1584,7 @@ target "laravel-mock" {
   context    = "../docker/laravel-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/laravel-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "ldap-mock" {
