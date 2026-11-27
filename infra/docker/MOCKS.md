@@ -363,6 +363,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## invision-power-board-mock
 - invision-power-board/CVE-2012-5692
 
+## ivanti-csa-44529-mock
+- ivanti-csa/CVE-2021-44529
+
 ## ivanti-csa-mock
 - ivanti-csa/CVE-2024-8963
 
