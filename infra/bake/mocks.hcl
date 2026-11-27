@@ -228,6 +228,7 @@ group "default" {
     "roundcube-mock",
     "rsync-mock",
     "sap-netweaver-mock",
+    "sap-solman-6207-mock",
     "screenconnect-mock",
     "servicenow-fileread-mock",
     "servicenow-ssti-mock",
@@ -2274,6 +2275,15 @@ target "sap-netweaver-mock" {
   context    = "../docker/sap-netweaver-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/sap-netweaver-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "sap-solman-6207-mock" {
+  name       = "sap-solman-6207-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sap-solman-6207-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sap-solman-6207-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

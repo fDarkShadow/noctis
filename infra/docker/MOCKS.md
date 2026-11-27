@@ -688,6 +688,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## sap-netweaver-mock
 - sap-netweaver/CVE-2025-31324
 
+## sap-solman-6207-mock
+- sap-solman/CVE-2020-6207
+
 ## screenconnect-mock
 - screenconnect/CVE-2024-1709
 
