@@ -817,6 +817,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## telnet-mock
 - general/telnet-exposed
 
+## thinkphp-20062-mock
+- thinkphp/CVE-2018-20062
+
 ## tomcat-admin-mock
 - tomcat/CVE-2009-3099
 
