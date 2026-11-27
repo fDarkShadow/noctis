@@ -88,6 +88,7 @@
   "forticlientems/CVE-2023-48788.yaml": "ee5c3171d3c84bb185f2b80a8eaf182544f6282aac8034682c212d23701dea8c",
   "forticlientems/CVE-2026-21643.yaml": "273109727db9d18c8850ce682e0c02c2d8ea1e8cda6e6231f9b91e7b718c6a60",
   "fortimanager/CVE-2024-47575.yaml": "c7ec1e71f5e0f42d69f3c58fa9d1a3aa333c197f5570a3f8053473e8b0714391",
+  "fortios/CVE-2018-13379.yaml": "6ce1b9140c6d0636d5df5e375549dc6ef69d628757950feae2a3fb8fa34691de",
   "fortios/CVE-2024-21762.yaml": "deb34f5e67c66edd847d7f811db574a89fb1a0adf43ad2bd6f08d81c6c119011",
   "fortios/CVE-2024-55591.yaml": "6cf0c2da6b06bb25f2353c992eebb0bc09ded1d2178f3a9b5e650888bae2a2bc",
   "fortiweb/CVE-2025-25257.yaml": "0eaa3aedb9638c2dcb462e2230aad47a619969492ec7bc21d50bbb8b3ec1ebbc",
