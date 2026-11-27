@@ -210,6 +210,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cups-mock
 - cups/cups-webui-xss
 
+## cwp-44877-mock
+- cwp/CVE-2022-44877
+
 ## cwp-48703-mock
 - cwp/CVE-2025-48703
 

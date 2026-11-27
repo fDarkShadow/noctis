@@ -70,6 +70,7 @@ group "default" {
     "cucm-3315-mock",
     "cucm-mock",
     "cups-mock",
+    "cwp-44877-mock",
     "cwp-48703-mock",
     "cyberpanel-mock",
     "dahua-mock",
@@ -905,6 +906,15 @@ target "cups-mock" {
   context    = "../docker/cups-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cups-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cwp-44877-mock" {
+  name       = "cwp-44877-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cwp-44877-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cwp-44877-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
