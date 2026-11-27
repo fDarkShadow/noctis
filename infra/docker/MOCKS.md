@@ -904,6 +904,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## workspace-one-mock
 - workspace-one/CVE-2022-22954
 
+## wp-file-manager-25213-mock
+- wordpress/CVE-2020-25213
+
 ## wp-symposium-mock
 - wp-symposium/CVE-2015-6522
 
