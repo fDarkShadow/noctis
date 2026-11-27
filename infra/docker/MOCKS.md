@@ -663,6 +663,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## quantum-mock
 - quantum/quantum-scalar-lfi
 
+## quest-kace-11138-mock
+- kace/CVE-2018-11138
+
 ## rconfig-mock
 - rconfig/CVE-2019-16662
 
