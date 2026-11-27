@@ -45,11 +45,17 @@
       "items": { "type": "string" },
       "description": "Service names the feed targets (http, https, ssh, …). Empty = all ports."
     },
+    "requires_credentials": {
+      "type": "boolean",
+      "default": false,
+      "description": "Authenticated feed: skipped (no task, no finding) when the scan request carries no `credentials`. Reference them as {{cred_username}} / {{cred_password}} / {{cred_token}}; guard optional authenticated steps with condition: \"cred_enabled\"."
+    },
     "author": { "type": "string" },
     "version": { "type": "string" },
     "category": {
       "type": "string",
-      "description": "Optional free-form classification (e.g. exposure, ssh, injection, auth-bypass)."
+      "description": "Optional classification from a closed vocabulary (enforced by scripts/check_feeds.py; see CLAUDE.md).",
+      "enum": ["exposure", "hardening", "default-credentials", "auth-bypass", "rce", "sqli", "file-read", "xss", "ssrf"]
     },
     "references": {
       "type": "array",

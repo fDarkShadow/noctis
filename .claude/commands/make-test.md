@@ -122,10 +122,12 @@ Derive `$ID`:
 - Zero or several CVEs → `ID` = a descriptive kebab-case slug
   (e.g. `ivanti-connect-secure-auth-bypass-rce`, `exposed-admin-paths`)
 
-Derive `$PRODUCT` (the vendor/product subfolder): check `infra/docker/MOCKS.md` for an
-existing mock matching this product. If one exists, reuse its slug (e.g. `ivanti-epm`).
-If not, pick a new short product slug (normally the mock directory name you're about to
-create, minus `-mock`).
+Derive `$PRODUCT` (the product subfolder — one per product, shared by all its CVEs):
+run `ls tests/vulnerabilities/` and reuse the existing directory for this product
+(e.g. `confluence`, `ivanti-ics`, `apache-httpd`) even if your CVE gets its own mock.
+Never create a per-CVE or per-bug-class directory (`confluence-ssti`, `expedition-sqli`).
+Only when the product is not there yet, pick a new short product slug. The mock directory
+is chosen separately — see `infra/docker/MOCKS.md`.
 
 ### 5. Create an isolated worktree
 
@@ -142,8 +144,9 @@ Follow CLAUDE.md strictly. For each vulnerability:
 
 **a) YAML feed** — `tests/vulnerabilities/<PRODUCT>/<ID>.yaml`
   - Generate a fresh valid UUID v4 (variant byte `[89ab]`)
-  - Set `cves: []` to the 0, 1, or N CVE IDs from the issue; set `category:` for
-    free-form classification regardless of `cves` (always set for a 0-CVE feed)
+  - Set `cves: []` to the 0, 1, or N CVE IDs from the issue; set `category:` from the
+    closed list in CLAUDE.md ("TestDef (YAML)") regardless of `cves` — always set it for
+    a 0-CVE feed, and `general/` feeds use only `exposure`, `hardening` or `default-credentials`
   - Always set `services:`
   - Use `tcp_connect` for any URL-encoded path payload
   - Use `resp.banner` (never `resp.data`)
@@ -165,9 +168,13 @@ Follow CLAUDE.md strictly. For each vulnerability:
       *every* feed listed for this mock in `MOCKS.md` and confirm your change is still
       compatible with each one's `pattern:`/`source:`.
   - `Dockerfile.vuln` + `Dockerfile.patched`
-  - Use `python:3.11-slim` base for proprietary appliances
-  - Serve HTTP:80 + HTTPS:443 (self-signed cert via openssl)
-  - Use `_make_https_server()` + `threading.Thread` pattern for Python mocks
+  - Python mocks (proprietary appliances): `FROM noctis/py-mock-base:latest`, then only
+    `COPY server.py /app/server.py` + `ENV <PRODUCT>_MODE=vuln|patched` — the base brings
+    python, openssl, the self-signed cert and `mocklib`
+  - Serve HTTP:80 + HTTPS:443 — in Python, end `server.py` with `serve(Handler, HTTPServer)`
+    (`from mocklib import serve`)
+  - To run an existing mock in another mode, prefer `container_env:` on the inventory host
+    over a second mock directory
   - Use `SSLSessionCache none` + `Mutex file:` for Apache (not shmcb)
   - Debian Buster EOL: patch sources.list to archive.debian.org first
 
@@ -324,6 +331,7 @@ npx ajv-cli validate -s schemas/feed.schema.json \
 cd infra
 task feeds-check -- --write   # regenerates tests/vulnerabilities/.feed-shas.json
 task mocks-manifest           # regenerates infra/docker/MOCKS.md if you added/reused a mock
+task bake-gen                 # regenerates infra/bake/mocks.hcl if you added a mock
 ```
 
 Fix any validation error before continuing. Both generated files (`.feed-shas.json`,

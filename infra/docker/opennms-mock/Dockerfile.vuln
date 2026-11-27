@@ -1,0 +1,3 @@
+FROM noctis/py-mock-base:latest
+COPY server.py /app/server.py
+ENV OPENNMS_MODE=vuln
