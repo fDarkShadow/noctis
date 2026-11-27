@@ -159,6 +159,13 @@ target "spring4shell-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/spring4shell-mock:${variant}"]
 }
+target "struts-5638-mock" {
+  name       = "struts-5638-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-5638-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-5638-mock:${variant}"]
+}
 target "struts-mock" {
   name       = "struts-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
