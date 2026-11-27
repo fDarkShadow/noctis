@@ -101,6 +101,7 @@ group "default" {
     "forticlientems-mock",
     "fortigate-mock",
     "fortimanager-mock",
+    "fortios-40684-mock",
     "fortios-ssl-vpn-mock",
     "fortiweb-25257-mock",
     "fritzbox-mock",
@@ -1176,6 +1177,15 @@ target "fortimanager-mock" {
   context    = "../docker/fortimanager-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/fortimanager-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "fortios-40684-mock" {
+  name       = "fortios-40684-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/fortios-40684-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/fortios-40684-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

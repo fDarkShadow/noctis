@@ -303,6 +303,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## fortimanager-mock
 - fortimanager/CVE-2024-47575
 
+## fortios-40684-mock
+- fortios/CVE-2022-40684
+
 ## fortios-ssl-vpn-mock
 - fortios/CVE-2024-21762
 
