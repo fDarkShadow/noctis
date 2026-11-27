@@ -47,6 +47,7 @@ group "default" {
     "clipbucket-mock",
     "cohu-camera-mock",
     "coldfusion-26360-mock",
+    "coldfusion-2861-mock",
     "coldfusion-48282-mock",
     "coldfusion-authbypass-mock",
     "coldfusion-mock",
@@ -703,6 +704,15 @@ target "coldfusion-26360-mock" {
   context    = "../docker/coldfusion-26360-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/coldfusion-26360-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "coldfusion-2861-mock" {
+  name       = "coldfusion-2861-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/coldfusion-2861-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/coldfusion-2861-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
