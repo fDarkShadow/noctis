@@ -138,6 +138,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cohu-camera-mock
 - cohu/CVE-2017-8860
 
+## coldfusion-15961-mock
+- coldfusion/CVE-2018-15961
+
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
 
