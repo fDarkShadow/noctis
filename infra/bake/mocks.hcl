@@ -213,6 +213,7 @@ group "default" {
     "pop3-mock",
     "postgres-mock",
     "pragyan-cms-mock",
+    "proftpd-mock",
     "projectsend-mock",
     "prometheus-mock",
     "ptzoptics-mock",
@@ -2145,6 +2146,14 @@ target "pragyan-cms-mock" {
   context    = "../docker/pragyan-cms-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/pragyan-cms-mock:${variant}"]
+}
+
+target "proftpd-mock" {
+  name       = "proftpd-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/proftpd-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/proftpd-mock:${variant}"]
 }
 
 target "projectsend-mock" {
