@@ -225,6 +225,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - general/hadoop-yarn-exposed
 
 ## hfs-mock
+- hfs/CVE-2014-6287
 - hfs/CVE-2024-23692
 
 ## home-assistant-mock
