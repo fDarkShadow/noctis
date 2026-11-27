@@ -255,6 +255,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ektron-mock
 - ektron/CVE-2012-5357
 
+## elasticsearch-1427-mock
+- elasticsearch/CVE-2015-1427
+
 ## elasticsearch-mock
 - general/elasticsearch-unauth
 
