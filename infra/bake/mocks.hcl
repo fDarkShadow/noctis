@@ -16,6 +16,7 @@ group "default" {
     "articlefr-mock",
     "astium-mock",
     "asustor-mock",
+    "atlassian-crowd-11580-mock",
     "atomcms-mock",
     "aviatrix-mock",
     "awstats-mock",
@@ -429,6 +430,15 @@ target "asustor-mock" {
   context    = "../docker/asustor-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/asustor-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "atlassian-crowd-11580-mock" {
+  name       = "atlassian-crowd-11580-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/atlassian-crowd-11580-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/atlassian-crowd-11580-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
