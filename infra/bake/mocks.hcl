@@ -163,6 +163,7 @@ group "default" {
     "merak-webmail-mock",
     "metabase-mock",
     "micollab-mock",
+    "microfocus-obr-22502-mock",
     "minio-mock",
     "mirth-connect-mock",
     "mongodb-mock",
@@ -1711,6 +1712,15 @@ target "micollab-mock" {
   context    = "../docker/micollab-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/micollab-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microfocus-obr-22502-mock" {
+  name       = "microfocus-obr-22502-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microfocus-obr-22502-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microfocus-obr-22502-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
