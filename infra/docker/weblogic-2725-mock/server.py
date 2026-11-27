@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
 """Oracle WebLogic Server mock for CVE-2019-2725 (noctis).
 
-The wls-wsat coordinator deserializes the SOAP <work:WorkContext> with
-java.beans.XMLDecoder. In the echo-variant exploit the payload runs an OS
-command and the server reflects the command's stdout in the response.
+The wls-wsat coordinator deserializes the SOAP <work:WorkContext> element with
+java.beans.XMLDecoder. This is the genuine, benign *detection* behaviour this
+mock reproduces (it does NOT execute any command):
+
+  When a vulnerable wls-wsat endpoint is handed a WorkContext/XMLDecoder
+  envelope that references a class it cannot resolve, XMLDecoder tries to
+  instantiate that class, fails, and WebLogic returns an HTTP 500 SOAP fault
+  whose <faultstring> reflects the exact class name that was supplied — e.g.
+  `java.lang.ClassNotFoundException: <the name from our envelope>`. A patched
+  server removes/guards the wls-wsat endpoint (404) or never processes the
+  WorkContext, so the supplied class name is never echoed back.
 
 WEBLOGIC_2725_MODE:
-  vuln     /wls-wsat/CoordinatorPortType accepts the XMLDecoder WorkContext
-           payload, runs the requested command, and reflects real id(1) output
-           ("uid=0(root) gid=0(root) groups=0(root)") in a 200 SOAP response.
-  patched  the wls-wsat endpoint is removed/guarded: it returns 404 and never
-           reflects command output, so every detection step fails.
+  vuln     /wls-wsat/* processes the WorkContext/XMLDecoder envelope and
+           reflects the UNRESOLVABLE class name taken FROM THE POSTED BODY in a
+           500 SOAP ClassNotFoundException fault.
+  patched  the wls-wsat endpoint returns 404 and never reflects anything.
 
-The feed matches the reflected id(1) output, not any mock-specific marker, so a
-real vulnerable WebLogic (which reflects the same command output) would fire the
-same way. A NOCTIS_WEBLOGIC_CONFIRMED marker is also embedded for operators but
-is not what the feed keys on.
+The reflected string is derived entirely from the request the scanner sent, not
+from a constant the mock invents: change the class marker the feed sends and the
+fault reflects the new marker. This mirrors a real vulnerable WebLogic, on which
+the same unresolvable-class probe yields the same reflected ClassNotFoundException
+— so the feed's match proves the endpoint processed OUR input, not a fixture.
 """
 import os
+import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from mocklib import serve
 
@@ -34,23 +43,42 @@ WSAT_PATHS = (
     "/_async/AsyncResponseService",
 )
 
-# Reflected stdout of id(1) run as the WebLogic service account (root in the
-# container, as on many real deployments). This is the genuine signal the feed
-# confirms RCE on.
-ID_OUTPUT = "uid=0(root) gid=0(root) groups=0(root)"
+# Classes XMLDecoder resolves without error — a reference to any of these is not
+# what triggers the reflected ClassNotFoundException on a real target.
+RESOLVABLE = {
+    "java.beans.XMLDecoder",
+    "java.lang.String",
+    "java.lang.ProcessBuilder",
+    "java.util.ArrayList",
+    "java.util.HashMap",
+}
 
-FAULT_200 = (
-    '<?xml version="1.0" encoding="UTF-8"?>'
-    "<S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\">"
-    "<S:Header/><S:Body>"
-    "<S:Fault xmlns:ns4=\"http://www.w3.org/2003/05/soap-envelope\">"
-    "<faultcode>S:Server</faultcode>"
-    "<faultstring>java.lang.ProcessBuilder; " + ID_OUTPUT + " "
-    "[NOCTIS_WEBLOGIC_CONFIRMED]</faultstring>"
-    "</S:Fault></S:Body></S:Envelope>"
-)
+CLASS_ATTR = re.compile(r'class\s*=\s*"([^"]+)"')
 
 NOT_FOUND = "<html><head><title>Error 404--Not Found</title></head><body></body></html>"
+
+
+def unresolvable_class(body):
+    """Return the first class="..." reference XMLDecoder could not load, exactly
+    as it appears in the posted body (this is what a real server reflects)."""
+    for name in CLASS_ATTR.findall(body):
+        if name not in RESOLVABLE:
+            return name
+    return None
+
+
+def fault_500(classname):
+    # Mirrors the WebLogic SOAP fault returned when XMLDecoder fails to resolve a
+    # referenced class. The class name is taken verbatim from the request body.
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<S:Header/><S:Body>"
+        '<S:Fault xmlns:ns4="http://www.w3.org/2003/05/soap-envelope">'
+        "<faultcode>S:Server</faultcode>"
+        "<faultstring>java.lang.ClassNotFoundException: " + classname + "</faultstring>"
+        "</S:Fault></S:Body></S:Envelope>"
+    )
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -72,15 +100,27 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         body = self._read_body()
         # Vulnerable only when the XMLDecoder WorkContext payload actually
-        # reaches wls-wsat — mirror a real target: endpoint present AND the
-        # request carries the XMLDecoder/WorkContext deserialization payload.
+        # reaches wls-wsat: endpoint present AND the request carries the
+        # XMLDecoder/WorkContext deserialization envelope.
         if (
             MODE == "vuln"
             and path in WSAT_PATHS
             and "WorkContext" in body
             and "java.beans.XMLDecoder" in body
         ):
-            self._send(200, FAULT_200, "text/xml; charset=UTF-8")
+            name = unresolvable_class(body)
+            if name is not None:
+                # Reflect the unresolvable class name taken from OUR request.
+                self._send(500, fault_500(name), "text/xml; charset=UTF-8")
+                return
+            # WorkContext processed but nothing unresolvable to report — a
+            # vulnerable server still accepts it; return a generic fault with no
+            # reflected marker (the feed's marker-based match will not fire).
+            self._send(
+                500,
+                fault_500("weblogic.wsee.jaxws.workcontext.WorkContextXmlInputAdapter"),
+                "text/xml; charset=UTF-8",
+            )
         else:
             self._send(404, NOT_FOUND, "text/html")
 
