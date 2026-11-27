@@ -4,6 +4,7 @@
 group "default" {
   targets = [
     "acti-camera-mock",
+    "activemq-3088-mock",
     "activemq-jolokia-mock",
     "activemq-mock",
     "advantech-mock",
@@ -324,6 +325,15 @@ target "acti-camera-mock" {
   context    = "../docker/acti-camera-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/acti-camera-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "activemq-3088-mock" {
+  name       = "activemq-3088-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/activemq-3088-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/activemq-3088-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
