@@ -120,6 +120,7 @@ group "default" {
     "imap-mock",
     "infusionsoft-gravityforms-mock",
     "ingress-nginx-mock",
+    "intel-amt-5689-mock",
     "invision-power-board-mock",
     "ivanti-csa-mock",
     "ivanti-epm-mock",
@@ -1339,6 +1340,15 @@ target "ingress-nginx-mock" {
   context    = "../docker/ingress-nginx-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ingress-nginx-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "intel-amt-5689-mock" {
+  name       = "intel-amt-5689-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/intel-amt-5689-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/intel-amt-5689-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

@@ -360,6 +360,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ingress-nginx-mock
 - ingress-nginx/CVE-2025-1974
 
+## intel-amt-5689-mock
+- intel-amt/CVE-2017-5689
+
 ## invision-power-board-mock
 - invision-power-board/CVE-2012-5692
 
