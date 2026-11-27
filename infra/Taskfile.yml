@@ -14,7 +14,7 @@ tasks:
         msg: "Version requirements not met (see output above)"
 
   build:
-    desc: "Build all local mock images (podman build, 66 mocks in parallel)"
+    desc: "Build all local mock images (podman build, every infra/docker/*/Dockerfile.vuln, in parallel)"
     dir: "{{.TASKFILE_DIR}}"
     cmds:
       - ansible-playbook playbooks/00-build-mocks.yml
@@ -83,6 +83,18 @@ tasks:
     dir: "{{.TASKFILE_DIR}}"
     cmds:
       - python3 ../scripts/check_feeds.py {{.CLI_ARGS}}
+
+  bake-gen:
+    desc: "Regenerate infra/bake/mocks.hcl from infra/docker/ — pass -- --check to verify it"
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - python3 ../scripts/gen_bake.py {{.CLI_ARGS}}
+
+  feeds-stats:
+    desc: "Count feeds / CVEs / products — pass -- --write to refresh the counters in README.md and docs/, -- --check to verify them"
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - python3 ../scripts/feed_stats.py {{.CLI_ARGS}}
 
   clean:
     desc: "Remove all local noctis/* images"

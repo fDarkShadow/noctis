@@ -88,6 +88,8 @@ curl -s http://localhost:8080/scans/<id>/findings | jq .
 {: .note }
 > Services are matched against each feed's `services:` field, so only the relevant feeds run on
 > each port. A feed with `services: []` runs on every discovered service.
+> Feeds that need to log in run only when the request carries `credentials`
+> (see [Usage](usage.html#authenticated-scans)).
 
 ## Next steps
 

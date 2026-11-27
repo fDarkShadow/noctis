@@ -11,7 +11,7 @@ description: |
   The server responded to an SMBv1 NEGOTIATE, confirming the legacy SMB1
   protocol is enabled — the protocol family behind EternalBlue (MS17-010).
 cves: []
-category: exposure
+category: hardening
 severity: high
 confidence_base: 0.45
 tags: [smb, smbv1, legacy, exposure, misconfig, eternalblue]

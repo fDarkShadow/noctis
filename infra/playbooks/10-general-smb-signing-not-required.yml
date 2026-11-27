@@ -1,0 +1,10 @@
+---
+- name: "smb-signing-not-required — SMB signing not required"
+  hosts: smb_signing_not_required
+  gather_facts: false
+  vars:
+    cve_id: "smb-signing-not-required"
+    expected_cves: []
+    feed_path: "{{ noctis_feeds_dir }}/vulnerabilities/general/smb-signing-not-required.yaml"
+  roles:
+    - common_docker

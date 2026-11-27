@@ -7,6 +7,13 @@
     docker_dir: "{{ playbook_dir }}/../docker"
 
   tasks:
+    # ── Shared base image: must exist before any mock that builds FROM it ────
+    - name: Build the shared Python mock base (noctis/py-mock-base:latest)
+      ansible.builtin.command:
+        cmd: podman build -f Dockerfile -t noctis/py-mock-base:latest .
+        chdir: "{{ docker_dir }}/_base/python-mock"
+      changed_when: true
+
     # ── Standard images: Dockerfile.vuln + Dockerfile.patched ────────────────
     - name: Find all mock directories with Dockerfile.vuln
       ansible.builtin.find:
@@ -39,37 +46,5 @@
         label: "{{ item.item.path | dirname | basename }}"
       register: job_result
       until: job_result.finished
-      retries: 60
-      delay: 10
-
-    # ── Special images: single Dockerfile, non-standard tag ──────────────────
-    # phpunit: split into two dirs (one Dockerfile each) → noctis/phpunit-{vuln,patched}:local
-    # openssh: per-version bases used by ssh-terrapin and regresshion mocks → noctis/openssh:9.x
-    - name: Build special single-Dockerfile images
-      ansible.builtin.shell: |
-        set -e
-        podman build -f Dockerfile -t {{ item.tag }} .
-      args:
-        chdir: "{{ docker_dir }}/{{ item.dir }}"
-        executable: /bin/sh
-      loop:
-        - { dir: "phpunit-vuln",    tag: "noctis/phpunit-vuln:local" }
-        - { dir: "phpunit-patched", tag: "noctis/phpunit-patched:local" }
-        - { dir: "openssh-9.5",     tag: "noctis/openssh:9.5" }
-        - { dir: "openssh-9.6",     tag: "noctis/openssh:9.6" }
-      loop_control:
-        label: "{{ item.dir }} → {{ item.tag }}"
-      async: 600
-      poll: 0
-      register: special_build_jobs
-
-    - name: Wait for special builds to finish
-      ansible.builtin.async_status:
-        jid: "{{ item.ansible_job_id }}"
-      loop: "{{ special_build_jobs.results }}"
-      loop_control:
-        label: "{{ item.item.dir }}"
-      register: special_job_result
-      until: special_job_result.finished
       retries: 60
       delay: 10

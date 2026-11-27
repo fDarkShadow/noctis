@@ -12,7 +12,7 @@ description: |
   so it accepts plaintext LOGIN before STARTTLS — credentials can be sent in
   the clear and intercepted.
 cves: []
-category: exposure
+category: hardening
 severity: medium
 confidence_base: 0.40
 tags: [imap, cleartext, starttls, exposure, misconfig]

@@ -44,14 +44,17 @@ noctis/
 │   └── common/             # Reusable includes
 ├── scripts/
 │   ├── gen_mocks_manifest.py # generates infra/docker/MOCKS.md (mock → consumer feeds)
-│   └── check_feeds.py        # sha lockfile + uid-uniqueness check — task feeds-check
+│   ├── gen_bake.py           # generates infra/bake/mocks.hcl — task bake-gen
+│   ├── check_feeds.py        # sha lockfile + uid-uniqueness check — task feeds-check
+│   └── feed_stats.py         # feed / CVE counters for README + Pages — task feeds-stats
 └── infra/                  # Reproducible test infrastructure
     ├── Taskfile.yml         # task test ID=CVE-XXXX / task test-all / task mocks-manifest
     ├── playbooks/           # 00-build / 01-start-servers / 10-<product>-<id> / 99-stop-servers
-    ├── bake/                # docker-bake HCL files, one per product family
+    ├── bake/mocks.hcl       # docker-bake targets for every mock (generated — task bake-gen)
     ├── roles/common_docker/ # Generic role: find port → REST POST /scans → assert → teardown
     ├── inventories/         # <product>/<id>/hosts.yml — one directory per vulnerability
     └── docker/              # Vuln/patched Dockerfiles per product; MOCKS.md (generated)
+        └── _base/python-mock/ # noctis/py-mock-base — shared base + mocklib.py for Python mocks
 ```
 
 ## Essential commands
@@ -69,8 +72,11 @@ task test ID=CVE-2021-41773           # TP + TN for one vulnerability
 task test-all                          # all vulnerabilities
 task build                             # build local mock images (podman build)
 task mocks-manifest                    # regenerate infra/docker/MOCKS.md
+task bake-gen                          # regenerate infra/bake/mocks.hcl (-- --check to verify)
 task feeds-check                       # sha lockfile + uid-uniqueness check
 task feeds-check -- --write            # regenerate the lockfile after an intentional feed edit
+task feeds-stats                       # count feeds / CVEs / products
+task feeds-stats -- --write            # refresh the <!-- feed-stats:* --> counters in README.md + docs/
 ```
 
 ## Key data model
@@ -83,6 +89,13 @@ pub struct ScanRequest {
     pub tests: Vec<String>,
     pub concurrency: usize,
     // + webhook_url, oob, filters
+    pub credentials: Option<Credentials>,  // write-only — never serialized, Debug-redacted
+}
+
+pub struct Credentials {      // at least one of username/token; password needs username
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub token: Option<String>,
 }
 
 pub struct DiscoveredService {
@@ -98,6 +111,7 @@ uid: <uuid-v4-stable>          # immutable identifier
 cves: []                       # zero, one, or many CVE IDs — see examples below
 services: [http, https]        # ports targeted by nmap service name
 confidence_base: 0.30          # confidence before steps run
+requires_credentials: false    # true → skipped (no task) when the request has no credentials
 ```
 
 `cves` cardinality — a feed is a **vulnerability test**, not a "CVE test":
@@ -106,8 +120,29 @@ cves: []                                       # misconfiguration / heuristic ch
 cves: [CVE-2021-44228]                         # the common case — exactly one CVE
 cves: [CVE-2023-46805, CVE-2024-21887]         # a chain tracked by multiple CVE IDs
 ```
-`category` (optional, free string) still classifies a feed regardless of `cves` —
+`category` (optional, closed vocabulary — see below) classifies a feed regardless of `cves` —
 e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside a CVE.
+
+`category` uses a **closed vocabulary**, enforced by `scripts/check_feeds.py` — pick an
+existing value, never a synonym (`filters.exclude_categories` matches the exact string, so
+`sql-injection` would escape an `exclude_categories: [sqli]` filter):
+
+| category | Use for |
+|----------|---------|
+| `exposure` | A service or data reachable without authentication, or a feature open to abuse (`redis-unauthenticated`, `smtp-open-relay`, `ntp-monlist`) |
+| `hardening` | Weak protocol / security posture that grants no access on its own (`tls-weak-config`, `http-security-headers`, `smbv1-enabled`, `ssh-weak-auth`) |
+| `default-credentials` | The feed logs in to an account with default or hardcoded credentials — intrusive, can lock accounts (SNMP community guessing stays `exposure`) |
+| `auth-bypass` | Authentication or authorization bypass |
+| `rce` | Code / command execution, including command injection, upload-to-RCE and arbitrary file write — these probes may write on the target |
+| `sqli` | SQL injection |
+| `file-read` | Arbitrary file read: path traversal, LFI, file download/disclosure |
+| `xss` | Cross-site scripting |
+| `ssrf` | Server-side request forgery |
+
+Feeds in `general/` use only `exposure`, `hardening` or `default-credentials`. `category`
+stays optional elsewhere — so `exclude_categories` only skips feeds that carry it; many
+older feeds have none yet. Set it on every new feed. Add a value (to the `category.enum` in `schemas/feed.schema.json` — `check_feeds.py` reads it from there — and to the tables here and in `docs/writing-feeds.md`) only
+when a scan operator genuinely needs to exclude that group on its own.
 
 ### Service → port matching
 - Feed `services: []` → runs on **all** discovered ports
@@ -126,8 +161,13 @@ e.g. `category: exposure` on a 0-CVE check, or `category: auth-bypass` alongside
 | `{{oob_host}}` | OOB server host (only when `--oob` is configured) |
 | `{{oob_port}}` | OOB server port |
 | `{{oob_enabled}}` | `true` when OOB is active, `false` otherwise |
+| `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
+| `{{cred_username}}` | `credentials.username` — only set when supplied |
+| `{{cred_password}}` | `credentials.password` — only set when supplied |
+| `{{cred_token}}` | `credentials.token` — only set when supplied |
 
-`{{port}}` and `{{scheme}}` are injected **from the matched service**, before `seed_vars()`.
+`{{port}}` and `{{scheme}}` are injected **from the matched service**, before `seed_vars()`
+(so are the `cred_*` vars — a feed's `vars:` can't shadow them).
 YAML feeds must not redefine `port:` or `scheme:` in their `vars:` section — they would be overwritten.
 
 ### `tcp_connect` and HTTPS
@@ -242,6 +282,11 @@ Between `tcp_send` steps, compute the next frame in a `script` step with the exi
 builtins: `u32be(substr(resp.response_hex, <hexoff>, <hexoff+7>))` parses a big-endian
 u32 at a byte offset (hex offset = byte × 2), and `md5(...)` / `pack` build the reply.
 See `tests/vulnerabilities/couchdb/CVE-2022-24706.yaml` for the full Erlang-cookie flow.
+For a single request/reply, parse `tcp_dialogue`'s `response_hex` the same way and return a
+map from the `script` (`#{ dialect: ..., signing_required: ... }`) that later steps read as
+`neg.signing_required` — see `tests/vulnerabilities/general/smb-signing-not-required.yaml`,
+whose parse logic is unit-tested against canned replies in `src/expr/rhai.rs`. Guard a missing
+reply with `type_of(resp.response_hex) == "string"` (it is `()` when nothing came back).
 
 ```
 # tcp_open  (store_as)
@@ -322,13 +367,21 @@ Use it for write-then-read propagation gaps. (`var_name`/`var_value` belong to `
 or a descriptive kebab-case slug when it maps to zero CVEs (misconfiguration/heuristic check)
 or to a chain tracked by several CVE IDs (e.g. `ivanti-connect-secure-auth-bypass-rce`).
 
-`<product>` = the mock's product slug — normally the `infra/docker/<product>-mock/`
-directory name with the `-mock` suffix (and any trailing CVE-number suffix) stripped, e.g.
-`bigip-22986-mock` → `bigip`. Feeds with no dedicated mock (misconfiguration checks) use
-`<product>` = `general`. **Before picking a `<product>`, check `infra/docker/MOCKS.md`** —
-if a mock for this product already exists, decide deliberately whether to reuse it
-(extend, never overwrite existing endpoints — see the shared-mock warning below) or give
-your CVE its own dedicated mock directory instead.
+`<product>` = the **product** the vulnerability affects — one directory per product,
+shared by all of its vulnerabilities, never one per CVE, per bug class or per mock. E.g.
+every Confluence CVE lives in `confluence/` (not `confluence-ssti/`), every Ivanti Connect
+Secure CVE in `ivanti-ics/`, every Apache httpd CVE in `apache-httpd/`. **Run
+`ls tests/vulnerabilities/` first and reuse the existing directory** when the product is
+already there. Only distinct products of the same vendor get distinct directories
+(`ivanti-ics` / `ivanti-epmm` / `ivanti-csa`, `sonicwall-sma` / `sonicwall-sma1000`).
+Feeds with no dedicated mock (misconfiguration checks) use `<product>` = `general`.
+
+The feed directory and the mock directory are independent: a product directory may hold
+feeds backed by several mocks (`bigip/` uses `bigip-mock`, `bigip-22986-mock`,
+`bigip-46747-mock`). **Before creating a mock, check `infra/docker/MOCKS.md`** — if a mock
+for this product already exists, decide deliberately whether to reuse it (extend, never
+overwrite existing endpoints — see the shared-mock warning below) or give your CVE its own
+dedicated mock directory (`<product>-<cve-number>-mock`) instead.
 
 1. **Feed**: `tests/vulnerabilities/<product>/<id>.yaml` with a stable UUID v4 uid and
    `cves: []` set to the matching 0, 1, or N CVE IDs. After adding or editing it, run
@@ -338,6 +391,15 @@ your CVE its own dedicated mock directory instead.
    - Four hosts minimum: `<id>_vuln`, `<id>_vuln_https`, `<id>_patched`, `<id>_patched_https`
    - Required fields: `target_host`, `target_service`, `container_name`, `docker_image`, `expected_result`
    - HTTPS hosts: add `container_port: 443` and `target_service: https`
+   - UDP-only mocks (DNS, NTP, SNMP, memcached-udp): add `target_protocol: udp` — the role then
+     picks a free UDP port, publishes `-p 127.0.0.1:port:container_port/udp`, waits on the container instead
+     of a TCP `wait_for`, and sends `"protocol": "udp"` in the scan request
+   - Optional `container_env: {VAR: value}` — passed as `-e` to the container. Use it to run
+     one mock in another mode instead of creating a second mock directory (see
+     `infra/inventories/axis2/CVE-2010-0219/hosts.yml`, `AXIS2_MODE: vuln_redirect`)
+   - Optional `noctis_credentials: {username: …, password: …}` (or `token:`) — for a feed
+     with `requires_credentials: true`; the role adds `credentials` to POST /scans and
+     `no_log`s the submit tasks
    - **No `target_port`** — port is allocated dynamically
    - On every vuln host set `expected_qod` (highest QoD branch the mock exercises) and
      `expected_min_confidence` (`confidence_base + highest_delta - 0.05`). These are asserted
@@ -363,7 +425,7 @@ your CVE its own dedicated mock directory instead.
    (e.g., 75 for response analysis) since OOB steps won't fire there.
 4. **Docker images**: `infra/docker/<product-name>/Dockerfile.vuln` + `Dockerfile.patched`
    - All mocks serve HTTP:80 **and** HTTPS:443 (self-signed cert generated at build time via openssl)
-   - Python mocks: use `_make_https_server()` + `threading.Thread` pattern (see `bigip-mock/server.py`)
+   - Python mocks: `FROM noctis/py-mock-base:latest` + `serve(Handler, HTTPServer)` from `mocklib` (template below)
    - Apache/php images: `a2enmod ssl` or `LoadModule ssl_module` + `SSLSessionCache none` + `Mutex file:` (shmcb fails in rootless Podman)
    - EOL base images (e.g. httpd:2.4.49 on Debian Buster): patch apt sources to `archive.debian.org` before installing openssl
    - **If reusing an existing mock directory** (per `infra/docker/MOCKS.md`): only *add*
@@ -375,16 +437,18 @@ your CVE its own dedicated mock directory instead.
    `10-` is mandatory; `task test-all` discovers playbooks from `infra/inventories/*/*/`
    directories, not by filename glob). Set `expected_cves: []` (matching the feed's
    `cves:`) alongside the display `cve_id`/`feed_path` vars.
-6. **Bake target**: add a matrix target in `infra/bake/<family>.hcl` — see template below
+6. **Bake target**: run `task bake-gen` and commit the regenerated `infra/bake/mocks.hcl`.
+   Never edit it by hand; on a merge conflict in it, just regenerate.
 
-### Python mock template (copy from `infra/docker/bigip-mock/server.py`)
+### Python mock template (copy from `infra/docker/mirth-connect-mock/server.py`)
 
 All Python mocks follow this exact structure — copy it, do not invent a new one:
 
 ```python
 #!/usr/bin/env python3
-import os, ssl, threading
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from mocklib import serve   # provided by noctis/py-mock-base
 
 VULN_MODE = os.environ.get("MYPRODUCT_MODE", "patched") == "vuln"
 
@@ -407,32 +471,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self): self.do_GET()
 
-def _make_https_server(port):
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ctx.load_cert_chain("/certs/server.crt", "/certs/server.key")
-    srv = HTTPServer(("0.0.0.0", port), Handler)
-    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
-    return srv
-
 if __name__ == "__main__":
-    https = _make_https_server(443)
-    threading.Thread(target=https.serve_forever, daemon=True).start()
-    HTTPServer(("0.0.0.0", 80), Handler).serve_forever()
+    serve(Handler, HTTPServer)   # HTTP:80 + HTTPS:443 (cert from the base image)
 ```
 
-Dockerfile.vuln (same pattern for all Python mocks):
+Dockerfile.vuln (same pattern for all Python mocks — python, openssl, the self-signed
+cert in `/certs`, `mocklib.py`, `EXPOSE 80 443` and the `CMD` all come from the base image
+`infra/docker/_base/python-mock/`, which `task build` builds first):
 ```dockerfile
-FROM python:3.11-slim
-RUN apt-get update -qq && apt-get install -y --no-install-recommends openssl \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir /certs \
-    && openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key \
-       -out /certs/server.crt -days 3650 -nodes \
-       -subj "/CN=noctis-mock"
+FROM noctis/py-mock-base:latest
 COPY server.py /app/server.py
 ENV MYPRODUCT_MODE=vuln
-EXPOSE 80 443
-CMD ["python3", "/app/server.py"]
 ```
 
 Dockerfile.patched: identical but `ENV MYPRODUCT_MODE=patched`.
@@ -448,7 +497,9 @@ noctis/<dirname>:vuln     ← from Dockerfile.vuln
 noctis/<dirname>:patched  ← from Dockerfile.patched
 ```
 
-No registration needed — the directory name is the image name.
+No registration needed — the directory name is the image name. Run `task bake-gen` so
+`infra/bake/mocks.hcl` lists it too. Directories starting with `_` (e.g. `_base/`) are
+shared build inputs, not mocks.
 
 ### Reference feeds to copy from
 
@@ -460,12 +511,16 @@ No registration needed — the directory name is the image name.
 | SSH banner version check | `tests/vulnerabilities/regresshion/CVE-2024-6387.yaml` |
 | Version via endpoint + OOB | `tests/vulnerabilities/log4shell/CVE-2021-44228.yaml` |
 | OGNL/template injection | `tests/vulnerabilities/confluence/CVE-2022-26134.yaml` |
-| Multi-step, first half of a 2-CVE chain (`cves: [CVE-2023-46805]`) | `tests/vulnerabilities/ivanti/CVE-2023-46805.yaml` |
+| Multi-step, first half of a 2-CVE chain (`cves: [CVE-2023-46805]`) | `tests/vulnerabilities/ivanti-ics/CVE-2023-46805.yaml` |
 | 0-CVE check, loop over a static list (`cves: []`, `category:`) | `tests/vulnerabilities/general/exposed-paths.yaml` |
 | 0-CVE check, ssh_check + match | `tests/vulnerabilities/general/ssh-weak-auth.yaml` |
 | 0-CVE check, tls_check | `tests/vulnerabilities/general/tls-weak-config.yaml` |
+| Binary protocol: `send_hex` frame + `script` parsing `response_hex` into a map (SMB2 NEGOTIATE) | `tests/vulnerabilities/general/smb-signing-not-required.yaml` |
+| Authenticated feed (`requires_credentials` + login, capture cookie, exec) | `tests/vulnerabilities/wing-ftp/CVE-2015-4107.yaml` |
 
 ### Dynamic port allocation
+Mock ports are published on `127.0.0.1` only (`-p 127.0.0.1:<port>:<container_port>/<proto>`),
+never on all interfaces — the noctis test servers run with `--network host`, so they still reach them.
 The `common_docker` role finds a free port via Python before each test:
 ```python
 import socket; s=socket.socket(); s.bind(('',0)); print(s.getsockname()[1]); s.close()
@@ -503,6 +558,16 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
 - **Debian Bullseye EOL** (httpd:2.4.51, python images using bullseye) — `bullseye-security` does not exist at `archive.debian.org`. Drop the security repo entirely: replace `/etc/apt/sources.list` with `echo "deb http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list`.
 - **`action: set_var` uses `var_name:` / `var_value:` fields, NOT a `vars:` map** — using `vars:` silently drops the step (unknown field ignored by serde), `var_name` is None, `run_set_var` returns `MissingField`, the scan runner swallows the error as `vec![]` findings. Always write `var_name: foo` / `var_value: false` on separate lines.
 - **`&&` in Rhai conditions works and short-circuits** — `cond_a == true && resp.status == 200` is safe even if `resp` is undefined: if `cond_a` is false, `resp.status` is never evaluated.
+- **Authenticated feeds** — set `requires_credentials: true` when the whole feed needs a
+  login (it is then skipped, no task, when the request has no `credentials`); for a feed
+  with an optional authenticated branch, guard those steps with `condition: "cred_enabled"`
+  instead. Only `cred_enabled` is always defined — `{{cred_password}}` in a strict field
+  (path/body/send…) errors when the request had no password. Password/token values (literal, lowercase hex,
+  percent-encoded, and the Basic-auth base64 of `user:pass`) are replaced by `<redacted>` in every finding
+  field, engine log line and step error; other encodings are not recognised, so never put credentials or
+  derived values in `evidence:`. Very short passwords also mask unrelated matching text. In an inventory, pass them with `noctis_credentials: {username: …,
+  password: …}` on the host — the `common_docker` role adds `credentials` to POST /scans and
+  `no_log`s those tasks.
 - **`cves: []` empty is valid and normal** — don't invent a placeholder CVE ID for a misconfiguration/heuristic check. `category:` is the classifier for 0-CVE feeds, not `cves`.
 - **`ScanFilters.exclude_cve` matches on overlap, not equality** — a test is excluded if *any* entry in its `cves:` list appears in the exclusion list, so excluding one CVE of a multi-CVE chain feed excludes the whole feed.
 - **Shared mocks silently break other CVEs** — `infra/docker/<product>-mock/` is sometimes reused by more than one CVE (check `infra/docker/MOCKS.md`). Overwriting an existing endpoint/response format instead of adding a new branch breaks the *other* CVE's test without any error appearing in your own — it only surfaces if that CVE happens to be re-run (e.g. in `task test-all`). Always add, never replace; re-test every other consumer listed in `MOCKS.md`.
@@ -511,3 +576,9 @@ npx ajv-cli validate -s schemas/feed.schema.json -d "tests/vulnerabilities/*/*.y
   include makes the engine skip the *whole* feed with only a log warning; `task feeds-check` now
   fails on any include that doesn't resolve.
 - **`task feeds-check` fails on a feed you edited** — that's by design: any content change to a file already in `tests/vulnerabilities/.feed-shas.json` must be accompanied by `task feeds-check -- --write` in the same commit, so an unreviewed/accidental edit to an existing feed shows up in the diff instead of silently merging.
+- **Templates only work in templated fields** — `{{var}}` is resolved in `path`, `method`,
+  `headers`, `body`, `send`, `send_hex`, `port`, `evidence`… but `id`, `action`, `store_as`,
+  `source`, `pattern`, `var_name`, `handle` and `line_ending` are read literally. `task feeds-check`
+  rejects a template in those fields (`method:` used to be literal too, so
+  `tests/common/http_base.yaml`'s `method: "{{http_method}}"` went out verbatim and every feed
+  including it silently lost its `probe` step).
