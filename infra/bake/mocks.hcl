@@ -91,6 +91,7 @@ group "default" {
     "epmm-mock",
     "erlang-otp-ssh-mock",
     "etcd-mock",
+    "exchange-34473-mock",
     "exchange-mock",
     "expedition-5910-mock",
     "expedition-mock",
@@ -1090,6 +1091,15 @@ target "etcd-mock" {
   context    = "../docker/etcd-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/etcd-mock:${variant}"]
+}
+
+target "exchange-34473-mock" {
+  name       = "exchange-34473-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/exchange-34473-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/exchange-34473-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "exchange-mock" {
