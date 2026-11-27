@@ -208,6 +208,7 @@ group "default" {
     "php-cgi-mock",
     "php-nuke-mock",
     "phplinkadmin-mock",
+    "phpmailer-10033-mock",
     "phprecipebook-mock",
     "phpunit-mock",
     "pop3-mock",
@@ -2103,6 +2104,15 @@ target "phplinkadmin-mock" {
   context    = "../docker/phplinkadmin-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/phplinkadmin-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "phpmailer-10033-mock" {
+  name       = "phpmailer-10033-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phpmailer-10033-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phpmailer-10033-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
