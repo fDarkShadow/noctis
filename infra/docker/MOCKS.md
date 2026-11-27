@@ -922,6 +922,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## zerocms-mock
 - zerocms/CVE-2014-4034
 
+## zimbra-9670-mock
+- zimbra/CVE-2019-9670
+
 ## zimbra-mock
 - zimbra/CVE-2024-45519
 

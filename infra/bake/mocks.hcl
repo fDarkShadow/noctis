@@ -305,6 +305,7 @@ group "default" {
     "yii2-mock",
     "zabbix-mock",
     "zerocms-mock",
+    "zimbra-9670-mock",
     "zimbra-mock",
     "zimbra-xxe-mock",
     "zookeeper-mock",
@@ -2947,6 +2948,15 @@ target "zerocms-mock" {
   context    = "../docker/zerocms-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zerocms-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "zimbra-9670-mock" {
+  name       = "zimbra-9670-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zimbra-9670-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zimbra-9670-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
