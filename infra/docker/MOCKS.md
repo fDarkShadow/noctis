@@ -591,6 +591,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## panos-0108-mock
 - panos/CVE-2025-0108
 
+## panos-15944-mock
+- panos/CVE-2017-15944
+
 ## panos-gp-mock
 - panos/CVE-2026-0257
 
