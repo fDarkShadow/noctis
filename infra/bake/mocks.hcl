@@ -241,6 +241,7 @@ group "default" {
     "smartermail-52691-mock",
     "smartermail-mock",
     "smb-mock",
+    "smbghost-mock",
     "smtp-mock",
     "snmp-mock",
     "solarwinds-srm-mock",
@@ -2387,6 +2388,14 @@ target "smb-mock" {
   context    = "../docker/smb-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/smb-mock:${variant}"]
+}
+
+target "smbghost-mock" {
+  name       = "smbghost-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/smbghost-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/smbghost-mock:${variant}"]
 }
 
 target "smtp-mock" {
