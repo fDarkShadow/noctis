@@ -841,6 +841,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## vacron-mock
 - vacron/CVE-2025-34043
 
+## vbulletin-16759-mock
+- vbulletin/CVE-2019-16759
+
 ## vbulletin-forumrunner-mock
 - vbulletin/CVE-2016-6195
 
