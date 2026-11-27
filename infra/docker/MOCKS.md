@@ -849,6 +849,7 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
+- vcenter-vsan/CVE-2021-22005
 
 ## veeam-mock
 - veeam/CVE-2024-40711
