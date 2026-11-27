@@ -199,6 +199,7 @@ group "default" {
     "panos-gp-mock",
     "panos-mock",
     "panos-ztp-mock",
+    "papercut-27350-mock",
     "papercut-mock",
     "password-protect-mock",
     "pentaho-43939-mock",
@@ -2026,6 +2027,15 @@ target "panos-ztp-mock" {
   context    = "../docker/panos-ztp-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/panos-ztp-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "papercut-27350-mock" {
+  name       = "papercut-27350-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/papercut-27350-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/papercut-27350-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

@@ -600,6 +600,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## panos-ztp-mock
 - panos/CVE-2024-0012
 
+## papercut-27350-mock
+- papercut/CVE-2023-27350
+
 ## papercut-mock
 - papercut/CVE-2023-27351
 
