@@ -868,6 +868,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## webjump-mock
 - webjump/CVE-2009-4892
 
+## weblogic-2725-mock
+- weblogic/CVE-2019-2725
+
 ## weblogic-mock
 - weblogic/CVE-2024-21182
 
