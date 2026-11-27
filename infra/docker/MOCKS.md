@@ -23,6 +23,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ajaxportal-mock
 - ajaxportal/CVE-2009-1509
 
+## alcatel-omnipcx-3010-mock
+- alcatel-omnipcx/CVE-2007-3010
+
 ## apache-cve-2021-41773
 - apache-httpd/CVE-2021-41773
 
