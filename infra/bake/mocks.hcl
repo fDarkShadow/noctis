@@ -76,6 +76,7 @@ group "default" {
     "deluxebb-mock",
     "dlink-dcs-mock",
     "dlink-dir3040-mock",
+    "dlink-dns320-25506-mock",
     "dlink-dwr-mock",
     "dlink-exportsettings-mock",
     "dns-mock",
@@ -959,6 +960,15 @@ target "dlink-dir3040-mock" {
   context    = "../docker/dlink-dir3040-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dlink-dir3040-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dlink-dns320-25506-mock" {
+  name       = "dlink-dns320-25506-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dlink-dns320-25506-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dlink-dns320-25506-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
