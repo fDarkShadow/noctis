@@ -11,7 +11,7 @@ description: |
   The POP3 server's CAPA list does not advertise STLS, so it accepts plaintext
   USER/PASS without TLS — credentials can be sent in the clear and intercepted.
 cves: []
-category: exposure
+category: hardening
 severity: medium
 confidence_base: 0.40
 tags: [pop3, cleartext, stls, starttls, exposure, misconfig]

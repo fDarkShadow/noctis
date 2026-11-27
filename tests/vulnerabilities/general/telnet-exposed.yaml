@@ -11,7 +11,7 @@ description: |
   A Telnet service is reachable on the target. Telnet transmits credentials and
   all session data in cleartext and should be replaced by SSH.
 cves: []
-category: exposure
+category: hardening
 severity: medium
 confidence_base: 0.40
 tags: [telnet, cleartext, exposure, misconfig]

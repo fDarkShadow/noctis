@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+# One run per PR: a new push to a PR branch cancels that PR's run still in
+# progress. Pushes to main are never cancelled (each one may publish :edge).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -90,6 +96,37 @@ jobs:
       - name: Docs in sync with engine
         run: python3 scripts/check_docs.py
 
+  bake:
+    name: Validate bake files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Parse every docker-bake HCL file
+        working-directory: infra/bake
+        run: |
+          # Parsing each bake file catches malformed HCL (e.g. a dropped
+          # closing brace) that the Image build — which only runs on push to
+          # main — would otherwise be the first to hit. `--print` evaluates the
+          # whole file without building; addressing the first target forces a
+          # full parse (any syntax error anywhere fails it).
+          status=0
+          for f in *.hcl; do
+            first=$(grep -m1 '^target "' "$f" | sed -E 's/^target "([^"]+)".*/\1/')
+            if [ -z "$first" ]; then
+              echo "::warning file=infra/bake/$f::no target block found, skipping"
+              continue
+            fi
+            echo "::group::$f (target $first)"
+            if docker buildx bake -f "$f" --print "$first" >/dev/null; then
+              echo "ok: $f"
+            else
+              echo "::error file=infra/bake/$f::docker buildx bake failed to parse $f (malformed HCL?)"
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $status
+
   codeql:
     name: CodeQL SAST
     runs-on: ubuntu-latest
@@ -123,7 +160,7 @@ jobs:
   # same pipeline and per-arch caches as the release (docker-image.yml).
   docker:
     name: Image (edge)
-    needs: [lint, test, audit, feeds]
+    needs: [lint, test, audit, feeds, bake]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/docker-image.yml
     permissions:

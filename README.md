@@ -11,6 +11,8 @@
 
 <p align="center">
   <a href="https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml"><img src="https://github.com/fDarkShadow/noctis/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="#available-feeds"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FfDarkShadow%2Fnoctis%2Fbadges%2Ffeeds.json&cacheSeconds=1800" alt="Vulnerability tests"></a>
+  <a href="#available-feeds"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FfDarkShadow%2Fnoctis%2Fbadges%2Fcves.json&cacheSeconds=1800" alt="CVEs covered"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-stable-orange" alt="Rust"></a>
   <a href="https://github.com/fDarkShadow/noctis/pkgs/container/noctis"><img src="https://ghcr-badge.egpl.dev/fdarkShadow/noctis/size?tag=latest&label=image" alt="Docker image"></a>
@@ -126,19 +128,21 @@ steps against the live service, and returns findings graded by how strong the ev
 - [x] **Service-aware matching** — feeds declare `services:` (`http`, `https`, `ssh`, `ftp`…); the engine maps them to discovered ports
 - [x] **HTTP/HTTPS** probes (reqwest) and **raw TCP** with verbatim byte payloads (path traversal, injections — no URL normalisation)
 - [x] **Non-HTTP protocols** — line & binary TCP dialogues, UDP, TLS (rustls), SSH (libssh2), SNMP v2c
+- [x] **Persistent sockets** — `tcp_open` / `tcp_send` / `tcp_close` keep one TCP/TLS connection across steps for multi-round-trip challenge–response protocols (e.g. the Erlang-cookie handshake in `couchdb/CVE-2022-24706.yaml`)
 - [x] **OpenVAS-style QoD** grading on every finding
 - [x] **Out-of-band detection** — built-in HTTP callback server (Log4Shell, SSRF, XXE)
 - [x] **Scripting** — [Rhai](https://rhai.rs) with string/regex, crypto/encoding, and binary pack/unpack builtins
+- [x] **SMB negotiate checks** — SMBv1 enabled, SMB2/3 signing not required (negotiated dialect in the evidence), done at the feed level with binary `send_hex` frames parsed by `script` ([#354](https://github.com/fDarkShadow/noctis/issues/354))
 - [x] **REST API** — submit scans, poll status, fetch findings; optional result webhook
+- [x] **Authenticated scans** — write-only `credentials` in the scan request, redacted from findings and logs; `requires_credentials: true` feeds are skipped without them
+- [x] **Scan filters** — skip feeds by `uid`, CVE, tag or `category` (closed vocabulary: `exposure`, `hardening`, `default-credentials`, `rce`, …)
 - [x] **Reproducible E2E tests** — Ansible + rootless Podman mocks, dynamic ports, automated true-positive / true-negative assertions
 - [x] **Multi-arch container** — static `scratch` image on GHCR (`linux/amd64` + `linux/arm64`)
 
 **On the roadmap**
 
-- [ ] SMB negotiate probe — dialect / signing / SMBv1 detection ([#354](https://github.com/fDarkShadow/noctis/issues/354))
-- [ ] Multi-round-trip binary protocol with keyed hash — epmd / Erlang distribution ([#316](https://github.com/fDarkShadow/noctis/issues/316))
-- [ ] On-host validation of the raw SYN probe (`tcp_syn`, needs `CAP_NET_RAW`) ([#330](https://github.com/fDarkShadow/noctis/issues/330))
-- [ ] Growing the feed catalogue via the `automation/feed-sourcing` pipeline and the open [CVE backlog](https://github.com/fDarkShadow/noctis/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Acve)
+- [ ] On-host validation of the raw SYN probe (`tcp_syn` needs `CAP_NET_RAW`, so it is not exercised in CI)
+- [ ] Growing the feed catalogue via the `automation/feed-sourcing` pipeline and the [CVE backlog](https://github.com/fDarkShadow/noctis/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Acve)
 
 ---
 
@@ -267,7 +271,24 @@ noctis serve --oob --oob-host <public-ip> --oob-port 9090   # enable OOB callbac
 ```
 
 `services` is required (min 1). `concurrency` defaults to `5` (range 1–100). Optional fields
-include `webhook_url`, `oob`, and `filters` (e.g. exclude a CVE).
+include `webhook_url`, `oob`, `credentials`, and `filters` — `exclude_uids`, `exclude_cve`,
+`exclude_tags`, `exclude_categories` (only feeds that carry a `category:` are skipped by the last one).
+
+**Authenticated scans** — pass `credentials` to let feeds log in to the target:
+
+```json
+"credentials": { "username": "admin", "password": "s3cr3t" }
+```
+
+`username`, `password` and `token` are all optional, but at least one of `username` / `token`
+is required and a `password` needs a `username` (otherwise `422`). Credentials are
+write-only: they never appear in `GET /scans`, webhook payloads or `Debug` output, and the
+password / token values are replaced by `<redacted>` in every finding field and engine log
+line. Masking covers the literal values, their lowercase hex and percent-encoded forms and
+the Basic-auth base64 of `username:password`; any other transformation a feed applies (hashing, JSON
+escaping, a custom encoding) is not recognised, so don't echo such values into evidence. A feed that
+declares `requires_credentials: true` is skipped (no task, no finding) when the request has
+no `credentials`.
 
 ---
 
@@ -285,7 +306,7 @@ name: "Apache httpd 2.4.49 path traversal / RCE"
 cves: [CVE-2021-41773]      # 0, 1, or several CVE IDs — [] for a misconfig/heuristic check
 cvss: 9.8                   # omit when cves is empty
 severity: critical          # info | low | medium | high | critical
-category: path-traversal    # optional free-form classifier (the main label for 0-CVE feeds)
+category: file-read         # optional, closed list — see docs/writing-feeds.md#categories
 confidence_base: 0.30       # starting confidence, before any step runs
 tags: [apache, path-traversal, rce]
 services: [http, https]     # nmap service names — [] means "run on every port"
@@ -328,6 +349,8 @@ Injected into every step; do not redefine `port` or `scheme` in a feed's `vars:`
 | `{{oob_url}}` | Full OOB callback URL |
 | `{{oob_host}}` / `{{oob_port}}` | OOB server host / port |
 | `{{oob_enabled}}` | `true` when `--oob` is configured |
+| `{{cred_enabled}}` | `true` when the scan request carries `credentials`, `false` otherwise |
+| `{{cred_username}}` / `{{cred_password}}` / `{{cred_token}}` | The request's `credentials` fields — each set only when supplied |
 
 ### Actions
 
@@ -406,16 +429,21 @@ tests/vulnerabilities/<product>/<id>.yaml    # <id> = the CVE, or a kebab-case s
 tests/common/                                # reusable includes
 ```
 
+**Today: <!-- feed-stats:feeds -->318<!-- /feed-stats --> vulnerability tests** in <!-- feed-stats:products -->210<!-- /feed-stats --> product directories — <!-- feed-stats:cve_feeds -->280<!-- /feed-stats --> CVE
+detections covering **<!-- feed-stats:cves -->414<!-- /feed-stats --> distinct CVEs**, plus <!-- feed-stats:nocve_feeds -->38<!-- /feed-stats --> CVE-less misconfiguration / exposure
+checks.
+
 Coverage spans **CVE detections** across Apache, Atlassian (Confluence/Jira), F5 BIG-IP,
 Fortinet, Ivanti, Citrix NetScaler, VMware, Cisco, GitLab, Jenkins, ColdFusion, CrushFTP, Cleo,
 PaperCut, and many more — plus a growing set of **protocol / exposure checks** under
 [`tests/vulnerabilities/general/`](tests/vulnerabilities/general/): unauthenticated Redis,
 MongoDB, Elasticsearch, CouchDB, etcd, Docker API, Kubernetes, Cassandra; exposed SNMP, Telnet,
-cleartext POP3/IMAP, finger, rsync, X11, VNC, LDAP anonymous bind, SMBv1; weak TLS and SSH auth;
+cleartext POP3/IMAP, finger, rsync, X11, VNC, LDAP anonymous bind, SMBv1, SMB signing not required; weak TLS and SSH auth;
 and more.
 
 ```sh
-grep -rl '^cves:' tests/vulnerabilities | wc -l   # how many feeds today
+task feeds-stats                  # recount from tests/vulnerabilities/ (run from infra/)
+task feeds-stats -- --write       # refresh every counter in README.md and docs/
 ```
 
 See **[CLAUDE.md](CLAUDE.md)** for the full authoring reference and reference feeds to copy from.
@@ -436,6 +464,8 @@ task test ID=CVE-2021-41773     # true-positive + true-negative for one vulnerab
 task test-all                   # every vulnerability — servers start once
 task feeds-check                # feed sha lockfile + uid-uniqueness check
 task mocks-manifest             # regenerate infra/docker/MOCKS.md
+task bake-gen                   # regenerate infra/bake/mocks.hcl after adding a mock
+task feeds-stats -- --write     # refresh the feed / CVE counters in README.md and docs/
 ```
 
 Each vulnerability is exercised on four hosts — `vuln` (HTTP), `vuln_https`, `patched`,

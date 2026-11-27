@@ -1,0 +1,58 @@
+name: Badges
+
+# Refreshes the README counter badges (vulnerability tests, CVEs) on every push
+# to main. The shields.io endpoint JSON files live on the orphan `badges`
+# branch, not on main: committing the count from each feed PR would make feed
+# PRs merged in parallel conflict, and Pages only deploys on release (#691).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/vulnerabilities/**"
+      - "scripts/feed_stats.py"
+      - ".github/workflows/badges.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Pushes to the badges branch must not race; the latest run wins.
+concurrency:
+  group: badges
+  cancel-in-progress: true
+
+jobs:
+  badges:
+    name: Update counter badges
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install PyYAML
+        run: python3 -c "import yaml" 2>/dev/null || pip install --quiet pyyaml
+
+      - name: Generate badge JSON
+        run: python3 scripts/feed_stats.py --badge "$RUNNER_TEMP/badges"
+
+      - name: Push to the badges branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dir="$RUNNER_TEMP/badges-branch"
+          if git fetch --depth=1 origin badges 2>/dev/null; then
+            git worktree add "$dir" FETCH_HEAD
+            git -C "$dir" checkout -B badges
+          else
+            git worktree add --detach "$dir"
+            git -C "$dir" checkout --orphan badges
+            git -C "$dir" rm -rf --quiet .
+          fi
+          cp "$RUNNER_TEMP"/badges/*.json "$dir/"
+          git -C "$dir" add -- *.json
+          if git -C "$dir" diff --cached --quiet; then
+            echo "Badges already up to date."
+            exit 0
+          fi
+          git -C "$dir" commit --quiet -m "badges: $(jq -r .message "$dir/feeds.json") feeds, $(jq -r .message "$dir/cves.json") CVEs (${GITHUB_SHA::7})"
+          git -C "$dir" push origin badges

@@ -1,0 +1,3 @@
+FROM noctis/py-mock-base:latest
+COPY server.py /app/server.py
+ENV CVE_2018_17786_MODE=patched

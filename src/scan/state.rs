@@ -123,6 +123,7 @@ mod tests {
             webhook_url: None,
             oob: None,
             filters: None,
+            credentials: None,
         }
     }
 
@@ -150,7 +151,7 @@ mod tests {
         s.started_at = Some(UtcTime::now().minus_millis(1000));
         s.completed_at = Some(UtcTime::now());
         let ms = s.elapsed_ms().unwrap();
-        assert!(ms >= 990 && ms <= 1100, "expected ~1000ms, got {ms}");
+        assert!((990..=1100).contains(&ms), "expected ~1000ms, got {ms}");
     }
 
     #[test]
@@ -177,5 +178,29 @@ mod tests {
     fn status_serde_snake_case() {
         let s = serde_json::to_string(&ScanStatus::Completed).unwrap();
         assert_eq!(s, r#""completed""#);
+    }
+
+    #[test]
+    fn state_and_summary_never_carry_credentials() {
+        use crate::scan::request::Credentials;
+        let mut r = req("host", 80);
+        r.webhook_url = Some("http://hook.example/x".into());
+        r.credentials = Some(Credentials {
+            username: Some("admin-user".into()),
+            password: Some("s3cr3t-pw".into()),
+            token: Some("tok-xyz".into()),
+        });
+        let s = ScanState::new(Uuid::new_v4(), &r);
+        let state_json = serde_json::to_string(&s).unwrap();
+        let summary_json = serde_json::to_string(&ScanSummary::from(&s)).unwrap();
+        let dbg = format!("{s:?} {:?}", ScanSummary::from(&s));
+        for out in [&state_json, &summary_json, &dbg] {
+            for secret in ["admin-user", "s3cr3t-pw", "tok-xyz", "credentials"] {
+                assert!(
+                    !out.contains(secret),
+                    "a credential value leaked into state output"
+                );
+            }
+        }
     }
 }

@@ -12,8 +12,9 @@
       ansible.builtin.command:
         cmd: >-
           python3 -c
-          "import socket; s=socket.socket(); s.bind(('',0));
-          print(s.getsockname()[1]); s.close()"
+          "import socket; s=socket.socket(socket.AF_INET,
+          socket.SOCK_DGRAM if '{{ target_protocol | default('tcp') }}' == 'udp' else socket.SOCK_STREAM);
+          s.bind(('',0)); print(s.getsockname()[1]); s.close()"
       register: free_port_reg
       changed_when: false
       throttle: 1
@@ -28,7 +29,8 @@
           {{ container_runtime }} run -d
           --name {{ container_name }}
           --network {{ container_network }}
-          -p {{ target_port }}:{{ container_port | default(80) }}
+          -p 127.0.0.1:{{ target_port }}:{{ container_port | default(80) }}/{{ target_protocol | default('tcp') }}
+          {% for k, v in (container_env | default({})).items() %}-e {{ (k ~ '=' ~ v) | quote }} {% endfor %}
           {{ docker_image }}
       changed_when: true
       throttle: 1
@@ -38,6 +40,25 @@
         host: "{{ target_host }}"
         port: "{{ target_port }}"
         timeout: 45
+      when: target_protocol | default('tcp') == 'tcp'
+
+    # UDP has no handshake, so wait_for (a TCP connect) can never succeed on a UDP-only
+    # mock: wait for the container to be running instead, then give the daemon a moment
+    # to bind its socket.
+    - name: "{{ cve_id }} — Wait for UDP container {{ container_name }}"
+      ansible.builtin.command:
+        cmd: "{{ container_runtime }} inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' {{ container_name }}"
+      register: _udp_running
+      until: _udp_running.stdout | trim == 'true'
+      retries: 45
+      delay: 1
+      changed_when: false
+      when: target_protocol | default('tcp') == 'udp'
+
+    - name: "{{ cve_id }} — Let the UDP daemon bind"
+      ansible.builtin.pause:
+        seconds: 2
+      when: target_protocol | default('tcp') == 'udp'
 
     # ── Choose server and build request body ──────────────────────────────────
 
@@ -48,7 +69,11 @@
             noctis_oob_server_port if noctis_use_oob else noctis_plain_port
           }}
 
+    # noctis_credentials (optional, per inventory host) → "credentials" in the
+    # request, e.g. {username: admin, password: admin}. Omitted when undefined, so
+    # existing inventories are unchanged. no_log keeps it out of Ansible output.
     - name: "{{ cve_id }} — Build scan request body"
+      no_log: "{{ noctis_credentials is defined }}"
       ansible.builtin.set_fact:
         _scan_body: >-
           {{
@@ -58,7 +83,7 @@
                 {
                   "port": target_port | int,
                   "service": target_service,
-                  "protocol": "tcp"
+                  "protocol": target_protocol | default('tcp')
                 }
               ],
               "tests": [feed_path],
@@ -72,6 +97,9 @@
                     "port": noctis_oob_callback_port | int
                   }
                 } if noctis_use_oob else {}
+            )
+            | combine(
+                { "credentials": noctis_credentials } if noctis_credentials is defined else {}
             )
           }}
 
@@ -92,6 +120,7 @@
     # ── Submit scan ───────────────────────────────────────────────────────────
 
     - name: "{{ cve_id }} — POST /scans to {{ _api_url }}"
+      no_log: "{{ noctis_credentials is defined }}"
       ansible.builtin.uri:
         url: "{{ _api_url }}/scans"
         method: POST

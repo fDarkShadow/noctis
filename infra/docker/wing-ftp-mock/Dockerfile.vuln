@@ -1,0 +1,5 @@
+FROM noctis/py-mock-base:latest
+COPY server.py /app/server.py
+ENV CVE_2015_4107_MODE=vuln
+ENV WING_ADMIN_USER=admin
+ENV WING_ADMIN_PASS=wingftp-admin-pw
