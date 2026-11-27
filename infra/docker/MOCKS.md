@@ -216,6 +216,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cyberpanel-mock
 - cyberpanel/CVE-2024-51567
 
+## dahua-33045-mock
+- dahua/CVE-2021-33045
+
 ## dahua-mock
 - dahua/CVE-2021-33044
 

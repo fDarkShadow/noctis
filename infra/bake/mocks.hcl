@@ -72,6 +72,7 @@ group "default" {
     "cups-mock",
     "cwp-48703-mock",
     "cyberpanel-mock",
+    "dahua-33045-mock",
     "dahua-mock",
     "deluxebb-mock",
     "dlink-dcs-mock",
@@ -923,6 +924,15 @@ target "cyberpanel-mock" {
   context    = "../docker/cyberpanel-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cyberpanel-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dahua-33045-mock" {
+  name       = "dahua-33045-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dahua-33045-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dahua-33045-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
