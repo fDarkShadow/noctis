@@ -254,6 +254,7 @@ group "default" {
     "spring4shell-mock",
     "ssh-mock",
     "ssh-terrapin-mock",
+    "struts-11776-mock",
     "struts-1965-mock",
     "struts-2248-mock",
     "struts-31805-mock",
@@ -2498,6 +2499,15 @@ target "ssh-terrapin-mock" {
   context    = "../docker/ssh-terrapin-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ssh-terrapin-mock:${variant}"]
+}
+
+target "struts-11776-mock" {
+  name       = "struts-11776-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-11776-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-11776-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "struts-1965-mock" {
