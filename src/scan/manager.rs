@@ -7,6 +7,7 @@ use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
 use crate::api::webhook;
+use crate::engine::runner::skip_for_missing_credentials;
 use crate::engine::Runner;
 use crate::error::Result;
 use crate::loader;
@@ -42,6 +43,7 @@ impl ScanManager {
             host = %request.host,
             services = request.services.len(),
             tests = request.tests.len(),
+            credentials = request.credentials.is_some(),
             "scan submitted"
         );
         let state = Arc::new(RwLock::new(ScanState::new(id, &request)));
@@ -130,6 +132,7 @@ impl ScanManager {
         let paths = loader::resolve_test_paths(&request.tests)?;
 
         let filters = request.filters.clone().unwrap_or_default();
+        let has_credentials = request.credentials.is_some();
 
         let mut defs = Vec::new();
         for path in &paths {
@@ -137,6 +140,8 @@ impl ScanManager {
                 Ok(d) => {
                     if filters.is_excluded(&d) {
                         tracing::debug!(test = %d.uid, "excluded by filter");
+                    } else if skip_for_missing_credentials(&d, has_credentials) {
+                        // Authenticated feed without credentials: no task is created.
                     } else {
                         defs.push(d);
                     }
@@ -185,7 +190,7 @@ impl ScanManager {
             }
         }
 
-        let runner = Arc::new(Runner::new(oob));
+        let runner = Arc::new(Runner::new(oob).with_credentials(request.credentials.clone()));
         let semaphore = Arc::new(Semaphore::new(request.concurrency));
         let cancel = CancellationToken::new();
         let host = Arc::new(request.host.clone());
@@ -304,4 +309,78 @@ fn matched_services(def: &TestDef, request: &ScanRequest) -> Vec<(u16, String)> 
         .filter(|s| def.services.contains(&s.service))
         .map(|s| (s.port, s.service.clone()))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::scan::request::{Credentials, DiscoveredService};
+
+    /// Write a one-step feed (`requires_credentials: true`) to a fresh temp dir.
+    fn cred_feed() -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("noctis-cred-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("auth.yaml");
+        std::fs::write(
+            &path,
+            format!(
+                "uid: {}\nname: Auth\nseverity: info\nrequires_credentials: true\n\
+                 services: [http]\nsteps:\n  - id: s\n    action: set_var\n    \
+                 var_name: x\n    var_value: true\n",
+                Uuid::new_v4()
+            ),
+        )
+        .unwrap();
+        path
+    }
+
+    async fn run_scan(credentials: Option<Credentials>) -> ScanSummary {
+        let path = cred_feed();
+        let req = ScanRequest {
+            host: "127.0.0.1".into(),
+            services: vec![DiscoveredService {
+                port: 1,
+                service: "http".into(),
+                protocol: "tcp".into(),
+            }],
+            tests: vec![path.to_string_lossy().into_owned()],
+            concurrency: 1,
+            webhook_url: None,
+            oob: None,
+            filters: None,
+            credentials,
+        };
+        let mgr = ScanManager::new(None);
+        let id = mgr.clone().submit(req).await.unwrap();
+        for _ in 0..200 {
+            let s = mgr.get(id).await.unwrap();
+            if matches!(s.status, ScanStatus::Completed | ScanStatus::Failed) {
+                let _ = std::fs::remove_dir_all(path.parent().unwrap());
+                return s;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+        panic!("scan did not finish");
+    }
+
+    #[tokio::test]
+    async fn authenticated_feed_without_credentials_creates_no_task() {
+        let s = run_scan(None).await;
+        assert_eq!(s.status, ScanStatus::Completed);
+        assert_eq!(s.progress.total, 0);
+        assert_eq!(s.findings_count, 0);
+    }
+
+    #[tokio::test]
+    async fn authenticated_feed_with_credentials_runs() {
+        let s = run_scan(Some(Credentials {
+            username: Some("admin".into()),
+            password: Some("pw".into()),
+            token: None,
+        }))
+        .await;
+        assert_eq!(s.status, ScanStatus::Completed);
+        assert_eq!(s.progress.total, 1);
+        assert_eq!(s.progress.completed, 1);
+    }
 }

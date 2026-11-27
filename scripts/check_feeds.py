@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes.
+"""Feed tree integrity: sha256 lockfile + uid uniqueness + resolvable includes +
+no `{{...}}` template in a step field the engine reads literally + `general/`
+feeds use one of the agreed categories, and every feed's category is in the shared
+vocabulary (see CLAUDE.md, "TestDef (YAML)").
 
 Run via `task feeds-check` (from infra/). Pass --write to regenerate the lockfile
 after an intentional feed edit — do that as part of the same commit, never separately.
@@ -96,6 +99,78 @@ def check_includes(paths: list[str]) -> list[str]:
     return errors
 
 
+# Step fields the engine reads as literal text — it never runs them through the
+# `{{var}}` template engine. A template there is sent / matched verbatim and the step
+# silently misbehaves (e.g. `method: "{{http_method}}"` used to go out as the HTTP
+# method itself). Keep this list in sync with src/engine/actions/*.rs.
+LITERAL_STEP_FIELDS = ("id", "action", "store_as", "source", "pattern", "var_name", "handle", "line_ending")
+_LITERAL_RE = re.compile(
+    r"^\s+(?:-\s+)?(" + "|".join(LITERAL_STEP_FIELDS) + r"):\s*(.*\{\{.*)$"
+)
+
+
+def check_literal_fields(paths: list[str]) -> list[str]:
+    errors = []
+    for path in paths:
+        rel = os.path.relpath(path, REPO_ROOT)
+        with open(path) as f:
+            for n, line in enumerate(f, 1):
+                m = _LITERAL_RE.match(line)
+                if m and not line.lstrip().startswith("#"):
+                    errors.append(
+                        f"{rel}:{n}: `{m.group(1)}:` is not templated by the engine, "
+                        f"so `{m.group(2).strip()}` would be used verbatim"
+                    )
+    return errors
+
+
+def common_paths() -> list[str]:
+    return sorted(glob.glob(os.path.join(REPO_ROOT, "tests", "common", "*.yaml")))
+
+
+# `filters.exclude_categories` is an exact-string match, so a synonym escapes it.
+# The vocabulary lives in the schema's `category` enum (single source of truth).
+SCHEMA_PATH = os.path.join(REPO_ROOT, "schemas", "feed.schema.json")
+with open(SCHEMA_PATH) as _f:
+    CATEGORIES = set(json.load(_f)["properties"]["category"]["enum"])
+GENERAL_CATEGORIES = {"exposure", "hardening", "default-credentials"}
+assert GENERAL_CATEGORIES <= CATEGORIES, "general/ categories must be in the schema enum"
+# A top-level `category:` line: quoted or bare scalar, optional trailing comment.
+_CATEGORY_RE = re.compile(
+    r"""^category:[ \t]*(?:"([^"\n]*)"|'([^'\n]*)'|([^\s#'"][^#\n]*?))?[ \t]*(?:#.*)?$""",
+    re.MULTILINE,
+)
+
+
+def check_categories(paths: list[str]) -> list[str]:
+    errors = []
+    general = os.path.join(FEEDS_DIR, "general") + os.sep
+    for path in paths:
+        with open(path) as f:
+            m = _CATEGORY_RE.search(f.read())
+        rel = os.path.relpath(path, FEEDS_DIR)
+        in_general = path.startswith(general)
+        cat = None
+        if m:
+            cat = next((g for g in m.groups() if g is not None), None)
+            if cat is not None and cat.strip() in ("", "~", "null"):
+                cat = None if cat.strip() != "" else ""
+        if cat is None:
+            if in_general:
+                errors.append(f"{rel}: general/ feed has no category")
+            continue
+        if in_general and cat not in GENERAL_CATEGORIES:
+            errors.append(
+                f"{rel}: category {cat!r} — general/ feeds use one of {sorted(GENERAL_CATEGORIES)}"
+            )
+        elif cat not in CATEGORIES:
+            errors.append(
+                f"{rel}: unknown category {cat!r} — use one of {sorted(CATEGORIES)} "
+                "(or extend the schema enum and CLAUDE.md if a new group is really needed)"
+            )
+    return errors
+
+
 def main() -> int:
     write = "--write" in sys.argv
 
@@ -120,6 +195,8 @@ def main() -> int:
 
     errors.extend(check_uid_uniqueness(feed_paths()))
     errors.extend(check_includes(feed_paths()))
+    errors.extend(check_literal_fields(feed_paths() + common_paths()))
+    errors.extend(check_categories(feed_paths()))
 
     if errors:
         print(f"feeds-check: {len(errors)} problem(s):", file=sys.stderr)
@@ -127,7 +204,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve.")
+    print(f"feeds-check: {len(hashes)} feeds, lockfile in sync, no duplicate uids, all includes resolve, no literal-field templates, categories valid.")
     return 0
 
 

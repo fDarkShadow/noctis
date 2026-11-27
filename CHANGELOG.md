@@ -1,6 +1,183 @@
 # Changelog
 
 All notable changes to noctis are documented here.
+## [0.3.0] — 2026-11-26
+
+### Bug fixes
+
+- **expr:** Keep stored-result objects intact across a script step (#393) (#453)
+- **bake:** Restore 41 missing closing braces in misc.hcl (#689)
+- **engine:** Interpolate http_request method; reject templates in literal step fields
+- **mocks:** Jenkins-mock sends X-Jenkins and exposes /cli in vuln mode
+- **infra:** Common_docker can test UDP mocks (target_protocol: udp)
+- **infra:** Publish test mock ports on 127.0.0.1 only
+- **infra:** Rename canon CVE-2018-12049 playbook so task test / test-all find it
+- **scan:** Redact encoded credential forms; no secrets in test panics
+- **engine:** Redact step errors; single-pass, hex-aware secret masking
+- **general:** Reject echoed requests in SMB2 negotiate parse (#699 review)
+- **CVE-2015-4107:** Version-gate the Wing FTP authenticated exec check
+- **CVE-2015-4107:** Make patched mock differ only by version; login via /admin_loginok.html
+
+### CI/CD
+
+- Parse every infra/bake/*.hcl on pull requests (#690)
+- Cancel superseded PR runs and deploy Pages only on release (#691)
+
+### Dependencies
+
+- **deps:** Bump crates, Rust 1.100 image and Pages actions
+
+### Documentation
+
+- Real vulnerability counts, generated; document the new layout
+- **feeds:** Correct filter name exclude_categories; empty category regex
+- Sync README, Pages and CONTRIBUTING with the current engine and tooling (#707)
+
+### Features
+
+- **engine:** Persistent multi-round-trip TCP socket + CVE-2022-24706 (#467)
+- **CVE-2020-17496:** Add detection feed and test infrastructure (#480)
+- **CVE-2025-13315:** Add detection feed and test infrastructure (#468)
+- **CVE-2024-54767:** Add detection feed and test infrastructure (#469)
+- **CVE-2018-1150:** Add detection feed and test infrastructure (#470)
+- **CVE-2024-8956:** Add detection feed and test infrastructure (#472)
+- **CVE-2021-33044:** Add detection feed and test infrastructure (#473)
+- **CVE-2020-8656:** Add detection feed and test infrastructure (#474)
+- **CVE-2025-34043:** Add detection feed and test infrastructure (#475)
+- **CVE-2024-3721:** Add detection feed and test infrastructure (#476)
+- **CVE-2018-19300:** Add detection feed and test infrastructure (#477)
+- **CVE-2020-5847:** Add detection feed and test infrastructure (#478)
+- **CVE-2021-20837:** Add detection feed and test infrastructure (#479)
+- **CVE-2018-1000861:** Add Jenkins Stapler ACL bypass feed + test infra (#466)
+- **CVE-2019-7609:** Add Kibana Timelion prototype-pollution RCE feed + test infra (#471)
+- **CVE-2023-27351:** Add PaperCut NG/MF auth bypass feed + test infra (#481)
+- **CVE-2025-32975:** Add Quest KACE SMA SSO auth bypass feed + test infra (#483)
+- **CVE-2026-20230:** Add Cisco Unified CM WebDialer SSRF/RCE feed + test infra (#484)
+- **CVE-2022-22963:** Add Spring Cloud Function SpEL RCE feed + test infra (#485)
+- **CVE-2023-27482:** Add Home Assistant Supervisor auth bypass feed + test infra (#486)
+- **CVE-2019-16662:** Add rConfig unauthenticated RCE feed + test infra (#487)
+- **CVE-2026-48282:** Add ColdFusion RDS unauthenticated file write feed + test infra (#488)
+- **CVE-2026-34910:** Add UniFi OS unauthenticated RCE chain feed + test infra (#482)
+- **CVE-2011-5325:** NUUO NVRmini 2 — unauthenticated endpoint access detection (#592)
+- **CVE-2018-11711:** Canon MF210/MF220 printers access bypass (#589)
+- **CVE-2009-4883:** PHPRecipeBook <= 2.24 — unauthenticated SQL injection detection (#590)
+- **CVE-2013-5743:** Add zabbix httpmon.php SQLi detection feed + test infra (#591)
+- **CVE-2015-6522:** Wp-symposium — get_album_item.php SQL injection (#593)
+- **clipbucket-multiple-vulns:** Add clipbucket videos.php SQLi detection feed + test infra (#594)
+- **CVE-2011-3315:** Add cucm IVRGetAudioFile traversal detection feed + test infra (#595)
+- **dolibarr-404-mult-vuln:** Add dolibarr SQL error (style.css.php lang) detection feed + test infra (#596)
+- **manageengine-desktop-central-dbqueryexecutor:** Add manageengine Desktop Central DB Query Executor detection feed + test infra (#597)
+- **CVE-2017-1000501:** Add awstats config traversal detection feed + test infra (#598)
+- **CVE-2014-3828:** Centreon — displayServiceStatus.php SQL injection detection (#599)
+- **CVE-2018-11509:** ASUSTOR ADM — unauthenticated RCE via aggrecate_js.cgi (#600)
+- **CVE-2010-20109:** Barracuda Networks — view_help.cgi directory traversal (#601)
+- **CVE-2012-5874:** Elite Bulletin Board — multiple SQL injection detection (#602)
+- **CVE-2017-3549:** Oracle E-Business Suite — IESFOOTPRINT SQL injection detection (#603)
+- **simatic-wincc-input-validation:** Siemens SIMATIC WinCC HMI — multiple input validation vulnerabilities (#604)
+- **CVE-2013-4789:** Cotonti — 'c' parameter error-based SQL injection (#605)
+- **CVE-2013-2248:** Apache Struts — S2-016/S2-017 DefaultActionMapper prefix injection (#606)
+- **cups-webui-xss:** Add CUPS < 2.0.3 reflected XSS detection feed + test infra (#607)
+- **netgear-readynas-cmd-injection:** NetGear ReadyNAS RAIDiator — FrontView unauthenticated command injection (#608)
+- **CVE-2021-44736:** Lexmark Printer Configuration Wipe Vulnerability (#609)
+- **CVE-2018-12049:** Canon-lbp6030w — auth bypass (#610)
+- **CVE-2017-7588:** Brother — web authorization bypass (#611)
+- **CVE-2016-4350:** Solarwinds-srm — SRM multiple SQL injection (#612)
+- **CVE-2018-11692:** Canon — printer auth bypass (#613)
+- **quantum-scalar-lfi:** Add Quantum Scalar i500 LFI detection feed + test infra (#614)
+- **splunk-multiple-vuln:** Splunk 4.x — multiple web vulnerabilities active check (#615)
+- **CVE-2016-6553:** Nuuo — NVR default credentials (#616)
+- **CVE-2015-0930:** SerVision HVG Default Credentials (#617)
+- **CVE-2014-9183:** Add detection feed and test infrastructure (#618)
+- **CVE-2001-0320:** Add detection feed and test infrastructure (#619)
+- **CVE-2013-1594:** Add detection feed and test infrastructure (#620)
+- **CVE-2013-4775:** Add detection feed and test infrastructure (#621)
+- **CVE-2013-2741:** Add detection feed and test infrastructure (#623)
+- **CVE-2004-1647:** Password Protect SQLi Vulnerability (#624)
+- **CVE-2004-1719:** Add detection feed and test infrastructure (#625)
+- **CVE-2017-8835:** Add detection feed and test infrastructure (#626)
+- **CVE-2016-5817:** Add detection feed and test infrastructure (#627)
+- **CVE-2016-6195:** Add detection feed and test infrastructure (#628)
+- **CVE-2015-4654:** Joomla! EQ Event Calendar component SQL Injection Vulnerability (#629)
+- **CVE-2015-5148:** Add detection feed and test infrastructure (#630)
+- **CVE-2015-2825:** WordPress Simple Ads Manager Plugin File Upload Vulnerability (#631)
+- **CVE-2015-1471:** Add detection feed and test infrastructure (#632)
+- **CVE-2015-7297:** Add detection feed and test infrastructure (#633)
+- **CVE-2013-5957:** Civicrm — unauthenticated SQL injection detection (#634)
+- **CVE-2014-3437:** Add detection feed and test infrastructure (#635)
+- **CVE-2014-4511:** Gitlist RCE Vulnerability (#636)
+- **CVE-2014-6446:** WordPress Infusionsoft Gravity Forms Add-on Arbitrary File Upload Vuln (#638)
+- **CVE-2009-4892:** WEBJump! — unauthenticated SQL injection detection (#639)
+- **CVE-2015-0975:** Opennms — default credentials rtc/rtc login flow (#640)
+- **CVE-2013-5014:** Symantec-epm — SEPM XXE & SQL injection (#641)
+- **CVE-2009-1024:** Beerwin's PhpLinkAdmin — unauthenticated SQL injection detection (#642)
+- **CVE-2014-8295:** Bacula-web — jobid SQL injection feed + test infra (#643)
+- **CVE-2009-1277:** Gravity Board X — unauthenticated SQL injection detection (#644)
+- **CVE-2009-1033:** DeluxeBB — unauthenticated SQL injection detection (#645)
+- **CVE-2012-5357:** Ektron — Ektron CMS < 8.02 SP5 RCE (#646)
+- **CVE-2009-4797:** JobHut — unauthenticated SQL injection detection (#647)
+- **CVE-2009-1509:** MyioSoft Ajax Portal — unauthenticated SQL injection detection (#648)
+- **CVE-2010-0219:** Axis2 — Apache Axis2 default credentials (#649)
+- **CVE-2014-4852:** Atomcms — AtomCMS SQLi / file upload (#650)
+- **CVE-2013-1965:** Struts — S2-012 Showcase OGNL RCE (#651)
+- **CVE-2009-3099:** Tomcat-admin — default admin credentials (#652)
+- **CVE-2014-125124:** Kloxo — unauthenticated SQL injection detection (#653)
+- **CVE-2014-1206:** Open-web-analytics — password-reset SQLi (#654)
+- **CVE-2013-1852:** Leaguemanager — unauthenticated export/SQL injection detection (#655)
+- **CVE-2008-6270:** Apoll — admin/login.php SQL injection (#656)
+- **CVE-2014-125115:** Pandora — FMS < 5.1 SP1 multiple vulns (#657)
+- **CVE-2018-11523:** Nuuo-nvrmini2 — file upload RCE (#658)
+- **CVE-2024-50630:** Synology — BeeStation SA-24:21 webapi info disclosure (#659)
+- **CVE-2007-6369:** Wordpress — multiple plugins/themes directory traversal / file download (#660)
+- **CVE-2014-5097:** ArticleFR CMS — unauthenticated SQL injection detection (#661)
+- **CVE-2012-2923:** ELearning Server 4G — unauthenticated SQL injection detection (#662)
+- **CVE-2012-5849:** ClipBucket — unauthenticated SQL injection detection (#663)
+- **CVE-2021-27850:** Apache Tapestry 5.4.0<5.6.3/5.7.0<5.7.1 — RCE exposure detection (#664)
+- **CVE-2012-4282:** Trombinoscope — unauthenticated SQL injection detection (#665)
+- **CVE-2017-8860:** Cohu 3960HD cameras — directory listing exposure detection (#666)
+- **CVE-2017-3184:** ACTi cameras — factory-default page auth-bypass detection (#667)
+- **CVE-2011-5228:** AppRain CMF — unauthenticated SQL injection detection (#668)
+- **CVE-2016-5639:** Crestron AirMedia AM-100 — unauthenticated file read detection (#669)
+- **CVE-2013-3316:** NETGEAR WNR1000v3 — config request auth-bypass detection (#670)
+- **CVE-2010-1918:** EFront — unauthenticated SQL injection detection (#671)
+- **CVE-2013-10043:** Astium VoIP PBX ≤2.1 — SQLi login-bypass detection (#672)
+- **CVE-2013-0632:** Adobe ColdFusion — admin authentication bypass detection (#673)
+- **CVE-2012-5692:** Invision Power Board — PHP code execution exposure detection (#674)
+- **CVE-2010-4278:** Pandora FMS ≤3.1 — authentication bypass detection (#675)
+- **CVE-2016-6277:** NETGEAR routers — unauthenticated command injection detection (#676)
+- **CVE-2015-6007:** Refbase — unauthenticated SQL injection detection (#677)
+- **CVE-2021-21816:** D-Link DIR-3040 — unauthenticated syslog disclosure detection (#678)
+- **CVE-2020-25078:** D-Link DCS IP cameras — credential disclosure detection (#679)
+- **CVE-2015-7765:** ManageEngine OpManager ≤11.6 — default-account detection (#680)
+- **CVE-2013-5709:** Siemens Scalance X-200 — config file disclosure detection (#681)
+- **CVE-2025-34126:** RIPS Scanner 0.55 — local file inclusion detection (#683)
+- **CVE-2012-5687:** TP-LINK TL-WR841N — unauthenticated file read detection (#684)
+- **CVE-2018-17786:** D-Link / TOTOLINK ExportSettings.sh — broken access control detection (#685)
+- **CVE-2017-8917:** Joomla! <3.7.1 — SQLi login-page fingerprint detection (#686)
+- **CVE-2014-4034:** ZeroCMS — unauthenticated SQL injection detection (#687)
+- **CVE-2013-6341:** Dokeos — unauthenticated SQL injection detection (#622)
+- **CVE-2010-4970:** Wiki Web Help — unauthenticated SQL injection detection (#637)
+- **CVE-2013-1627:** Add Advantech Studio NTWebServer traversal detection feed + test infra (#688)
+- **scan:** Credentials surface for authenticated scans (#693)
+- **CVE-2015-4107:** Add Wing FTP Server admin default account feed + test infrastructure
+- **CVE-2015-4107:** Rework Wing FTP feed into faithful authenticated check (#693)
+- **general:** SMB2 negotiate probe — signing not required (#354)
+- **CVE-2015-4107:** Wing FTP Server ≤4.3.8 — authenticated admin Lua command execution (#701)
+- **CVE-2024-21182:** Oracle WebLogic Server T3/IIOP data disclosure — version detection
+- **CVE-2026-28318:** Serv-U deflate DoS — FTP banner version check (#702)
+- **CVE-2026-48558:** SimpleHelp RMM — OIDC authentication bypass (#703)
+- **CVE-2021-31805:** Apache Struts2 S2-062 — forced double OGNL evaluation RCE (#704)
+- **beestation-sa-24-23:** Synology BeeStation (BSM) SA-24:23 webapi file disclosure (#705)
+
+### Refactoring
+
+- **feeds:** One directory per product, common http_base include
+- **mocks:** Shared Python base image, generated bake file, no dead mocks
+- **mocks:** Move advantech-mock (from #688) onto py-mock-base
+
+### Tests
+
+- **CVE-2024-21182:** Add unaffected-version TN host and 14.1.1.0.0 https twin; reject unknown mock mode
+
 ## [0.2.1] — 2026-11-23
 
 ### CI/CD

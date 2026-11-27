@@ -29,7 +29,7 @@ REFERENCE_FEEDS: list[tuple[list[str], str]] = [
     (["ognl", "template injection", "ssti", "expression language"],
      "tests/vulnerabilities/confluence/CVE-2022-26134.yaml"),
     (["chain", "multi-step", "pre-auth rce", "two-stage"],
-     "tests/vulnerabilities/ivanti/CVE-2023-46805.yaml"),
+     "tests/vulnerabilities/ivanti-ics/CVE-2023-46805.yaml"),
     (["exposed path", "exposed endpoint", "static list", "sensitive file"],
      "tests/vulnerabilities/general/exposed-paths.yaml"),
     (["weak auth", "default credentials", "default password"],

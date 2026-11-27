@@ -11,9 +11,6 @@ services: [http, https]
 author: florian
 version: "1.0.0"
 
-vars:
-  port: 80
-
 steps:
   - id: probe-paths
     action: http_request

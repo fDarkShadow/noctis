@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
-import os, ssl, threading
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from mocklib import serve
 
 VULN_MODE = os.environ.get("SIMPLEHELP_MODE", "patched") == "vuln"
 
 TRAVERSAL_PATH = "/toolbox-resource/../serverconfig.xml"
+
+# CVE-2026-48558 — vuln = 5.5.15 with OIDC technician login configured,
+# patched = 5.5.17 (no OIDC discovery document).
+VERSION = "5.5.15" if VULN_MODE else "5.5.17"
+OIDC_PATH = "/.well-known/openid-configuration"
+OIDC_CONFIG = (
+    '{"issuer":"https://auth.example.com",'
+    '"authorization_endpoint":"https://auth.example.com/auth",'
+    '"token_endpoint":"https://auth.example.com/token",'
+    '"NOCTIS_SIMPLEHELP_OIDC":"configured"}'
+)
 
 CONFIG_XML = (
     "<SimpleSuite><Settings>"
@@ -32,21 +44,15 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, CONFIG_XML, "application/octet-stream")
             else:
                 self._send(403, "Forbidden")
+        elif self.path == "/":
+            self._send(200, f"SimpleHelp {VERSION} - Technician Login", "text/html")
+        elif self.path == OIDC_PATH and VULN_MODE:
+            self._send(200, OIDC_CONFIG, "application/json")
         else:
             self._send(404, "Not Found")
 
     def do_POST(self): self.do_GET()
 
 
-def _make_https_server(port):
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ctx.load_cert_chain("/certs/server.crt", "/certs/server.key")
-    srv = HTTPServer(("0.0.0.0", port), Handler)
-    srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
-    return srv
-
-
 if __name__ == "__main__":
-    https = _make_https_server(443)
-    threading.Thread(target=https.serve_forever, daemon=True).start()
-    HTTPServer(("0.0.0.0", 80), Handler).serve_forever()
+    serve(Handler, HTTPServer)
