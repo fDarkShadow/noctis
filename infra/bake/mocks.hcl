@@ -39,6 +39,7 @@ group "default" {
     "centrestack-mock",
     "chamilo-mock",
     "checkpoint-mock",
+    "cisco-hyperflex-1497-mock",
     "cisco-ise-mock",
     "cisco-wsma-mock",
     "civicrm-mock",
@@ -631,6 +632,15 @@ target "checkpoint-mock" {
   context    = "../docker/checkpoint-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/checkpoint-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-hyperflex-1497-mock" {
+  name       = "cisco-hyperflex-1497-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-hyperflex-1497-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-hyperflex-1497-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
