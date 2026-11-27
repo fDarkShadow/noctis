@@ -15,6 +15,7 @@ group "default" {
     "apprain-mock",
     "articlefr-mock",
     "astium-mock",
+    "asus-mock",
     "asustor-mock",
     "atomcms-mock",
     "aviatrix-mock",
@@ -420,6 +421,15 @@ target "astium-mock" {
   context    = "../docker/astium-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/astium-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "asus-mock" {
+  name       = "asus-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/asus-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/asus-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
