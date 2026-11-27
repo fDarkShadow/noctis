@@ -270,6 +270,7 @@ group "default" {
     "teamcity-token-mock",
     "telerik-report-mock",
     "telnet-mock",
+    "tomcat-12617-mock",
     "tomcat-admin-mock",
     "tomcat-put-mock",
     "tp-link-wr841n-mock",
@@ -2638,6 +2639,15 @@ target "telnet-mock" {
   context    = "../docker/telnet-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/telnet-mock:${variant}"]
+}
+
+target "tomcat-12617-mock" {
+  name       = "tomcat-12617-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/tomcat-12617-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/tomcat-12617-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "tomcat-admin-mock" {
