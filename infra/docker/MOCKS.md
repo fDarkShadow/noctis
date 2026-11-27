@@ -116,6 +116,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## checkpoint-mock
 - checkpoint/CVE-2024-24919
 
+## cisco-asa-mock
+- cisco-asa/CVE-2018-0296
+
 ## cisco-ise-mock
 - cisco-ise/CVE-2025-20281
 
