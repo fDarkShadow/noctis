@@ -115,6 +115,7 @@ group "default" {
     "gravityboardx-mock",
     "hadoop-yarn-mock",
     "hfs-mock",
+    "hikvision-7921-mock",
     "home-assistant-mock",
     "hugegraph-mock",
     "imap-mock",
@@ -1296,6 +1297,15 @@ target "hfs-mock" {
   context    = "../docker/hfs-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/hfs-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "hikvision-7921-mock" {
+  name       = "hikvision-7921-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/hikvision-7921-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/hikvision-7921-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
