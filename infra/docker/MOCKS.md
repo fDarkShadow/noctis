@@ -234,6 +234,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dlink-exportsettings-mock
 - dlink-exportsettings/CVE-2018-17786
 
+## dlink-routers-16920-mock
+- dlink-routers/CVE-2019-16920
+
 ## dns-mock
 - general/dns-open-resolver
 
