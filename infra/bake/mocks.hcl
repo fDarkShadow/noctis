@@ -251,6 +251,7 @@ group "default" {
     "splunk-mock",
     "splunk-pg-mock",
     "spring-cloud-function-mock",
+    "spring-cloud-gateway-mock",
     "spring4shell-mock",
     "ssh-mock",
     "ssh-terrapin-mock",
@@ -2473,6 +2474,15 @@ target "spring-cloud-function-mock" {
   context    = "../docker/spring-cloud-function-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/spring-cloud-function-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "spring-cloud-gateway-mock" {
+  name       = "spring-cloud-gateway-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/spring-cloud-gateway-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/spring-cloud-gateway-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
