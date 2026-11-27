@@ -140,6 +140,7 @@ group "default" {
     "joomla-eq-calendar-mock",
     "joomla-mock",
     "joomla-sqli-may17-mock",
+    "juniper-junos-mock",
     "jupyter-mock",
     "kace-mock",
     "kentico-mock",
@@ -1513,6 +1514,15 @@ target "joomla-sqli-may17-mock" {
   context    = "../docker/joomla-sqli-may17-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/joomla-sqli-may17-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "juniper-junos-mock" {
+  name       = "juniper-junos-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/juniper-junos-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/juniper-junos-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
