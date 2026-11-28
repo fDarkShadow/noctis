@@ -242,6 +242,7 @@ group "default" {
     "refbase-mock",
     "regresshion-mock",
     "rips-scanner-mock",
+    "roundcube-12641-mock",
     "roundcube-mock",
     "rsync-mock",
     "sap-netweaver-mock",
@@ -2424,6 +2425,15 @@ target "rips-scanner-mock" {
   context    = "../docker/rips-scanner-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/rips-scanner-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "roundcube-12641-mock" {
+  name       = "roundcube-12641-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/roundcube-12641-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/roundcube-12641-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
