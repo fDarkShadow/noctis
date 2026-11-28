@@ -118,6 +118,7 @@ group "default" {
     "expedition-5910-mock",
     "expedition-mock",
     "expedition-sqli-mock",
+    "eyesofnetwork-8657-mock",
     "eyesofnetwork-mock",
     "finger-mock",
     "forgerock-openam-mock",
@@ -1400,6 +1401,15 @@ target "expedition-sqli-mock" {
   context    = "../docker/expedition-sqli-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/expedition-sqli-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "eyesofnetwork-8657-mock" {
+  name       = "eyesofnetwork-8657-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/eyesofnetwork-8657-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/eyesofnetwork-8657-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

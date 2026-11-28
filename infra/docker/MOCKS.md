@@ -354,6 +354,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## expedition-sqli-mock
 - expedition/CVE-2024-9465
 
+## eyesofnetwork-8657-mock
+- eyesofnetwork/CVE-2020-8657
+
 ## eyesofnetwork-mock
 - eyesofnetwork/CVE-2020-8656
 
