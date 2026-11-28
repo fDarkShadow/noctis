@@ -244,6 +244,7 @@ group "default" {
     "opennms-mock",
     "opmanager-mock",
     "oracle-ebs-mock",
+    "oracle-oam-mock",
     "oracle-reports-3152-mock",
     "owncloud-graphapi-mock",
     "pandora-fms-mock",
@@ -2517,6 +2518,15 @@ target "oracle-ebs-mock" {
   context    = "../docker/oracle-ebs-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/oracle-ebs-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "oracle-oam-mock" {
+  name       = "oracle-oam-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/oracle-oam-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/oracle-oam-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
