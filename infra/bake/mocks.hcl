@@ -332,6 +332,7 @@ group "default" {
     "zimbra-xxe-mock",
     "zookeeper-mock",
     "zte-zxdsl-mock",
+    "zyxel-30525-mock",
   ]
 }
 
@@ -3209,4 +3210,13 @@ target "zte-zxdsl-mock" {
   context    = "../docker/zte-zxdsl-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zte-zxdsl-mock:${variant}"]
+}
+
+target "zyxel-30525-mock" {
+  name       = "zyxel-30525-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zyxel-30525-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zyxel-30525-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
