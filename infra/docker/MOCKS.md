@@ -300,6 +300,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dolibarr-mock
 - dolibarr/dolibarr-404-mult-vuln
 
+## draytek-8515-mock
+- draytek/CVE-2020-8515
+
 ## drupal-7600-mock
 - drupal/CVE-2018-7600
 

@@ -100,6 +100,7 @@ group "default" {
     "docker-api-mock",
     "dokeos-mock",
     "dolibarr-mock",
+    "draytek-8515-mock",
     "drupal-7600-mock",
     "drupal-sqli-mock",
     "efront-mock",
@@ -1239,6 +1240,15 @@ target "dolibarr-mock" {
   context    = "../docker/dolibarr-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dolibarr-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "draytek-8515-mock" {
+  name       = "draytek-8515-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/draytek-8515-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/draytek-8515-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
