@@ -10,6 +10,7 @@ group "default" {
     "advantech-mock",
     "airflow-13927-mock",
     "ajaxportal-mock",
+    "alcatel-omnipcx-3010-mock",
     "apache-cve-2021-41773",
     "apache-cve-2021-42013",
     "apache-mod-proxy-mock",
@@ -422,6 +423,15 @@ target "ajaxportal-mock" {
   context    = "../docker/ajaxportal-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ajaxportal-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "alcatel-omnipcx-3010-mock" {
+  name       = "alcatel-omnipcx-3010-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/alcatel-omnipcx-3010-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/alcatel-omnipcx-3010-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
