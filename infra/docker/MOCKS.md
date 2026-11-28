@@ -946,6 +946,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## struts-5638-mock
 - struts/CVE-2017-5638
 
+## struts-9791-mock
+- struts/CVE-2017-9791
+
 ## struts-mock
 - struts/CVE-2024-53677
 
