@@ -252,6 +252,7 @@ group "default" {
     "pop3-mock",
     "postgres-mock",
     "pragyan-cms-mock",
+    "primefaces-1000486-mock",
     "projectsend-mock",
     "prometheus-mock",
     "ptzoptics-mock",
@@ -2550,6 +2551,15 @@ target "pragyan-cms-mock" {
   context    = "../docker/pragyan-cms-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/pragyan-cms-mock:${variant}"]
+}
+
+target "primefaces-1000486-mock" {
+  name       = "primefaces-1000486-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/primefaces-1000486-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/primefaces-1000486-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "projectsend-mock" {

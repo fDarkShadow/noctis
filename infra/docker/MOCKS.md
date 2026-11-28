@@ -760,6 +760,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## pragyan-cms-mock
 - pragyan-cms/CVE-2015-1471
 
+## primefaces-1000486-mock
+- primefaces/CVE-2017-1000486
+
 ## projectsend-mock
 - projectsend/CVE-2024-11680
 
