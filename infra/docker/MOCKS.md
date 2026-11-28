@@ -98,6 +98,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## brother-mock
 - brother/CVE-2017-7588
 
+## buffalo-20090-mock
+- buffalo/CVE-2021-20090
+
 ## cacti-mock
 - cacti/CVE-2022-46169
 

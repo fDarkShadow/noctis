@@ -33,6 +33,7 @@ group "default" {
     "bigip-mock",
     "bluekeep-mock",
     "brother-mock",
+    "buffalo-20090-mock",
     "cacti-mock",
     "canon-11692-mock",
     "canon-lbp6030w-mock",
@@ -606,6 +607,15 @@ target "brother-mock" {
   context    = "../docker/brother-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/brother-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "buffalo-20090-mock" {
+  name       = "buffalo-20090-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/buffalo-20090-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/buffalo-20090-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
