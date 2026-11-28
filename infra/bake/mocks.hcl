@@ -48,6 +48,7 @@ group "default" {
     "chamilo-mock",
     "checkpoint-mock",
     "cisco-asa-mock",
+    "cisco-hyperflex-1497-mock",
     "cisco-ise-mock",
     "cisco-rv-mock",
     "cisco-wsma-mock",
@@ -789,6 +790,15 @@ target "cisco-asa-mock" {
   context    = "../docker/cisco-asa-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cisco-asa-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-hyperflex-1497-mock" {
+  name       = "cisco-hyperflex-1497-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-hyperflex-1497-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-hyperflex-1497-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
