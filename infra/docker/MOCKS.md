@@ -871,6 +871,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - general/smb-signing-not-required
 - general/smbv1-enabled
 
+## smbghost-mock
+- general/CVE-2020-0796
+
 ## smtp-mock
 - general/smtp-open-relay
 
