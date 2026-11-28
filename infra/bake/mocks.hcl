@@ -56,6 +56,7 @@ group "default" {
     "cleo-mock",
     "clipbucket-mock",
     "cohu-camera-mock",
+    "coldfusion-15961-mock",
     "coldfusion-26360-mock",
     "coldfusion-2861-mock",
     "coldfusion-48282-mock",
@@ -838,6 +839,15 @@ target "cohu-camera-mock" {
   context    = "../docker/cohu-camera-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cohu-camera-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "coldfusion-15961-mock" {
+  name       = "coldfusion-15961-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/coldfusion-15961-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/coldfusion-15961-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
