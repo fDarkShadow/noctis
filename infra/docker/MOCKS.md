@@ -579,6 +579,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## oracle-ebs-mock
 - oracle-ebs/CVE-2017-3549
 
+## oracle-oam-mock
+- oracle-oam/CVE-2021-35587
+
 ## owncloud-graphapi-mock
 - owncloud-graphapi/CVE-2023-49103
 

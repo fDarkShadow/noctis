@@ -211,6 +211,7 @@
   "open-web-analytics/CVE-2014-1206.yaml": "0c5f53d2421ced0587f10c5639373631f9b621b4ea7821a48ca2b4f5d4f2fc83",
   "opennms/CVE-2015-0975.yaml": "3657cb5c07e5c7d46d1802ea4dcd74a7cdd5e47645a0bbdd643e5fc61c206f08",
   "oracle-ebs/CVE-2017-3549.yaml": "7e143c369be3c80cc7d3a1087a8c2bdb8f75bc8d9519693cdc767520a462b52d",
+  "oracle-oam/CVE-2021-35587.yaml": "545e032ed9b15a31478074e2088ed39a265c08dd412d07ce9e254f457e643ecb",
   "owncloud-graphapi/CVE-2023-49103.yaml": "ff4bd3ec1baa3ba45626a61ec6a1c5a20c48e5f7e0d1d3b144bb5ba8db0460cf",
   "pandora-fms/CVE-2010-4278.yaml": "bc08bfc1a2a63f300b06a02bc043db16295d670ff9d053867fc0e373506d0c27",
   "pandora-fms/CVE-2014-125115.yaml": "6e28baa8b82672cd23172110a23e9240b344e27ee0a47f4d6afbfe9382f288d4",
