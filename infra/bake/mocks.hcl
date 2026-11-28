@@ -4,18 +4,24 @@
 group "default" {
   targets = [
     "acti-camera-mock",
+    "activemq-3088-mock",
     "activemq-jolokia-mock",
     "activemq-mock",
     "advantech-mock",
+    "airflow-13927-mock",
     "ajaxportal-mock",
+    "alcatel-omnipcx-3010-mock",
     "apache-cve-2021-41773",
     "apache-cve-2021-42013",
     "apache-mod-proxy-mock",
+    "apisix-24112-mock",
     "apoll-mock",
     "apprain-mock",
     "articlefr-mock",
     "astium-mock",
+    "asus-mock",
     "asustor-mock",
+    "atlassian-crowd-11580-mock",
     "atomcms-mock",
     "aviatrix-mock",
     "awstats-mock",
@@ -27,9 +33,11 @@ group "default" {
     "beyondtrust-mock",
     "bigip-22986-mock",
     "bigip-46747-mock",
+    "bigip-5902-mock",
     "bigip-mock",
     "bluekeep-mock",
     "brother-mock",
+    "buffalo-20090-mock",
     "cacti-mock",
     "canon-11692-mock",
     "canon-lbp6030w-mock",
@@ -39,7 +47,11 @@ group "default" {
     "centrestack-mock",
     "chamilo-mock",
     "checkpoint-mock",
+    "cisco-asa-mock",
+    "cisco-hyperflex-1497-mock",
+    "cisco-hyperflex-1498-mock",
     "cisco-ise-mock",
+    "cisco-rv-mock",
     "cisco-smart-install-mock",
     "cisco-wsma-mock",
     "civicrm-mock",
@@ -47,12 +59,15 @@ group "default" {
     "cleo-mock",
     "clipbucket-mock",
     "cohu-camera-mock",
+    "coldfusion-15961-mock",
     "coldfusion-26360-mock",
+    "coldfusion-2861-mock",
     "coldfusion-48282-mock",
     "coldfusion-authbypass-mock",
     "coldfusion-mock",
     "commvault-mock",
     "confluence-26084-mock",
+    "confluence-3396-mock",
     "confluence-mock",
     "confluence-restore-mock",
     "confluence-setup-mock",
@@ -64,6 +79,7 @@ group "default" {
     "cpanel-whm-mock",
     "craftcms-56145-mock",
     "craftcms-mock",
+    "crestron-airmedia-3929-mock",
     "crestron-airmedia-mock",
     "crushftp-31161-mock",
     "crushftp-mock",
@@ -71,37 +87,51 @@ group "default" {
     "cucm-3315-mock",
     "cucm-mock",
     "cups-mock",
+    "cwp-44877-mock",
     "cwp-48703-mock",
     "cyberpanel-mock",
+    "dahua-33045-mock",
     "dahua-mock",
+    "dasan-gpon-10562-mock",
     "deluxebb-mock",
     "dlink-dcs-mock",
     "dlink-dir3040-mock",
+    "dlink-dir8xx-mock",
+    "dlink-dns320-25506-mock",
     "dlink-dwr-mock",
     "dlink-exportsettings-mock",
+    "dlink-routers-16920-mock",
     "dns-mock",
     "docker-api-mock",
     "dokeos-mock",
     "dolibarr-mock",
+    "draytek-8515-mock",
+    "drupal-7600-mock",
     "drupal-sqli-mock",
     "efront-mock",
     "ektron-mock",
+    "elasticsearch-1427-mock",
     "elasticsearch-mock",
     "elearning-server-mock",
     "elite-bulletin-board-mock",
     "epmm-mock",
     "erlang-otp-ssh-mock",
     "etcd-mock",
+    "exchange-34473-mock",
     "exchange-mock",
     "expedition-5910-mock",
     "expedition-mock",
     "expedition-sqli-mock",
+    "eyesofnetwork-8657-mock",
     "eyesofnetwork-mock",
     "finger-mock",
+    "forgerock-openam-mock",
     "forticlientems-21643-mock",
     "forticlientems-mock",
     "fortigate-mock",
     "fortimanager-mock",
+    "fortios-13379-mock",
+    "fortios-40684-mock",
     "fortios-ssl-vpn-mock",
     "fortiweb-25257-mock",
     "fritzbox-mock",
@@ -111,17 +141,22 @@ group "default" {
     "gitlab-mock",
     "gitlab-password-reset-mock",
     "gitlist-mock",
+    "goanywhere-0669-mock",
     "goanywhere-mock",
     "grafana-mock",
     "gravityboardx-mock",
     "hadoop-yarn-mock",
     "hfs-mock",
+    "hikvision-36260-mock",
+    "hikvision-7921-mock",
     "home-assistant-mock",
     "hugegraph-mock",
     "imap-mock",
     "infusionsoft-gravityforms-mock",
     "ingress-nginx-mock",
+    "intel-amt-5689-mock",
     "invision-power-board-mock",
+    "ivanti-csa-44529-mock",
     "ivanti-csa-mock",
     "ivanti-epm-mock",
     "ivanti-epmm-mock",
@@ -130,6 +165,7 @@ group "default" {
     "ivanti-mock",
     "ivanti-rce-mock",
     "ivanti-saml-mock",
+    "ivanti-sentry-38035-mock",
     "ivanti-sentry-mock",
     "ivanti-vtm-mock",
     "jenkins-1000861-mock",
@@ -141,6 +177,7 @@ group "default" {
     "joomla-eq-calendar-mock",
     "joomla-mock",
     "joomla-sqli-may17-mock",
+    "juniper-junos-mock",
     "jupyter-mock",
     "kace-mock",
     "kentico-mock",
@@ -148,15 +185,22 @@ group "default" {
     "kloxo-mock",
     "kubernetes-mock",
     "langflow-mock",
+    "laravel-mock",
     "ldap-mock",
     "leaguemanager-mock",
     "lexmark-mock",
+    "linear-emerge-7256-mock",
     "livelycart-mock",
     "livewire-mock",
     "loadmaster-mock",
+    "log4shell-45046-mock",
     "log4shell-mock",
     "magento-mock",
     "magicinfo-mock",
+    "manageengine-37415-mock",
+    "manageengine-40539-mock",
+    "manageengine-44077-mock",
+    "manageengine-44515-mock",
     "manageengine-5337-mock",
     "manageengine-mock",
     "memcached-mock",
@@ -164,6 +208,10 @@ group "default" {
     "merak-webmail-mock",
     "metabase-mock",
     "micollab-mock",
+    "microfocus-obr-22502-mock",
+    "microsoft-httpsys-1635-mock",
+    "microsoft-iis-7269-mock",
+    "microsoft-omi-38647-mock",
     "minio-mock",
     "mirth-connect-mock",
     "mongodb-mock",
@@ -176,12 +224,16 @@ group "default" {
     "netgear-prosafe-mock",
     "netgear-readynas-mock",
     "netgear-routers-mock",
+    "netgear-wnap320-1555-mock",
     "netgear-wnr1000-mock",
+    "netscaler-19781-mock",
     "netscaler-5777-mock",
     "netscaler-mock",
     "netscaler-saml-mock",
     "nextjs-mock",
+    "nostromo-16278-mock",
     "ntp-mock",
+    "nuuo-14933-mock",
     "nuuo-mock",
     "nuuo-nvrmini2-11523-mock",
     "nuuo-nvrmini2-mock",
@@ -193,13 +245,16 @@ group "default" {
     "opennms-mock",
     "opmanager-mock",
     "oracle-ebs-mock",
+    "oracle-reports-3152-mock",
     "owncloud-graphapi-mock",
     "pandora-fms-mock",
     "pandora-mock",
     "panos-0108-mock",
+    "panos-15944-mock",
     "panos-gp-mock",
     "panos-mock",
     "panos-ztp-mock",
+    "papercut-27350-mock",
     "papercut-mock",
     "password-protect-mock",
     "pentaho-43939-mock",
@@ -209,26 +264,35 @@ group "default" {
     "php-cgi-mock",
     "php-nuke-mock",
     "phplinkadmin-mock",
+    "phpmailer-10033-mock",
     "phprecipebook-mock",
     "phpunit-mock",
     "pop3-mock",
     "postgres-mock",
     "pragyan-cms-mock",
+    "primefaces-1000486-mock",
+    "proftpd-mock",
     "projectsend-mock",
     "prometheus-mock",
     "ptzoptics-mock",
     "pulse-secure-mock",
     "qlik-sense-mock",
+    "qnap-photostation-7195-mock",
+    "qnap-qts-7192-mock",
     "qnap-qts-mock",
     "quantum-mock",
+    "quest-kace-11138-mock",
     "rconfig-mock",
     "redis-mock",
     "refbase-mock",
     "regresshion-mock",
     "rips-scanner-mock",
+    "roundcube-12641-mock",
     "roundcube-mock",
     "rsync-mock",
+    "saltstack-16846-mock",
     "sap-netweaver-mock",
+    "sap-solman-6207-mock",
     "screenconnect-mock",
     "servicenow-fileread-mock",
     "servicenow-ssti-mock",
@@ -242,23 +306,32 @@ group "default" {
     "smartermail-52691-mock",
     "smartermail-mock",
     "smb-mock",
+    "smbghost-mock",
     "smtp-mock",
     "snmp-mock",
     "solarwinds-srm-mock",
+    "sonicwall-sma-20038-mock",
     "sonicwall-sma-mock",
     "sonicwall-sma1000-mock",
+    "sonicwall-sra-mock",
     "sonicwall-sslvpn-mock",
+    "sophos-utm-25223-mock",
     "spark-mock",
     "splunk-mock",
     "splunk-pg-mock",
     "spring-cloud-function-mock",
+    "spring-cloud-gateway-mock",
+    "spring-data-1273-mock",
     "spring4shell-mock",
     "ssh-mock",
     "ssh-terrapin-mock",
+    "struts-11776-mock",
     "struts-1965-mock",
     "struts-2248-mock",
     "struts-31805-mock",
     "struts-50164-mock",
+    "struts-5638-mock",
+    "struts-9791-mock",
     "struts-mock",
     "superset-mock",
     "symantec-epm-mock",
@@ -271,6 +344,9 @@ group "default" {
     "teamcity-token-mock",
     "telerik-report-mock",
     "telnet-mock",
+    "thinkphp-20062-mock",
+    "tomcat-12615-mock",
+    "tomcat-12617-mock",
     "tomcat-admin-mock",
     "tomcat-put-mock",
     "tp-link-wr841n-mock",
@@ -279,8 +355,10 @@ group "default" {
     "unifi-mock",
     "unraid-mock",
     "vacron-mock",
+    "vbulletin-16759-mock",
     "vbulletin-forumrunner-mock",
     "vbulletin-widget-mock",
+    "vcenter-vsan-21972-mock",
     "vcenter-vsan-mock",
     "veeam-mock",
     "versa-concerto-mock",
@@ -288,6 +366,8 @@ group "default" {
     "vivotek-mock",
     "vnc-mock",
     "webjump-mock",
+    "weblogic-14750-mock",
+    "weblogic-2725-mock",
     "weblogic-mock",
     "webmin-mock",
     "whatsupgold-mock",
@@ -300,16 +380,21 @@ group "default" {
     "wing-ftp-mock",
     "wordpress-dirtrav-mock",
     "workspace-one-mock",
+    "wp-file-manager-25213-mock",
     "wp-symposium-mock",
+    "wso2-29464-mock",
     "x11-mock",
     "xwiki-mock",
     "yii2-mock",
     "zabbix-mock",
     "zerocms-mock",
+    "zimbra-9670-mock",
     "zimbra-mock",
     "zimbra-xxe-mock",
     "zookeeper-mock",
     "zte-zxdsl-mock",
+    "zyxel-30525-mock",
+    "zyxel-9054-mock",
   ]
 }
 
@@ -325,6 +410,15 @@ target "acti-camera-mock" {
   context    = "../docker/acti-camera-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/acti-camera-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "activemq-3088-mock" {
+  name       = "activemq-3088-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/activemq-3088-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/activemq-3088-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -354,12 +448,30 @@ target "advantech-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "airflow-13927-mock" {
+  name       = "airflow-13927-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/airflow-13927-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/airflow-13927-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "ajaxportal-mock" {
   name       = "ajaxportal-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/ajaxportal-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ajaxportal-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "alcatel-omnipcx-3010-mock" {
+  name       = "alcatel-omnipcx-3010-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/alcatel-omnipcx-3010-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/alcatel-omnipcx-3010-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -385,6 +497,15 @@ target "apache-mod-proxy-mock" {
   context    = "../docker/apache-mod-proxy-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/apache-mod-proxy-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "apisix-24112-mock" {
+  name       = "apisix-24112-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/apisix-24112-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/apisix-24112-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -424,12 +545,30 @@ target "astium-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "asus-mock" {
+  name       = "asus-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/asus-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/asus-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "asustor-mock" {
   name       = "asustor-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/asustor-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/asustor-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "atlassian-crowd-11580-mock" {
+  name       = "atlassian-crowd-11580-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/atlassian-crowd-11580-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/atlassian-crowd-11580-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -531,6 +670,15 @@ target "bigip-46747-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "bigip-5902-mock" {
+  name       = "bigip-5902-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/bigip-5902-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/bigip-5902-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "bigip-mock" {
   name       = "bigip-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -553,6 +701,15 @@ target "brother-mock" {
   context    = "../docker/brother-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/brother-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "buffalo-20090-mock" {
+  name       = "buffalo-20090-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/buffalo-20090-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/buffalo-20090-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -635,12 +792,48 @@ target "checkpoint-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "cisco-asa-mock" {
+  name       = "cisco-asa-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-asa-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-asa-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-hyperflex-1497-mock" {
+  name       = "cisco-hyperflex-1497-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-hyperflex-1497-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-hyperflex-1497-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-hyperflex-1498-mock" {
+  name       = "cisco-hyperflex-1498-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-hyperflex-1498-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-hyperflex-1498-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "cisco-ise-mock" {
   name       = "cisco-ise-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/cisco-ise-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cisco-ise-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-rv-mock" {
+  name       = "cisco-rv-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-rv-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-rv-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -706,12 +899,30 @@ target "cohu-camera-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "coldfusion-15961-mock" {
+  name       = "coldfusion-15961-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/coldfusion-15961-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/coldfusion-15961-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "coldfusion-26360-mock" {
   name       = "coldfusion-26360-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/coldfusion-26360-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/coldfusion-26360-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "coldfusion-2861-mock" {
+  name       = "coldfusion-2861-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/coldfusion-2861-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/coldfusion-2861-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -757,6 +968,15 @@ target "confluence-26084-mock" {
   context    = "../docker/confluence-26084-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/confluence-26084-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "confluence-3396-mock" {
+  name       = "confluence-3396-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/confluence-3396-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/confluence-3396-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -854,6 +1074,15 @@ target "craftcms-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "crestron-airmedia-3929-mock" {
+  name       = "crestron-airmedia-3929-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/crestron-airmedia-3929-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/crestron-airmedia-3929-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "crestron-airmedia-mock" {
   name       = "crestron-airmedia-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -917,6 +1146,15 @@ target "cups-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "cwp-44877-mock" {
+  name       = "cwp-44877-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cwp-44877-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cwp-44877-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "cwp-48703-mock" {
   name       = "cwp-48703-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -935,12 +1173,30 @@ target "cyberpanel-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "dahua-33045-mock" {
+  name       = "dahua-33045-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dahua-33045-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dahua-33045-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "dahua-mock" {
   name       = "dahua-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/dahua-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dahua-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dasan-gpon-10562-mock" {
+  name       = "dasan-gpon-10562-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dasan-gpon-10562-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dasan-gpon-10562-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -971,6 +1227,24 @@ target "dlink-dir3040-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "dlink-dir8xx-mock" {
+  name       = "dlink-dir8xx-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dlink-dir8xx-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dlink-dir8xx-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dlink-dns320-25506-mock" {
+  name       = "dlink-dns320-25506-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dlink-dns320-25506-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dlink-dns320-25506-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "dlink-dwr-mock" {
   name       = "dlink-dwr-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -986,6 +1260,15 @@ target "dlink-exportsettings-mock" {
   context    = "../docker/dlink-exportsettings-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dlink-exportsettings-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dlink-routers-16920-mock" {
+  name       = "dlink-routers-16920-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dlink-routers-16920-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dlink-routers-16920-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1023,6 +1306,24 @@ target "dolibarr-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "draytek-8515-mock" {
+  name       = "draytek-8515-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/draytek-8515-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/draytek-8515-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "drupal-7600-mock" {
+  name       = "drupal-7600-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/drupal-7600-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/drupal-7600-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "drupal-sqli-mock" {
   name       = "drupal-sqli-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1046,6 +1347,15 @@ target "ektron-mock" {
   context    = "../docker/ektron-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ektron-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "elasticsearch-1427-mock" {
+  name       = "elasticsearch-1427-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/elasticsearch-1427-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/elasticsearch-1427-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1101,6 +1411,15 @@ target "etcd-mock" {
   tags       = ["noctis/etcd-mock:${variant}"]
 }
 
+target "exchange-34473-mock" {
+  name       = "exchange-34473-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/exchange-34473-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/exchange-34473-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "exchange-mock" {
   name       = "exchange-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1136,6 +1455,15 @@ target "expedition-sqli-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "eyesofnetwork-8657-mock" {
+  name       = "eyesofnetwork-8657-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/eyesofnetwork-8657-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/eyesofnetwork-8657-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "eyesofnetwork-mock" {
   name       = "eyesofnetwork-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1151,6 +1479,15 @@ target "finger-mock" {
   context    = "../docker/finger-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/finger-mock:${variant}"]
+}
+
+target "forgerock-openam-mock" {
+  name       = "forgerock-openam-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/forgerock-openam-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/forgerock-openam-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "forticlientems-21643-mock" {
@@ -1185,6 +1522,24 @@ target "fortimanager-mock" {
   context    = "../docker/fortimanager-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/fortimanager-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "fortios-13379-mock" {
+  name       = "fortios-13379-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/fortios-13379-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/fortios-13379-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "fortios-40684-mock" {
+  name       = "fortios-40684-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/fortios-40684-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/fortios-40684-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1265,6 +1620,15 @@ target "gitlist-mock" {
   tags       = ["noctis/gitlist-mock:${variant}"]
 }
 
+target "goanywhere-0669-mock" {
+  name       = "goanywhere-0669-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/goanywhere-0669-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/goanywhere-0669-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "goanywhere-mock" {
   name       = "goanywhere-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1305,6 +1669,24 @@ target "hfs-mock" {
   context    = "../docker/hfs-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/hfs-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "hikvision-36260-mock" {
+  name       = "hikvision-36260-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/hikvision-36260-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/hikvision-36260-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "hikvision-7921-mock" {
+  name       = "hikvision-7921-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/hikvision-7921-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/hikvision-7921-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1351,12 +1733,30 @@ target "ingress-nginx-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "intel-amt-5689-mock" {
+  name       = "intel-amt-5689-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/intel-amt-5689-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/intel-amt-5689-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "invision-power-board-mock" {
   name       = "invision-power-board-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/invision-power-board-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/invision-power-board-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "ivanti-csa-44529-mock" {
+  name       = "ivanti-csa-44529-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ivanti-csa-44529-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ivanti-csa-44529-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1427,6 +1827,15 @@ target "ivanti-saml-mock" {
   context    = "../docker/ivanti-saml-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ivanti-saml-mock:${variant}"]
+}
+
+target "ivanti-sentry-38035-mock" {
+  name       = "ivanti-sentry-38035-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ivanti-sentry-38035-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ivanti-sentry-38035-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "ivanti-sentry-mock" {
@@ -1525,6 +1934,15 @@ target "joomla-sqli-may17-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "juniper-junos-mock" {
+  name       = "juniper-junos-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/juniper-junos-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/juniper-junos-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "jupyter-mock" {
   name       = "jupyter-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1586,6 +2004,15 @@ target "langflow-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "laravel-mock" {
+  name       = "laravel-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/laravel-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/laravel-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "ldap-mock" {
   name       = "ldap-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1609,6 +2036,15 @@ target "lexmark-mock" {
   context    = "../docker/lexmark-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/lexmark-mock:${variant}"]
+}
+
+target "linear-emerge-7256-mock" {
+  name       = "linear-emerge-7256-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/linear-emerge-7256-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/linear-emerge-7256-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "livelycart-mock" {
@@ -1637,6 +2073,15 @@ target "loadmaster-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "log4shell-45046-mock" {
+  name       = "log4shell-45046-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/log4shell-45046-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/log4shell-45046-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "log4shell-mock" {
   name       = "log4shell-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1660,6 +2105,42 @@ target "magicinfo-mock" {
   context    = "../docker/magicinfo-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/magicinfo-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "manageengine-37415-mock" {
+  name       = "manageengine-37415-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/manageengine-37415-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/manageengine-37415-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "manageengine-40539-mock" {
+  name       = "manageengine-40539-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/manageengine-40539-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/manageengine-40539-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "manageengine-44077-mock" {
+  name       = "manageengine-44077-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/manageengine-44077-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/manageengine-44077-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "manageengine-44515-mock" {
+  name       = "manageengine-44515-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/manageengine-44515-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/manageengine-44515-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1720,6 +2201,42 @@ target "micollab-mock" {
   context    = "../docker/micollab-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/micollab-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microfocus-obr-22502-mock" {
+  name       = "microfocus-obr-22502-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microfocus-obr-22502-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microfocus-obr-22502-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microsoft-httpsys-1635-mock" {
+  name       = "microsoft-httpsys-1635-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microsoft-httpsys-1635-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microsoft-httpsys-1635-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microsoft-iis-7269-mock" {
+  name       = "microsoft-iis-7269-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microsoft-iis-7269-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microsoft-iis-7269-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microsoft-omi-38647-mock" {
+  name       = "microsoft-omi-38647-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microsoft-omi-38647-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microsoft-omi-38647-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -1827,6 +2344,15 @@ target "netgear-routers-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "netgear-wnap320-1555-mock" {
+  name       = "netgear-wnap320-1555-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netgear-wnap320-1555-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netgear-wnap320-1555-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "netgear-wnr1000-mock" {
   name       = "netgear-wnr1000-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -1834,6 +2360,14 @@ target "netgear-wnr1000-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/netgear-wnr1000-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "netscaler-19781-mock" {
+  name       = "netscaler-19781-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netscaler-19781-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netscaler-19781-mock:${variant}"]
 }
 
 target "netscaler-5777-mock" {
@@ -1870,12 +2404,30 @@ target "nextjs-mock" {
   tags       = ["noctis/nextjs-mock:${variant}"]
 }
 
+target "nostromo-16278-mock" {
+  name       = "nostromo-16278-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/nostromo-16278-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/nostromo-16278-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "ntp-mock" {
   name       = "ntp-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/ntp-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ntp-mock:${variant}"]
+}
+
+target "nuuo-14933-mock" {
+  name       = "nuuo-14933-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/nuuo-14933-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/nuuo-14933-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "nuuo-mock" {
@@ -1977,6 +2529,15 @@ target "oracle-ebs-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "oracle-reports-3152-mock" {
+  name       = "oracle-reports-3152-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/oracle-reports-3152-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/oracle-reports-3152-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "owncloud-graphapi-mock" {
   name       = "owncloud-graphapi-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2012,6 +2573,15 @@ target "panos-0108-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "panos-15944-mock" {
+  name       = "panos-15944-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/panos-15944-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/panos-15944-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "panos-gp-mock" {
   name       = "panos-gp-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2035,6 +2605,15 @@ target "panos-ztp-mock" {
   context    = "../docker/panos-ztp-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/panos-ztp-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "papercut-27350-mock" {
+  name       = "papercut-27350-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/papercut-27350-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/papercut-27350-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2115,6 +2694,15 @@ target "phplinkadmin-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "phpmailer-10033-mock" {
+  name       = "phpmailer-10033-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/phpmailer-10033-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/phpmailer-10033-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "phprecipebook-mock" {
   name       = "phprecipebook-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2154,6 +2742,23 @@ target "pragyan-cms-mock" {
   context    = "../docker/pragyan-cms-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/pragyan-cms-mock:${variant}"]
+}
+
+target "primefaces-1000486-mock" {
+  name       = "primefaces-1000486-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/primefaces-1000486-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/primefaces-1000486-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "proftpd-mock" {
+  name       = "proftpd-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/proftpd-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/proftpd-mock:${variant}"]
 }
 
 target "projectsend-mock" {
@@ -2199,6 +2804,24 @@ target "qlik-sense-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "qnap-photostation-7195-mock" {
+  name       = "qnap-photostation-7195-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/qnap-photostation-7195-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/qnap-photostation-7195-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "qnap-qts-7192-mock" {
+  name       = "qnap-qts-7192-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/qnap-qts-7192-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/qnap-qts-7192-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "qnap-qts-mock" {
   name       = "qnap-qts-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2214,6 +2837,15 @@ target "quantum-mock" {
   context    = "../docker/quantum-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/quantum-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "quest-kace-11138-mock" {
+  name       = "quest-kace-11138-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/quest-kace-11138-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/quest-kace-11138-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2260,6 +2892,15 @@ target "rips-scanner-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "roundcube-12641-mock" {
+  name       = "roundcube-12641-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/roundcube-12641-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/roundcube-12641-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "roundcube-mock" {
   name       = "roundcube-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2277,12 +2918,30 @@ target "rsync-mock" {
   tags       = ["noctis/rsync-mock:${variant}"]
 }
 
+target "saltstack-16846-mock" {
+  name       = "saltstack-16846-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/saltstack-16846-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/saltstack-16846-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "sap-netweaver-mock" {
   name       = "sap-netweaver-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/sap-netweaver-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/sap-netweaver-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "sap-solman-6207-mock" {
+  name       = "sap-solman-6207-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sap-solman-6207-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sap-solman-6207-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2398,6 +3057,14 @@ target "smb-mock" {
   tags       = ["noctis/smb-mock:${variant}"]
 }
 
+target "smbghost-mock" {
+  name       = "smbghost-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/smbghost-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/smbghost-mock:${variant}"]
+}
+
 target "smtp-mock" {
   name       = "smtp-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2423,6 +3090,15 @@ target "solarwinds-srm-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "sonicwall-sma-20038-mock" {
+  name       = "sonicwall-sma-20038-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sonicwall-sma-20038-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sonicwall-sma-20038-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "sonicwall-sma-mock" {
   name       = "sonicwall-sma-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2441,12 +3117,30 @@ target "sonicwall-sma1000-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "sonicwall-sra-mock" {
+  name       = "sonicwall-sra-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sonicwall-sra-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sonicwall-sra-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "sonicwall-sslvpn-mock" {
   name       = "sonicwall-sslvpn-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/sonicwall-sslvpn-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/sonicwall-sslvpn-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "sophos-utm-25223-mock" {
+  name       = "sophos-utm-25223-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/sophos-utm-25223-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/sophos-utm-25223-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2485,6 +3179,24 @@ target "spring-cloud-function-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "spring-cloud-gateway-mock" {
+  name       = "spring-cloud-gateway-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/spring-cloud-gateway-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/spring-cloud-gateway-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "spring-data-1273-mock" {
+  name       = "spring-data-1273-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/spring-data-1273-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/spring-data-1273-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "spring4shell-mock" {
   name       = "spring4shell-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2507,6 +3219,15 @@ target "ssh-terrapin-mock" {
   context    = "../docker/ssh-terrapin-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ssh-terrapin-mock:${variant}"]
+}
+
+target "struts-11776-mock" {
+  name       = "struts-11776-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-11776-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-11776-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "struts-1965-mock" {
@@ -2542,6 +3263,23 @@ target "struts-50164-mock" {
   context    = "../docker/struts-50164-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/struts-50164-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "struts-5638-mock" {
+  name       = "struts-5638-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-5638-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-5638-mock:${variant}"]
+}
+
+target "struts-9791-mock" {
+  name       = "struts-9791-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/struts-9791-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/struts-9791-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2649,6 +3387,33 @@ target "telnet-mock" {
   tags       = ["noctis/telnet-mock:${variant}"]
 }
 
+target "thinkphp-20062-mock" {
+  name       = "thinkphp-20062-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/thinkphp-20062-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/thinkphp-20062-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "tomcat-12615-mock" {
+  name       = "tomcat-12615-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/tomcat-12615-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/tomcat-12615-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "tomcat-12617-mock" {
+  name       = "tomcat-12617-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/tomcat-12617-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/tomcat-12617-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "tomcat-admin-mock" {
   name       = "tomcat-admin-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2721,6 +3486,15 @@ target "vacron-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "vbulletin-16759-mock" {
+  name       = "vbulletin-16759-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vbulletin-16759-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vbulletin-16759-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "vbulletin-forumrunner-mock" {
   name       = "vbulletin-forumrunner-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2735,6 +3509,15 @@ target "vbulletin-widget-mock" {
   context    = "../docker/vbulletin-widget-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/vbulletin-widget-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "vcenter-vsan-21972-mock" {
+  name       = "vcenter-vsan-21972-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vcenter-vsan-21972-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vcenter-vsan-21972-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2795,6 +3578,24 @@ target "webjump-mock" {
   context    = "../docker/webjump-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/webjump-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "weblogic-14750-mock" {
+  name       = "weblogic-14750-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/weblogic-14750-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/weblogic-14750-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "weblogic-2725-mock" {
+  name       = "weblogic-2725-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/weblogic-2725-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/weblogic-2725-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2906,12 +3707,30 @@ target "workspace-one-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "wp-file-manager-25213-mock" {
+  name       = "wp-file-manager-25213-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wp-file-manager-25213-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wp-file-manager-25213-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "wp-symposium-mock" {
   name       = "wp-symposium-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
   context    = "../docker/wp-symposium-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/wp-symposium-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "wso2-29464-mock" {
+  name       = "wso2-29464-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wso2-29464-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wso2-29464-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
@@ -2959,6 +3778,15 @@ target "zerocms-mock" {
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
+target "zimbra-9670-mock" {
+  name       = "zimbra-9670-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zimbra-9670-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zimbra-9670-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
 target "zimbra-mock" {
   name       = "zimbra-mock-${variant}"
   matrix     = { variant = ["vuln", "patched"] }
@@ -2990,4 +3818,22 @@ target "zte-zxdsl-mock" {
   context    = "../docker/zte-zxdsl-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/zte-zxdsl-mock:${variant}"]
+}
+
+target "zyxel-30525-mock" {
+  name       = "zyxel-30525-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zyxel-30525-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zyxel-30525-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "zyxel-9054-mock" {
+  name       = "zyxel-9054-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/zyxel-9054-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/zyxel-9054-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
