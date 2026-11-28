@@ -155,6 +155,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cisco-rv-mock
 - cisco-rv/CVE-2019-1653
 
+## cisco-smart-install-mock
+- cisco-smart-install/CVE-2018-0171
+
 ## cisco-wsma-mock
 - cisco-wsma/CVE-2023-20198
 

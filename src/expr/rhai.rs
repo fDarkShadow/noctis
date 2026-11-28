@@ -311,6 +311,52 @@ mod tests {
         }
     }
 
+    /// Run the shipped `cisco-smart-install/CVE-2018-0171` feed's parse script
+    /// against a canned SMI identify reply (hex) — the feed's own code.
+    fn smi_parse(reply_hex: serde_json::Value) -> serde_json::Value {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/vulnerabilities/cisco-smart-install/CVE-2018-0171.yaml");
+        let def = crate::loader::load(&path).unwrap();
+        let step = def
+            .steps
+            .iter()
+            .find(|s| s.id == "parse-smi")
+            .expect("parse-smi step");
+        let mut vars = v(&[("smi", json!({"connected": true, "response_hex": reply_hex}))]);
+        eval_script(step.code.as_deref().unwrap(), &mut vars, "s").unwrap()
+    }
+
+    #[test]
+    fn script_smi_identify_response_enabled() {
+        // The genuine SMI identify response (first word 0x00000004).
+        let out = smi_parse(json!("000000040000000000000003000000080000000100000000"));
+        assert_eq!(out["smi_enabled"], json!(true));
+        assert_eq!(out["word0"], json!(4));
+        assert_eq!(out["word2"], json!(3));
+    }
+
+    #[test]
+    fn script_smi_identify_rejects_non_smi_replies() {
+        for reply in [
+            // Our own probe echoed back (first word 0x00000001, not 0x00000004).
+            json!("000000010000000100000004000000080000000100000000"),
+            // Constant / garbage reply of the right length.
+            json!("aaaaaaaabbbbbbbbccccccccddddddddeeeeeeeeffffffff"),
+            // Right first word but wrong trailing structure.
+            json!("000000040000000000000003000000080000000900000000"),
+            // Too short.
+            json!("00000004"),
+            // No reply at all.
+            json!(null),
+        ] {
+            assert_eq!(
+                smi_parse(reply.clone())["smi_enabled"],
+                json!(false),
+                "{reply}"
+            );
+        }
+    }
+
     /// Run the shipped `general/CVE-2020-0796` (SMBGhost) feed's parse script
     /// against a canned SMB2 NEGOTIATE reply (hex) — the feed's own code, so a
     /// broken negotiate-context offset in the YAML fails here, not only e2e.
