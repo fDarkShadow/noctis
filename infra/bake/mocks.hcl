@@ -73,6 +73,7 @@ group "default" {
     "cpanel-whm-mock",
     "craftcms-56145-mock",
     "craftcms-mock",
+    "crestron-airmedia-3929-mock",
     "crestron-airmedia-mock",
     "crushftp-31161-mock",
     "crushftp-mock",
@@ -969,6 +970,15 @@ target "craftcms-mock" {
   context    = "../docker/craftcms-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/craftcms-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "crestron-airmedia-3929-mock" {
+  name       = "crestron-airmedia-3929-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/crestron-airmedia-3929-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/crestron-airmedia-3929-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
