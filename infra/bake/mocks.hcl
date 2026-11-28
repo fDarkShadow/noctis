@@ -170,6 +170,7 @@ group "default" {
     "ldap-mock",
     "leaguemanager-mock",
     "lexmark-mock",
+    "linear-emerge-7256-mock",
     "livelycart-mock",
     "livewire-mock",
     "loadmaster-mock",
@@ -1816,6 +1817,15 @@ target "lexmark-mock" {
   context    = "../docker/lexmark-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/lexmark-mock:${variant}"]
+}
+
+target "linear-emerge-7256-mock" {
+  name       = "linear-emerge-7256-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/linear-emerge-7256-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/linear-emerge-7256-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "livelycart-mock" {
