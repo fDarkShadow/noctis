@@ -233,6 +233,7 @@
   "microfocus-obr/CVE-2021-22502.yaml": "9ffd6446e190894b1165a797e7a2f6049eefcf9f0842a9fb702bab87bd315e99",
   "microsoft-httpsys/CVE-2015-1635.yaml": "7aa4ff6569f338dfbfd95f84959f0e8e65f97ea386e8586c64a23111f26fe333",
   "microsoft-iis/CVE-2017-7269.yaml": "3cdfb06e436110d41531ab089fe80354fb23c6c13cff7cec4a0e9fe0e4c18b0b",
+  "microsoft-omi/CVE-2021-38647.yaml": "5cbf9902d2edff38381d11a87ed8fef1c38cf09ff4e59f4df8b131bb327e8a5b",
   "minio/CVE-2023-28432.yaml": "7afd2e7068851f2645b008890a10463d7d2a183e5d94da5f86dfffddaa3b6ddb",
   "mirth-connect/CVE-2023-43208.yaml": "d2d3f66e81f2a0ed8bd133bf80f0e4512c28b6575da5a3444f86fcf2c630b4e9",
   "movabletype/CVE-2021-20837.yaml": "f49693882ccce8053fbfe68636f43b74282c037585b9f721903aaa3761c5ab09",

@@ -208,6 +208,7 @@ group "default" {
     "microfocus-obr-22502-mock",
     "microsoft-httpsys-1635-mock",
     "microsoft-iis-7269-mock",
+    "microsoft-omi-38647-mock",
     "minio-mock",
     "mirth-connect-mock",
     "mongodb-mock",
@@ -2195,6 +2196,15 @@ target "microsoft-iis-7269-mock" {
   context    = "../docker/microsoft-iis-7269-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/microsoft-iis-7269-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microsoft-omi-38647-mock" {
+  name       = "microsoft-omi-38647-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microsoft-omi-38647-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microsoft-omi-38647-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
