@@ -262,6 +262,7 @@ group "default" {
     "roundcube-12641-mock",
     "roundcube-mock",
     "rsync-mock",
+    "saltstack-16846-mock",
     "sap-netweaver-mock",
     "screenconnect-mock",
     "servicenow-fileread-mock",
@@ -2626,6 +2627,15 @@ target "rsync-mock" {
   context    = "../docker/rsync-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/rsync-mock:${variant}"]
+}
+
+target "saltstack-16846-mock" {
+  name       = "saltstack-16846-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/saltstack-16846-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/saltstack-16846-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "sap-netweaver-mock" {
