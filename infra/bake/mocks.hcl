@@ -93,6 +93,7 @@ group "default" {
     "drupal-sqli-mock",
     "efront-mock",
     "ektron-mock",
+    "elasticsearch-1427-mock",
     "elasticsearch-mock",
     "elearning-server-mock",
     "elite-bulletin-board-mock",
@@ -1129,6 +1130,15 @@ target "ektron-mock" {
   context    = "../docker/ektron-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ektron-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "elasticsearch-1427-mock" {
+  name       = "elasticsearch-1427-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/elasticsearch-1427-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/elasticsearch-1427-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
