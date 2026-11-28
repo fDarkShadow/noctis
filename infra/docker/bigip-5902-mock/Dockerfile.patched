@@ -1,0 +1,4 @@
+FROM noctis/py-mock-base:latest
+# F5 BIG-IP TMUI mock — patched: the `..;/` traversal is rejected (403).
+COPY server.py /app/server.py
+ENV BIGIP_MODE=patched
