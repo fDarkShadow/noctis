@@ -40,6 +40,7 @@ group "default" {
     "chamilo-mock",
     "checkpoint-mock",
     "cisco-ise-mock",
+    "cisco-smart-install-mock",
     "cisco-wsma-mock",
     "civicrm-mock",
     "cleo-55956-mock",
@@ -641,6 +642,14 @@ target "cisco-ise-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/cisco-ise-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-smart-install-mock" {
+  name       = "cisco-smart-install-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-smart-install-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-smart-install-mock:${variant}"]
 }
 
 target "cisco-wsma-mock" {
