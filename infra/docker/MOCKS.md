@@ -874,6 +874,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## webmin-mock
 - webmin/CVE-2019-15107
 
+## websphere-mock
+- websphere/CVE-2015-7450
+
 ## whatsupgold-mock
 - whatsupgold/CVE-2024-4885
 

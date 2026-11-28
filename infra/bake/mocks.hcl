@@ -289,6 +289,7 @@ group "default" {
     "webjump-mock",
     "weblogic-mock",
     "webmin-mock",
+    "websphere-mock",
     "whatsupgold-mock",
     "whatsupgold-sqli-mock",
     "whd-26399-mock",
@@ -2804,6 +2805,15 @@ target "webmin-mock" {
   context    = "../docker/webmin-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/webmin-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "websphere-mock" {
+  name       = "websphere-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/websphere-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/websphere-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
