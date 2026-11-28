@@ -327,6 +327,7 @@ group "default" {
     "wing-ftp-mock",
     "wordpress-dirtrav-mock",
     "workspace-one-mock",
+    "wp-file-manager-25213-mock",
     "wp-symposium-mock",
     "x11-mock",
     "xwiki-mock",
@@ -3173,6 +3174,15 @@ target "workspace-one-mock" {
   context    = "../docker/workspace-one-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/workspace-one-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "wp-file-manager-25213-mock" {
+  name       = "wp-file-manager-25213-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/wp-file-manager-25213-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/wp-file-manager-25213-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
