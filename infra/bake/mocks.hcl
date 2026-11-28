@@ -271,6 +271,7 @@ group "default" {
     "qnap-photostation-7195-mock",
     "qnap-qts-mock",
     "quantum-mock",
+    "quest-kace-11138-mock",
     "rconfig-mock",
     "redis-mock",
     "refbase-mock",
@@ -2736,6 +2737,15 @@ target "quantum-mock" {
   context    = "../docker/quantum-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/quantum-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "quest-kace-11138-mock" {
+  name       = "quest-kace-11138-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/quest-kace-11138-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/quest-kace-11138-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
