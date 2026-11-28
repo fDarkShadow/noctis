@@ -40,6 +40,7 @@ group "default" {
     "centrestack-mock",
     "chamilo-mock",
     "checkpoint-mock",
+    "cisco-asa-mock",
     "cisco-ise-mock",
     "cisco-wsma-mock",
     "civicrm-mock",
@@ -652,6 +653,15 @@ target "checkpoint-mock" {
   context    = "../docker/checkpoint-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/checkpoint-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "cisco-asa-mock" {
+  name       = "cisco-asa-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/cisco-asa-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/cisco-asa-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
