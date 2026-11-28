@@ -642,6 +642,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## mirth-connect-mock
 - mirth-connect/CVE-2023-43208
 
+## mobileiron-mock
+- mobileiron/CVE-2020-15505
+
 ## mongodb-mock
 - general/mongodb-unauth
 
