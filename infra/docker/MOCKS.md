@@ -591,6 +591,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## manageengine-37415-mock
 - manageengine/CVE-2021-37415
 
+## manageengine-40539-mock
+- manageengine/CVE-2021-40539
+
 ## manageengine-44077-mock
 - manageengine/CVE-2021-44077
 
