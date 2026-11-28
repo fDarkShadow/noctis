@@ -176,6 +176,7 @@ group "default" {
     "netgear-readynas-mock",
     "netgear-routers-mock",
     "netgear-wnr1000-mock",
+    "netscaler-19781-mock",
     "netscaler-5777-mock",
     "netscaler-mock",
     "netscaler-saml-mock",
@@ -1825,6 +1826,14 @@ target "netgear-wnr1000-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/netgear-wnr1000-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "netscaler-19781-mock" {
+  name       = "netscaler-19781-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netscaler-19781-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netscaler-19781-mock:${variant}"]
 }
 
 target "netscaler-5777-mock" {

@@ -196,6 +196,7 @@
   "netgear-readynas/netgear-readynas-cmd-injection.yaml": "a9d13aa655ddff8123d43e72ac392d37b9c188dbccfb9087d4e5c612cff8a49a",
   "netgear-routers/CVE-2016-6277.yaml": "7317a10093c3386a62f63baff75b2405d4074e69d9561a9ef44c7bd1d1db5f5b",
   "netgear-wnr1000/CVE-2013-3316.yaml": "c8b5d94510d1c500f98e68d6d99347dea2bf21bc2944e0c638ffcb2b0d5d900d",
+  "netscaler/CVE-2019-19781.yaml": "1d24a88d95e8bde99f6a0bbbf86780b1850e32c7b7aaa642519ceed79a25da2e",
   "netscaler/CVE-2023-4966.yaml": "1e620228dc4cb97deb6d3f1de2141ec344bf8027201dc0be587f8938f18301b9",
   "netscaler/CVE-2025-5777.yaml": "3a65f89404de94c2adca1f8ff6edaf1b2f074c26cf642757916b66db83da2c49",
   "netscaler/CVE-2026-3055.yaml": "3ec6faaff2a2330c7020afc225aac8343db91fb4db6108d558ac49665b7f413d",
