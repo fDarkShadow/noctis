@@ -233,6 +233,7 @@ group "default" {
     "pandora-fms-mock",
     "pandora-mock",
     "panos-0108-mock",
+    "panos-15944-mock",
     "panos-gp-mock",
     "panos-mock",
     "panos-ztp-mock",
@@ -2389,6 +2390,15 @@ target "panos-0108-mock" {
   context    = "../docker/panos-0108-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/panos-0108-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "panos-15944-mock" {
+  name       = "panos-15944-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/panos-15944-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/panos-15944-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
