@@ -333,6 +333,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## etcd-mock
 - general/etcd-unauth
 
+## exchange-34473-mock
+- exchange/CVE-2021-34473
+
 ## exchange-mock
 - exchange/CVE-2021-26855
 
