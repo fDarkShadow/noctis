@@ -150,6 +150,7 @@ group "default" {
     "ldap-mock",
     "leaguemanager-mock",
     "lexmark-mock",
+    "liferay-mock",
     "livelycart-mock",
     "livewire-mock",
     "loadmaster-mock",
@@ -1600,6 +1601,15 @@ target "lexmark-mock" {
   context    = "../docker/lexmark-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/lexmark-mock:${variant}"]
+}
+
+target "liferay-mock" {
+  name       = "liferay-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/liferay-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/liferay-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "livelycart-mock" {
