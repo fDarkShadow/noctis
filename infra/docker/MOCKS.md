@@ -11,6 +11,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## acti-camera-mock
 - acti/CVE-2017-3184
 
+## activemq-3088-mock
+- activemq/CVE-2016-3088
+
 ## activemq-jolokia-mock
 - activemq/CVE-2026-34197
 
