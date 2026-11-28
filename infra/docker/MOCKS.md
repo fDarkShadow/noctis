@@ -394,6 +394,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ivanti-vtm-mock
 - ivanti-vtm/CVE-2024-7593
 
+## jboss-mock
+- jboss/CVE-2017-12149
+
 ## jenkins-1000861-mock
 - jenkins/CVE-2018-1000861
 
