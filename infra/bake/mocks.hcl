@@ -157,6 +157,7 @@ group "default" {
     "livelycart-mock",
     "livewire-mock",
     "loadmaster-mock",
+    "log4shell-45046-mock",
     "log4shell-mock",
     "magento-mock",
     "magicinfo-mock",
@@ -1668,6 +1669,15 @@ target "loadmaster-mock" {
   context    = "../docker/loadmaster-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/loadmaster-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "log4shell-45046-mock" {
+  name       = "log4shell-45046-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/log4shell-45046-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/log4shell-45046-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
