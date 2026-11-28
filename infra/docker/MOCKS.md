@@ -1056,6 +1056,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## wp-symposium-mock
 - wp-symposium/CVE-2015-6522
 
+## wso2-29464-mock
+- wso2/CVE-2022-29464
+
 ## x11-mock
 - general/x11-open
 
