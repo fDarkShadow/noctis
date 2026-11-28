@@ -289,6 +289,7 @@ group "default" {
     "vacron-mock",
     "vbulletin-forumrunner-mock",
     "vbulletin-widget-mock",
+    "vcenter-vsan-21972-mock",
     "vcenter-vsan-mock",
     "veeam-mock",
     "versa-concerto-mock",
@@ -2815,6 +2816,15 @@ target "vbulletin-widget-mock" {
   context    = "../docker/vbulletin-widget-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/vbulletin-widget-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "vcenter-vsan-21972-mock" {
+  name       = "vcenter-vsan-21972-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vcenter-vsan-21972-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vcenter-vsan-21972-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

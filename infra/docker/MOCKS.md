@@ -875,6 +875,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## vbulletin-widget-mock
 - vbulletin/CVE-2020-17496
 
+## vcenter-vsan-21972-mock
+- vcenter-vsan/CVE-2021-21972
+
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
 - vcenter-vsan/CVE-2021-22005
