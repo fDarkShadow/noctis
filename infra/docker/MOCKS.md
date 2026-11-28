@@ -146,6 +146,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cisco-hyperflex-1497-mock
 - cisco-hyperflex/CVE-2021-1497
 
+## cisco-hyperflex-1498-mock
+- cisco-hyperflex/CVE-2021-1498
+
 ## cisco-ise-mock
 - cisco-ise/CVE-2025-20281
 
