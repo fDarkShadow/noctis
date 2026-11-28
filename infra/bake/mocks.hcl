@@ -195,6 +195,7 @@ group "default" {
     "netgear-prosafe-mock",
     "netgear-readynas-mock",
     "netgear-routers-mock",
+    "netgear-wnap320-1555-mock",
     "netgear-wnr1000-mock",
     "netscaler-19781-mock",
     "netscaler-5777-mock",
@@ -2027,6 +2028,15 @@ target "netgear-routers-mock" {
   context    = "../docker/netgear-routers-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/netgear-routers-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "netgear-wnap320-1555-mock" {
+  name       = "netgear-wnap320-1555-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/netgear-wnap320-1555-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/netgear-wnap320-1555-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

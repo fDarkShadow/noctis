@@ -588,6 +588,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## netgear-routers-mock
 - netgear-routers/CVE-2016-6277
 
+## netgear-wnap320-1555-mock
+- netgear-wnap320/CVE-2016-1555
+
 ## netgear-wnr1000-mock
 - netgear-wnr1000/CVE-2013-3316
 
