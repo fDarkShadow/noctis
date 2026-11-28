@@ -302,6 +302,7 @@
   "smartermail/CVE-2025-52691.yaml": "2edbadd0b3e3162db8a366d776008f723ef66a10c50e520137fe61652cb6278a",
   "smartermail/CVE-2026-23760.yaml": "0325d50eb9aaaea3d0f3ad332f043dac19a57eb1a31a4bf964f7ab2a322fed42",
   "solarwinds-srm/CVE-2016-4350.yaml": "5309135af294f10ceda8a1968b2ec6a5152190ac4a354a9378ce019d8c394176",
+  "sonicwall-sma/CVE-2021-20038.yaml": "151ec01bfefa7ae7a3f0145e7c2bce7a458d7e47e7ed0fb07cbc9f6bb8bb61a4",
   "sonicwall-sma/CVE-2024-38475.yaml": "b813af2e17641b72df5129644c63f0cf0d4651903ee26ba0b34f257016faaa74",
   "sonicwall-sma1000/CVE-2025-23006.yaml": "05ddfae2f30c02f4a0a66b237b58a05bc228c21e5f8df0d8e786f54adf7259ce",
   "sonicwall-sra/CVE-2019-7481.yaml": "1e64ed6191a8701538c18c9f9864c0957256cdcad1a61e585d8f978cc6dfbc3a",
