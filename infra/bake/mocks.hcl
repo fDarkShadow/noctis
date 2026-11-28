@@ -191,6 +191,7 @@ group "default" {
     "merak-webmail-mock",
     "metabase-mock",
     "micollab-mock",
+    "microsoft-httpsys-1635-mock",
     "minio-mock",
     "mirth-connect-mock",
     "mongodb-mock",
@@ -2010,6 +2011,15 @@ target "micollab-mock" {
   context    = "../docker/micollab-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/micollab-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "microsoft-httpsys-1635-mock" {
+  name       = "microsoft-httpsys-1635-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/microsoft-httpsys-1635-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/microsoft-httpsys-1635-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
