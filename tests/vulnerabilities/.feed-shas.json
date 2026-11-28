@@ -272,6 +272,7 @@
   "solarwinds-srm/CVE-2016-4350.yaml": "5309135af294f10ceda8a1968b2ec6a5152190ac4a354a9378ce019d8c394176",
   "sonicwall-sma/CVE-2024-38475.yaml": "b813af2e17641b72df5129644c63f0cf0d4651903ee26ba0b34f257016faaa74",
   "sonicwall-sma1000/CVE-2025-23006.yaml": "05ddfae2f30c02f4a0a66b237b58a05bc228c21e5f8df0d8e786f54adf7259ce",
+  "sonicwall-sra/CVE-2019-7481.yaml": "1e64ed6191a8701538c18c9f9864c0957256cdcad1a61e585d8f978cc6dfbc3a",
   "sonicwall-sslvpn/CVE-2024-53704.yaml": "d7c70c2b571a6efb1084fb355b192586bb3ab5555a6c04dbc1d2dc549b26dfb4",
   "splunk/CVE-2026-20253.yaml": "15c847f13ae8788f839c744b333645ff8abe51a58b90dd2fdcaf4df00434694d",
   "splunk/splunk-multiple-vuln.yaml": "c9d239f91501d66e2955bf862a03d258a38e2330ae72497a264eb89208a6f7d6",
