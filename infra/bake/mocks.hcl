@@ -326,6 +326,7 @@ group "default" {
     "teamcity-token-mock",
     "telerik-report-mock",
     "telnet-mock",
+    "thinkphp-20062-mock",
     "tomcat-12615-mock",
     "tomcat-12617-mock",
     "tomcat-admin-mock",
@@ -3204,6 +3205,15 @@ target "telnet-mock" {
   context    = "../docker/telnet-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/telnet-mock:${variant}"]
+}
+
+target "thinkphp-20062-mock" {
+  name       = "thinkphp-20062-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/thinkphp-20062-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/thinkphp-20062-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "tomcat-12615-mock" {
