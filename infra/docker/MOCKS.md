@@ -860,6 +860,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## telnet-mock
 - general/telnet-exposed
 
+## tomcat-12615-mock
+- tomcat/CVE-2017-12615
+
 ## tomcat-admin-mock
 - tomcat/CVE-2009-3099
 
