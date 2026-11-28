@@ -44,6 +44,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## astium-mock
 - astium/CVE-2013-10043
 
+## asus-mock
+- asus/CVE-2021-32030
+
 ## asustor-mock
 - asustor/CVE-2018-11509
 
