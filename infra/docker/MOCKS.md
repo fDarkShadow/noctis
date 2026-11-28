@@ -1145,3 +1145,6 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## zyxel-30525-mock
 - zyxel/CVE-2022-30525
+
+## zyxel-9054-mock
+- zyxel/CVE-2020-9054
