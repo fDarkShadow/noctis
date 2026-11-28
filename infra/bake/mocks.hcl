@@ -275,6 +275,7 @@ group "default" {
     "pulse-secure-mock",
     "qlik-sense-mock",
     "qnap-photostation-7195-mock",
+    "qnap-qts-7192-mock",
     "qnap-qts-mock",
     "quantum-mock",
     "quest-kace-11138-mock",
@@ -2780,6 +2781,15 @@ target "qnap-photostation-7195-mock" {
   context    = "../docker/qnap-photostation-7195-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/qnap-photostation-7195-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "qnap-qts-7192-mock" {
+  name       = "qnap-qts-7192-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/qnap-qts-7192-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/qnap-qts-7192-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
