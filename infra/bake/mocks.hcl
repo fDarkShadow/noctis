@@ -94,6 +94,7 @@ group "default" {
     "dlink-dir8xx-mock",
     "dlink-dwr-mock",
     "dlink-exportsettings-mock",
+    "dlink-routers-16920-mock",
     "dns-mock",
     "docker-api-mock",
     "dokeos-mock",
@@ -1169,6 +1170,15 @@ target "dlink-exportsettings-mock" {
   context    = "../docker/dlink-exportsettings-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/dlink-exportsettings-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "dlink-routers-16920-mock" {
+  name       = "dlink-routers-16920-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/dlink-routers-16920-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/dlink-routers-16920-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
