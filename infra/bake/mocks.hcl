@@ -214,6 +214,7 @@ group "default" {
     "nextjs-mock",
     "nostromo-16278-mock",
     "ntp-mock",
+    "nuuo-14933-mock",
     "nuuo-mock",
     "nuuo-nvrmini2-11523-mock",
     "nuuo-nvrmini2-mock",
@@ -2213,6 +2214,15 @@ target "ntp-mock" {
   context    = "../docker/ntp-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ntp-mock:${variant}"]
+}
+
+target "nuuo-14933-mock" {
+  name       = "nuuo-14933-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/nuuo-14933-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/nuuo-14933-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
 target "nuuo-mock" {
