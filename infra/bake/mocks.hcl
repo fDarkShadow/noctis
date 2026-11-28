@@ -167,6 +167,7 @@ group "default" {
     "ivanti-sentry-38035-mock",
     "ivanti-sentry-mock",
     "ivanti-vtm-mock",
+    "jboss-mock",
     "jenkins-1000861-mock",
     "jenkins-cli-mock",
     "jenkins-mock",
@@ -1844,6 +1845,15 @@ target "ivanti-vtm-mock" {
   context    = "../docker/ivanti-vtm-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/ivanti-vtm-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "jboss-mock" {
+  name       = "jboss-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/jboss-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/jboss-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
