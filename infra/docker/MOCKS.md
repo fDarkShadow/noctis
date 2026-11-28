@@ -567,6 +567,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## lexmark-mock
 - lexmark/CVE-2021-44736
 
+## liferay-mock
+- liferay/CVE-2020-7961
+
 ## linear-emerge-7256-mock
 - linear-emerge/CVE-2019-7256
 
