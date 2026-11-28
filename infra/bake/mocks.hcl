@@ -27,6 +27,7 @@ group "default" {
     "beyondtrust-mock",
     "bigip-22986-mock",
     "bigip-46747-mock",
+    "bigip-5902-mock",
     "bigip-mock",
     "bluekeep-mock",
     "brother-mock",
@@ -531,6 +532,15 @@ target "bigip-46747-mock" {
   context    = "../docker/bigip-46747-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/bigip-46747-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "bigip-5902-mock" {
+  name       = "bigip-5902-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/bigip-5902-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/bigip-5902-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 

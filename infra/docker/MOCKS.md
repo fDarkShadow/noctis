@@ -80,6 +80,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## bigip-46747-mock
 - bigip/CVE-2023-46747
 
+## bigip-5902-mock
+- bigip/CVE-2020-5902
+
 ## bigip-mock
 - bigip/CVE-2022-1388
 
