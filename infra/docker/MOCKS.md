@@ -624,6 +624,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## microsoft-httpsys-1635-mock
 - microsoft-httpsys/CVE-2015-1635
 
+## microsoft-iis-7269-mock
+- microsoft-iis/CVE-2017-7269
+
 ## minio-mock
 - minio/CVE-2023-28432
 
