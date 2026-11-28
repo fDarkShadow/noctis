@@ -11,6 +11,7 @@ group "default" {
     "apache-cve-2021-41773",
     "apache-cve-2021-42013",
     "apache-mod-proxy-mock",
+    "apisix-24112-mock",
     "apoll-mock",
     "apprain-mock",
     "articlefr-mock",
@@ -403,6 +404,15 @@ target "apache-mod-proxy-mock" {
   context    = "../docker/apache-mod-proxy-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/apache-mod-proxy-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "apisix-24112-mock" {
+  name       = "apisix-24112-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/apisix-24112-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/apisix-24112-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
