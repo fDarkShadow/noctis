@@ -267,6 +267,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dahua-mock
 - dahua/CVE-2021-33044
 
+## dasan-gpon-10562-mock
+- dasan-gpon/CVE-2018-10562
+
 ## deluxebb-mock
 - deluxebb/CVE-2009-1033
 
