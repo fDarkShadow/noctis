@@ -147,6 +147,7 @@ group "default" {
     "kloxo-mock",
     "kubernetes-mock",
     "langflow-mock",
+    "laravel-mock",
     "ldap-mock",
     "leaguemanager-mock",
     "lexmark-mock",
@@ -1575,6 +1576,15 @@ target "langflow-mock" {
   context    = "../docker/langflow-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/langflow-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "laravel-mock" {
+  name       = "laravel-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/laravel-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/laravel-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
