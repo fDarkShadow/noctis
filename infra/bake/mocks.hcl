@@ -165,6 +165,7 @@ group "default" {
     "micollab-mock",
     "minio-mock",
     "mirth-connect-mock",
+    "mobileiron-mock",
     "mongodb-mock",
     "movabletype-mock",
     "moveit-mock",
@@ -1729,6 +1730,15 @@ target "mirth-connect-mock" {
   context    = "../docker/mirth-connect-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/mirth-connect-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "mobileiron-mock" {
+  name       = "mobileiron-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/mobileiron-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/mobileiron-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
