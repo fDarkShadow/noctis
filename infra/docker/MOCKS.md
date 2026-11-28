@@ -59,6 +59,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## asustor-mock
 - asustor/CVE-2018-11509
 
+## atlassian-crowd-11580-mock
+- atlassian-crowd/CVE-2019-11580
+
 ## atomcms-mock
 - atomcms/CVE-2014-4852
 
