@@ -946,6 +946,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## spring-cloud-gateway-mock
 - spring-cloud-gateway/CVE-2022-22947
 
+## spring-data-1273-mock
+- spring-data/CVE-2018-1273
+
 ## spring4shell-mock
 - spring4shell/CVE-2022-22965
 
