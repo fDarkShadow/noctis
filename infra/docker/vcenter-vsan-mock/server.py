@@ -13,6 +13,12 @@ VSAN_ENDPOINT = (
     "VsanCapabilityProvider/getClusterCapabilityData"
 )
 
+# CVE-2021-22005 — unauthenticated Analytics (CEIP) arbitrary file upload.
+# A vulnerable vCenter accepts the upload and returns 201 with an EMPTY body;
+# a patched vCenter rejects it. The empty 201 is the genuine upload-accepted
+# signal (content-length 0), so no marker string is embedded here.
+ANALYTICS_ENDPOINT = "/analytics/telemetry/ph/api/hyper/send"
+
 VSPHERE_LOGIN_PAGE = b"""<!DOCTYPE html>
 <html><head><title>vSphere</title></head>
 <body><div id="login"><h1>VMware vSphere</h1></div></body>
@@ -41,7 +47,17 @@ class VCenterHandler(BaseHTTPRequestHandler):
             self._send(404, {"error": "Not Found"})
 
     def do_POST(self):
-        if self.path == VSAN_ENDPOINT:
+        path_only = self.path.split("?", 1)[0]
+        if path_only == ANALYTICS_ENDPOINT:
+            length = int(self.headers.get("Content-Length", 0))
+            self.rfile.read(length)  # consume body
+            if VULN_MODE:
+                # Vulnerable CEIP handler accepts the upload: 201 + empty body.
+                self._send(201, b"", ct="text/plain")
+            else:
+                # Patched vCenter rejects the unauthenticated upload.
+                self._send(404, {"error": "Not Found"})
+        elif self.path == VSAN_ENDPOINT:
             length = int(self.headers.get("Content-Length", 0))
             self.rfile.read(length)  # consume body
             if VULN_MODE:

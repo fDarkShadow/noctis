@@ -11,6 +11,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## acti-camera-mock
 - acti/CVE-2017-3184
 
+## activemq-3088-mock
+- activemq/CVE-2016-3088
+
 ## activemq-jolokia-mock
 - activemq/CVE-2026-34197
 
@@ -20,8 +23,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## advantech-mock
 - advantech/CVE-2013-1627
 
+## airflow-13927-mock
+- airflow/CVE-2020-13927
+
 ## ajaxportal-mock
 - ajaxportal/CVE-2009-1509
+
+## alcatel-omnipcx-3010-mock
+- alcatel-omnipcx/CVE-2007-3010
 
 ## apache-cve-2021-41773
 - apache-httpd/CVE-2021-41773
@@ -31,6 +40,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## apache-mod-proxy-mock
 - apache-httpd/CVE-2021-40438
+
+## apisix-24112-mock
+- apisix/CVE-2022-24112
 
 ## apoll-mock
 - apoll/CVE-2008-6270
@@ -44,8 +56,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## astium-mock
 - astium/CVE-2013-10043
 
+## asus-mock
+- asus/CVE-2021-32030
+
 ## asustor-mock
 - asustor/CVE-2018-11509
+
+## atlassian-crowd-11580-mock
+- atlassian-crowd/CVE-2019-11580
 
 ## atomcms-mock
 - atomcms/CVE-2014-4852
@@ -80,6 +98,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## bigip-46747-mock
 - bigip/CVE-2023-46747
 
+## bigip-5902-mock
+- bigip/CVE-2020-5902
+
 ## bigip-mock
 - bigip/CVE-2022-1388
 
@@ -88,6 +109,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## brother-mock
 - brother/CVE-2017-7588
+
+## buffalo-20090-mock
+- buffalo/CVE-2021-20090
 
 ## cacti-mock
 - cacti/CVE-2022-46169
@@ -116,8 +140,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## checkpoint-mock
 - checkpoint/CVE-2024-24919
 
+## cisco-asa-mock
+- cisco-asa/CVE-2018-0296
+
 ## cisco-ise-mock
 - cisco-ise/CVE-2025-20281
+
+## cisco-rv-mock
+- cisco-rv/CVE-2019-1653
 
 ## cisco-wsma-mock
 - cisco-wsma/CVE-2023-20198
@@ -138,8 +168,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cohu-camera-mock
 - cohu/CVE-2017-8860
 
+## coldfusion-15961-mock
+- coldfusion/CVE-2018-15961
+
 ## coldfusion-26360-mock
 - coldfusion/CVE-2023-26360
+
+## coldfusion-2861-mock
+- coldfusion/CVE-2010-2861
 
 ## coldfusion-48282-mock
 - coldfusion/CVE-2026-48282
@@ -155,6 +191,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## confluence-26084-mock
 - confluence/CVE-2021-26084
+
+## confluence-3396-mock
+- confluence/CVE-2019-3396
 
 ## confluence-mock
 - confluence/CVE-2022-26134
@@ -189,6 +228,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## craftcms-mock
 - craftcms/CVE-2025-32432
 
+## crestron-airmedia-3929-mock
+- crestron-airmedia/CVE-2019-3929
+
 ## crestron-airmedia-mock
 - crestron-airmedia/CVE-2016-5639
 
@@ -210,11 +252,17 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## cups-mock
 - cups/cups-webui-xss
 
+## cwp-44877-mock
+- cwp/CVE-2022-44877
+
 ## cwp-48703-mock
 - cwp/CVE-2025-48703
 
 ## cyberpanel-mock
 - cyberpanel/CVE-2024-51567
+
+## dahua-33045-mock
+- dahua/CVE-2021-33045
 
 ## dahua-mock
 - dahua/CVE-2021-33044
@@ -228,11 +276,17 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dlink-dir3040-mock
 - dlink-dir3040/CVE-2021-21816
 
+## dlink-dir8xx-mock
+- dlink-dir8xx/CVE-2018-6530
+
 ## dlink-dwr-mock
 - dlink-dwr/CVE-2018-19300
 
 ## dlink-exportsettings-mock
 - dlink-exportsettings/CVE-2018-17786
+
+## dlink-routers-16920-mock
+- dlink-routers/CVE-2019-16920
 
 ## dns-mock
 - general/dns-open-resolver
@@ -246,6 +300,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## dolibarr-mock
 - dolibarr/dolibarr-404-mult-vuln
 
+## drupal-7600-mock
+- drupal/CVE-2018-7600
+
 ## drupal-sqli-mock
 - drupal/CVE-2026-9082
 
@@ -254,6 +311,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## ektron-mock
 - ektron/CVE-2012-5357
+
+## elasticsearch-1427-mock
+- elasticsearch/CVE-2015-1427
 
 ## elasticsearch-mock
 - general/elasticsearch-unauth
@@ -273,6 +333,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## etcd-mock
 - general/etcd-unauth
 
+## exchange-34473-mock
+- exchange/CVE-2021-34473
+
 ## exchange-mock
 - exchange/CVE-2021-26855
 
@@ -291,6 +354,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## finger-mock
 - general/finger-exposed
 
+## forgerock-openam-mock
+- forgerock-openam/CVE-2021-35464
+
 ## forticlientems-21643-mock
 - forticlientems/CVE-2026-21643
 
@@ -302,6 +368,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## fortimanager-mock
 - fortimanager/CVE-2024-47575
+
+## fortios-13379-mock
+- fortios/CVE-2018-13379
+
+## fortios-40684-mock
+- fortios/CVE-2022-40684
 
 ## fortios-ssl-vpn-mock
 - fortios/CVE-2024-21762
@@ -330,6 +402,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## gitlist-mock
 - gitlist/CVE-2014-4511
 
+## goanywhere-0669-mock
+- goanywhere/CVE-2023-0669
+
 ## goanywhere-mock
 - goanywhere/CVE-2024-0204
 
@@ -343,7 +418,11 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - general/hadoop-yarn-exposed
 
 ## hfs-mock
+- hfs/CVE-2014-6287
 - hfs/CVE-2024-23692
+
+## hikvision-36260-mock
+- hikvision/CVE-2021-36260
 
 ## home-assistant-mock
 - home-assistant/CVE-2023-27482
@@ -360,8 +439,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## ingress-nginx-mock
 - ingress-nginx/CVE-2025-1974
 
+## intel-amt-5689-mock
+- intel-amt/CVE-2017-5689
+
 ## invision-power-board-mock
 - invision-power-board/CVE-2012-5692
+
+## ivanti-csa-44529-mock
+- ivanti-csa/CVE-2021-44529
 
 ## ivanti-csa-mock
 - ivanti-csa/CVE-2024-8963
@@ -387,6 +472,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## ivanti-saml-mock
 - ivanti-ics/CVE-2024-21893
+
+## ivanti-sentry-38035-mock
+- ivanti-sentry/CVE-2023-38035
 
 ## ivanti-sentry-mock
 - ivanti-sentry/CVE-2026-10520
@@ -422,6 +510,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## joomla-sqli-may17-mock
 - joomla/CVE-2017-8917
 
+## juniper-junos-mock
+- juniper-junos/CVE-2023-36845
+
 ## jupyter-mock
 - general/jupyter-no-auth
 
@@ -443,6 +534,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## langflow-mock
 - langflow/CVE-2025-3248
 
+## laravel-mock
+- laravel/CVE-2021-3129
+
 ## ldap-mock
 - general/ldap-anonymous-bind
 
@@ -451,6 +545,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## lexmark-mock
 - lexmark/CVE-2021-44736
+
+## linear-emerge-7256-mock
+- linear-emerge/CVE-2019-7256
 
 ## livelycart-mock
 - livelycart/CVE-2015-5148
@@ -461,6 +558,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## loadmaster-mock
 - loadmaster/CVE-2024-1212
 
+## log4shell-45046-mock
+- log4shell/CVE-2021-45046
+
 ## log4shell-mock
 - log4shell/CVE-2021-44228
 
@@ -469,6 +569,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## magicinfo-mock
 - magicinfo/CVE-2024-7399
+
+## manageengine-37415-mock
+- manageengine/CVE-2021-37415
 
 ## manageengine-5337-mock
 - manageengine/manageengine-desktop-central-dbqueryexecutor
@@ -490,6 +593,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## micollab-mock
 - micollab/CVE-2024-41713
+
+## microsoft-httpsys-1635-mock
+- microsoft-httpsys/CVE-2015-1635
 
 ## minio-mock
 - minio/CVE-2023-28432
@@ -527,8 +633,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## netgear-routers-mock
 - netgear-routers/CVE-2016-6277
 
+## netgear-wnap320-1555-mock
+- netgear-wnap320/CVE-2016-1555
+
 ## netgear-wnr1000-mock
 - netgear-wnr1000/CVE-2013-3316
+
+## netscaler-19781-mock
+- netscaler/CVE-2019-19781
 
 ## netscaler-5777-mock
 - netscaler/CVE-2025-5777
@@ -542,8 +654,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## nextjs-mock
 - nextjs/CVE-2025-29927
 
+## nostromo-16278-mock
+- nostromo/CVE-2019-16278
+
 ## ntp-mock
 - general/ntp-monlist
+
+## nuuo-14933-mock
+- nuuo/CVE-2018-14933
 
 ## nuuo-mock
 - nuuo/CVE-2016-6553
@@ -579,6 +697,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## oracle-ebs-mock
 - oracle-ebs/CVE-2017-3549
 
+## oracle-reports-3152-mock
+- oracle-reports/CVE-2012-3152
+
 ## owncloud-graphapi-mock
 - owncloud-graphapi/CVE-2023-49103
 
@@ -591,6 +712,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## panos-0108-mock
 - panos/CVE-2025-0108
 
+## panos-15944-mock
+- panos/CVE-2017-15944
+
 ## panos-gp-mock
 - panos/CVE-2026-0257
 
@@ -599,6 +723,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## panos-ztp-mock
 - panos/CVE-2024-0012
+
+## papercut-27350-mock
+- papercut/CVE-2023-27350
 
 ## papercut-mock
 - papercut/CVE-2023-27351
@@ -627,6 +754,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## phplinkadmin-mock
 - phplinkadmin/CVE-2009-1024
 
+## phpmailer-10033-mock
+- phpmailer/CVE-2016-10033
+
 ## phprecipebook-mock
 - phprecipebook/CVE-2009-4883
 
@@ -642,6 +772,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## pragyan-cms-mock
 - pragyan-cms/CVE-2015-1471
 
+## primefaces-1000486-mock
+- primefaces/CVE-2017-1000486
+
 ## projectsend-mock
 - projectsend/CVE-2024-11680
 
@@ -656,6 +789,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## qlik-sense-mock
 - qlik-sense/CVE-2023-41266
+
+## qnap-photostation-7195-mock
+- qnap-qts/CVE-2019-7195
 
 ## qnap-qts-mock
 - qnap-qts/CVE-2023-47218
@@ -678,6 +814,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## rips-scanner-mock
 - rips/CVE-2025-34126
 
+## roundcube-12641-mock
+- roundcube/CVE-2020-12641
+
 ## roundcube-mock
 - roundcube/CVE-2023-43770
 - roundcube/CVE-2025-49113
@@ -685,8 +824,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## rsync-mock
 - general/rsync-anonymous-list
 
+## saltstack-16846-mock
+- saltstack/CVE-2020-16846
+
 ## sap-netweaver-mock
 - sap-netweaver/CVE-2025-31324
+
+## sap-solman-6207-mock
+- sap-solman/CVE-2020-6207
 
 ## screenconnect-mock
 - screenconnect/CVE-2024-1709
@@ -729,6 +874,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 - general/smb-signing-not-required
 - general/smbv1-enabled
 
+## smbghost-mock
+- general/CVE-2020-0796
+
 ## smtp-mock
 - general/smtp-open-relay
 
@@ -738,14 +886,23 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## solarwinds-srm-mock
 - solarwinds-srm/CVE-2016-4350
 
+## sonicwall-sma-20038-mock
+- sonicwall-sma/CVE-2021-20038
+
 ## sonicwall-sma-mock
 - sonicwall-sma/CVE-2024-38475
 
 ## sonicwall-sma1000-mock
 - sonicwall-sma1000/CVE-2025-23006
 
+## sonicwall-sra-mock
+- sonicwall-sra/CVE-2019-7481
+
 ## sonicwall-sslvpn-mock
 - sonicwall-sslvpn/CVE-2024-53704
+
+## sophos-utm-25223-mock
+- sophos-utm/CVE-2020-25223
 
 ## spark-mock
 - general/spark-master-exposed
@@ -759,6 +916,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## spring-cloud-function-mock
 - spring-cloud-function/CVE-2022-22963
 
+## spring-cloud-gateway-mock
+- spring-cloud-gateway/CVE-2022-22947
+
 ## spring4shell-mock
 - spring4shell/CVE-2022-22965
 
@@ -767,6 +927,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## ssh-terrapin-mock
 - ssh-terrapin/CVE-2023-48795
+
+## struts-11776-mock
+- struts/CVE-2018-11776
 
 ## struts-1965-mock
 - struts/CVE-2013-1965
@@ -779,6 +942,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## struts-50164-mock
 - struts/CVE-2023-50164
+
+## struts-5638-mock
+- struts/CVE-2017-5638
+
+## struts-9791-mock
+- struts/CVE-2017-9791
 
 ## struts-mock
 - struts/CVE-2024-53677
@@ -820,6 +989,12 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## thinkphp-20062-mock
 - thinkphp/CVE-2018-20062
 
+## tomcat-12615-mock
+- tomcat/CVE-2017-12615
+
+## tomcat-12617-mock
+- tomcat/CVE-2017-12617
+
 ## tomcat-admin-mock
 - tomcat/CVE-2009-3099
 
@@ -844,14 +1019,21 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## vacron-mock
 - vacron/CVE-2025-34043
 
+## vbulletin-16759-mock
+- vbulletin/CVE-2019-16759
+
 ## vbulletin-forumrunner-mock
 - vbulletin/CVE-2016-6195
 
 ## vbulletin-widget-mock
 - vbulletin/CVE-2020-17496
 
+## vcenter-vsan-21972-mock
+- vcenter-vsan/CVE-2021-21972
+
 ## vcenter-vsan-mock
 - vcenter-vsan/CVE-2021-21985
+- vcenter-vsan/CVE-2021-22005
 
 ## veeam-mock
 - veeam/CVE-2024-40711
@@ -870,6 +1052,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## webjump-mock
 - webjump/CVE-2009-4892
+
+## weblogic-2725-mock
+- weblogic/CVE-2019-2725
 
 ## weblogic-mock
 - weblogic/CVE-2024-21182
@@ -907,8 +1092,14 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## workspace-one-mock
 - workspace-one/CVE-2022-22954
 
+## wp-file-manager-25213-mock
+- wordpress/CVE-2020-25213
+
 ## wp-symposium-mock
 - wp-symposium/CVE-2015-6522
+
+## wso2-29464-mock
+- wso2/CVE-2022-29464
 
 ## x11-mock
 - general/x11-open
@@ -925,6 +1116,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## zerocms-mock
 - zerocms/CVE-2014-4034
 
+## zimbra-9670-mock
+- zimbra/CVE-2019-9670
+
 ## zimbra-mock
 - zimbra/CVE-2024-45519
 
@@ -936,3 +1130,6 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 
 ## zte-zxdsl-mock
 - zte-zxdsl/CVE-2014-9183
+
+## zyxel-30525-mock
+- zyxel/CVE-2022-30525
