@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, ssl, threading
+import os, re, ssl, threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 from mocklib import serve
@@ -18,7 +18,28 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        decoded_path = unquote(self.path)
+        raw_path = self.path
+        decoded_path = unquote(raw_path)
+
+        # CVE-2014-6287: HFS < 2.3c null-byte search macro injection. A
+        # {.cookie|name|value.} macro in the search parameter (prefixed with a
+        # %00 null byte) is evaluated server-side, reflecting the value as a
+        # Set-Cookie header. Matched before the CVE-2024-23692 cmd=/exec branch.
+        m = re.search(r"\{\.cookie\|([^|]+)\|([^.]+)\.\}", decoded_path)
+        is_cookie_injection = (
+            "search=" in raw_path and "%00" in raw_path and m is not None
+        )
+        if VULN_MODE and is_cookie_injection:
+            name, value = m.group(1), m.group(2)
+            body = b"<html><title>HFS /</title></html>"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Set-Cookie", f"{name}={value};")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         is_injection = "cmd=" in decoded_path and (
             "exec" in decoded_path or "{." in decoded_path
         )
