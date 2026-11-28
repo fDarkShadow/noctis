@@ -313,6 +313,7 @@ group "default" {
     "unifi-mock",
     "unraid-mock",
     "vacron-mock",
+    "vbulletin-16759-mock",
     "vbulletin-forumrunner-mock",
     "vbulletin-widget-mock",
     "vcenter-vsan-21972-mock",
@@ -3061,6 +3062,15 @@ target "vacron-mock" {
   context    = "../docker/vacron-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/vacron-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "vbulletin-16759-mock" {
+  name       = "vbulletin-16759-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/vbulletin-16759-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/vbulletin-16759-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
