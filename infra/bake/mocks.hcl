@@ -270,6 +270,7 @@ group "default" {
     "postgres-mock",
     "pragyan-cms-mock",
     "primefaces-1000486-mock",
+    "proftpd-mock",
     "projectsend-mock",
     "prometheus-mock",
     "ptzoptics-mock",
@@ -2741,6 +2742,14 @@ target "primefaces-1000486-mock" {
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/primefaces-1000486-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "proftpd-mock" {
+  name       = "proftpd-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/proftpd-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/proftpd-mock:${variant}"]
 }
 
 target "projectsend-mock" {

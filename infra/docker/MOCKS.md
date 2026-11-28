@@ -814,6 +814,9 @@ and re-run `task test ID=<id>` for each of them, not just the one you're adding.
 ## primefaces-1000486-mock
 - primefaces/CVE-2017-1000486
 
+## proftpd-mock
+- proftpd/CVE-2015-3306
+
 ## projectsend-mock
 - projectsend/CVE-2024-11680
 
