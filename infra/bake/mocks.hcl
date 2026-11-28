@@ -144,6 +144,7 @@ group "default" {
     "ingress-nginx-mock",
     "intel-amt-5689-mock",
     "invision-power-board-mock",
+    "ivanti-csa-44529-mock",
     "ivanti-csa-mock",
     "ivanti-epm-mock",
     "ivanti-epmm-mock",
@@ -1607,6 +1608,15 @@ target "invision-power-board-mock" {
   context    = "../docker/invision-power-board-mock"
   dockerfile = "Dockerfile.${variant}"
   tags       = ["noctis/invision-power-board-mock:${variant}"]
+  contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
+}
+
+target "ivanti-csa-44529-mock" {
+  name       = "ivanti-csa-44529-mock-${variant}"
+  matrix     = { variant = ["vuln", "patched"] }
+  context    = "../docker/ivanti-csa-44529-mock"
+  dockerfile = "Dockerfile.${variant}"
+  tags       = ["noctis/ivanti-csa-44529-mock:${variant}"]
   contexts   = { "noctis/py-mock-base" = "target:py-mock-base" }
 }
 
